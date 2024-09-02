@@ -6,6 +6,7 @@
 [![CodeQL](https://github.com/IAreKyleW00t/verified-bot-commit/actions/workflows/codeql.yml/badge.svg)](https://github.com/IAreKyleW00t/verified-bot-commit/actions/workflows/codeql.yml)  
 [![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Verified%20Bot%20Commit-blue?style=flat&logo=github)](https://github.com/marketplace/actions/verified-bot-commit)
 [![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/IAreKyleW00t/verified-bot-commit?style=flat&label=Latest%20Version&color=blue)](https://github.com/IAreKyleW00t/verified-bot-commit/tags)
+[![License](https://img.shields.io/github/license/IAreKyleW00t/verified-bot-commit?label=License)](https://github.com/IAreKyleW00t/verified-bot-commit/blob/main/LICENSE)
 [![Dependabot](https://img.shields.io/badge/Dependabot-0366d6?style=flat&logo=dependabot&logoColor=white)](.github/dependabot.yml)
 
 A GitHub Action to create signed and verified commits as the
