@@ -1,0 +1,54 @@
+{
+  "name": "verified-bot-commit",
+  "description": "GitHub Action for creating signed and verified bot commits",
+  "version": "0.0.0",
+  "author": "Kyle Colantonio",
+  "private": true,
+  "homepage": "https://github.com/IAreKyleW00t/verified-bot-commit",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IAreKyleW00t/verified-bot-commit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/IAreKyleW00t/verified-bot-commit/issues"
+  },
+  "keywords": [
+    "actions",
+    "node",
+    "git"
+  ],
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "bundle": "npm run format:write && npm run package",
+    "format:write": "npx prettier --write .",
+    "format:check": "npx prettier --check .",
+    "lint": "npx eslint . -c ./.github/linters/.eslintrc.yml",
+    "package": "npx ncc build src/index.ts -o dist --source-map --license licenses.txt",
+    "package:watch": "npm run package -- --watch",
+    "all": "npm run format:write && npm run lint && npm run package"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.10.1",
+    "@actions/github": "^6.0.0",
+    "@actions/glob": "^0.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.0",
+    "@typescript-eslint/eslint-plugin": "^8.3.0",
+    "@typescript-eslint/parser": "^8.3.0",
+    "@vercel/ncc": "^0.38.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-github": "^5.0.1",
+    "eslint-plugin-jsonc": "^2.16.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "prettier": "^3.3.3",
+    "prettier-eslint": "^16.3.0",
+    "typescript": "^5.5.4"
+  }
+}

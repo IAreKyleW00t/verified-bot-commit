@@ -1,0 +1,95 @@
+name: Action Tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Test action
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TEST_BRANCH: test-${{ github.run_id }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Create test branch
+        id: branch
+        shell: bash
+        run: |
+          git checkout -b "$TEST_BRANCH"
+          git push -u origin "$TEST_BRANCH"
+
+      - name: Generate file changes
+        shell: bash
+        run: |
+          echo -e "\n### $(date -Iseconds)" | tee -a README.md
+          date -Iseconds | tee date.txt
+          uuidgen | tee src/test.txt
+          uuidgen | tee src/test2.txt
+          mkdir -p "$TEST_BRANCH"
+          for i in {1..4}; do
+            UUID=$(uuidgen)
+            echo "$UUID" | tee "$TEST_BRANCH/$i-$UUID"
+          done
+
+      - name: Commit changes
+        id: commit
+        uses: ./
+        with:
+          ref: ${{ env.TEST_BRANCH }}
+          message: 'test: ${{ github.ref }} @ ${{ github.sha }}'
+          files: |
+            README.md
+            date.txt
+            src/test.txt
+            src/*.txt
+            ${{ env.TEST_BRANCH }}/**
+
+      - name: Update test branch locally
+        shell: bash
+        run: |
+          rm -rf README.md date.txt src/*.txt "$TEST_BRANCH"
+          git pull origin "$TEST_BRANCH"
+
+      - name: Verify GPG signature
+        shell: bash
+        env:
+          COMMIT: ${{ steps.commit.outputs.commit }}
+          GPG_KEY_ID: 968479A1AFF927E37D1A566BB5690EEEBB952194
+        run: |
+          curl -fSsL "https://github.com/web-flow.gpg" | gpg --import
+          echo "$GPG_KEY_ID:6" | gpg --import-ownertrust
+          git verify-commit "$COMMIT"
+
+      - name: Verify file changes
+        shell: bash
+        env:
+          COMMIT: ${{ steps.commit.outputs.commit }}
+        run: |
+          FILES=$(git diff-tree --no-commit-id --name-only -r "$COMMIT")
+          echo "$FILES"
+          if [ "$(wc -l <<< "$FILES")" -ne 8 ]; then
+            echo "::error::Unexpected changes in commit"
+            exit 1
+          fi
+
+      - name: Delete test branch
+        if: cancelled() == false
+        shell: bash
+        run: |
+          if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
+            git checkout "${GITHUB_REF/#refs\//}"
+          else
+            git checkout "$GITHUB_REF_NAME"
+          fi
+          git branch -D "$TEST_BRANCH"
+          git push -u origin --delete "$TEST_BRANCH"

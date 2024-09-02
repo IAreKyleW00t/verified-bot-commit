@@ -1,0 +1,35 @@
+name: Shared Tags
+run-name: ${{ github.ref_name }}
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    name: Update shared tags
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Update tags
+        shell: bash
+        run: |
+          MAJOR=$(cut -d '.' -f 1 <<< "$GITHUB_REF_NAME")
+          MINOR=$(cut -d '.' -f 2 <<< "$GITHUB_REF_NAME")
+          cat <<EOF
+          VERSION=$GITHUB_REF_NAME
+          MAJOR=$MAJOR
+          MINOR=$MINOR
+          EOF
+
+          git tag -f "$MAJOR.$MINOR" "$GITHUB_SHA"
+          git tag -f "$MAJOR" "$GITHUB_SHA"
+          git push -u origin -f "$MAJOR.$MINOR"
+          git push -u origin -f "$MAJOR"
+
+          git show-ref --tags | grep "$GITHUB_SHA"
