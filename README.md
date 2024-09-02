@@ -14,7 +14,7 @@ accomplished via the GitHub [REST API] by using the [Blob] and [Tree] endpoints 
 build the commit and update the original Ref to point to it. [^1]
 
 The resulting commit will be signed and verified using
-[GitHub's public PGP key](https://github.com/web-flow.gpg)! ✅
+[GitHub's public PGP key](https://github.com/web-flow.gpg)!
 
 > [!IMPORTANT]
 >
