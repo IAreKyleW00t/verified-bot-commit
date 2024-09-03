@@ -22,6 +22,9 @@ The resulting commit will be signed and verified using
 > Using this Action with your own [Personal Access Token (PAT)] is **not** recommended.  
 > See [limitations](#limitations) for more details.
 
+This action supports Linux, macOS and Windows runners (results may vary with
+self-hosted runners).
+
 ## Quick Start
 
 ```yaml
@@ -97,7 +100,8 @@ and [crazy-max/ghaction-import-gpg](https://github.com/crazy-max/ghaction-import
 > Since this is a TypeScript action you **must** transpile it into native
 > JavaScript. This is done for you automatically as part of the `npm run all`
 > command and will be validated via the
-> [`check-dist.yml`](.github/workflows/check-dist.yml) Workflow in any PR.
+> [`check-dist.yml`](https://github.com/IAreKyleW00t/verified-bot-commit/actions/workflows/check-dist.yml)
+> Workflow in any PR.
 
 1. ⚙️ Install the version of [Node.js](https://nodejs.org/en) as defined in the
    [`.node-version`](.node-version).  
@@ -109,13 +113,13 @@ and [crazy-max/ghaction-import-gpg](https://github.com/crazy-max/ghaction-import
    asdf install
    ```
 
-1. 🛠️ Install dependencies
+2. 🛠️ Install dependencies
 
    ```sh
    npm install
    ```
 
-1. 🏗️ Format, lint, and package your code changes.
+3. 🏗️ Format, lint, and package your code changes.
 
    ```sh
    npm run all
