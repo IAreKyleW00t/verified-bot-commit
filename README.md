@@ -163,7 +163,7 @@ versions.
 Feel free to contribute and make things better by opening an
 [Issue](https://github.com/IAreKyleW00t/verified-bot-commit/issues) or
 [Pull Request](https://github.com/IAreKyleW00t/verified-bot-commit/pulls).  
-Thank you for your contribution! 🎉
+Thank you for your contribution! ❤️
 
 ## License
 
