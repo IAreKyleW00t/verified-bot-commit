@@ -31724,81 +31724,68 @@ exports.createBlob = createBlob;
 exports.createTree = createTree;
 exports.createCommit = createCommit;
 exports.updateRef = updateRef;
-const core = __importStar(__nccwpck_require__(2186));
 const fs = __importStar(__nccwpck_require__(7147));
+const utils = __importStar(__nccwpck_require__(1314));
 function buildCommitMessage(message, file) {
-    core.debug(`git.buildCommitMessage(message: '${message}', file: '${file}')`);
     // Allow message to be either static or from contents in a file
     const output = file ? fs.readFileSync(file, 'utf-8') : message;
     // Raise error if output commit message is empty
     if (!output)
         throw Error('Commit message is empty');
-    else {
-        core.debug(`\t=> ${output}`);
+    else
         return output;
-    }
 }
 function normalizeRef(ref) {
-    core.debug(`git.normalizeRef(ref: '${ref}')`);
-    const output = ref.startsWith('heads/') ? ref : `heads/${ref}`;
-    core.debug(`\t=> ${output}`);
-    return output;
+    // Ensure ref matches format `heads/<ref>`
+    if (ref.startsWith('heads/'))
+        return ref;
+    else if (ref.startsWith('refs/'))
+        return ref.replace('refs/', '');
+    else
+        return `heads/${ref}`;
 }
 async function getRef(ref, context, octokit) {
-    core.debug(`git.getRef('${ref}')`);
-    const sha = (await octokit.rest.git.getRef({
+    return (await octokit.rest.git.getRef({
         owner: context.repo.owner,
         repo: context.repo.repo,
         ref
     })).data.object.sha;
-    core.debug(`\t=> ${sha}`);
-    return sha;
 }
 async function getTree(sha, context, octokit) {
-    core.debug(`git.getTree('${sha}')`);
-    const treeSha = (await octokit.rest.git.getCommit({
+    return (await octokit.rest.git.getCommit({
         owner: context.repo.owner,
         repo: context.repo.repo,
         commit_sha: sha
     })).data.tree.sha;
-    core.debug(`\t=> ${treeSha}`);
-    return treeSha;
 }
-async function getFileMode(file) {
-    core.debug(`git.getFileMode(file: '${file}')`);
-    const stat = fs.statSync(file);
-    core.debug(`\tmode=${stat.mode}`);
-    let mode;
+function getFileMode(file, symlink) {
+    const stat = symlink ? fs.lstatSync(file) : fs.statSync(file);
     if (stat.isFile()) {
         // Check if execute bit is set on file for current user
         if (stat.mode & fs.constants.S_IXUSR) {
-            mode = '100755';
+            return '100755';
         }
         else {
-            mode = '100644';
+            return '100644';
         }
     }
     else if (stat.isDirectory()) {
-        // TODO: Add logic to account for submodules
-        mode = '040000';
+        // Technically don't need to worry about submodules because
+        // they aren't applicable in our case.
+        return '040000';
     }
     else if (stat.isSymbolicLink()) {
-        mode = '120000';
+        return '120000';
     }
     else
         throw Error(`Unknown file mode for ${file}`);
-    core.debug(`\t=> ${mode}`);
-    return mode;
 }
-async function createBlob(file, workspace, context, octokit) {
-    core.debug(`git.createBlob(file: '${file}', workspace: '${workspace}')`);
+async function createBlob(file, workspace, symlink, context, octokit) {
     // Generate relative and absolute paths to file base on workspace
-    const relPath = file.replace(`${workspace}/`, '');
-    const absPath = file.startsWith(workspace) ? file : `${workspace}/${file}`;
-    core.debug(`\trelPath=${relPath}`);
-    core.debug(`\tabsPath=${absPath}`);
+    const relPath = utils.normalizePath(utils.relativePath(file, workspace));
+    const absPath = utils.absolutePath(file, workspace);
     // Get file data
-    const mode = await getFileMode(absPath);
+    const mode = getFileMode(absPath, symlink);
     const content = Buffer.from(fs.readFileSync(absPath)).toString('base64');
     // Send the blob to GitHub
     const sha = (await octokit.rest.git.createBlob({
@@ -31808,52 +31795,38 @@ async function createBlob(file, workspace, context, octokit) {
         content
     })).data.sha;
     // Format blob for later use in tree
-    const blob = {
+    return {
         path: relPath,
         type: 'blob',
         mode,
         sha
     };
-    core.debug(`\t=> ${JSON.stringify(blob)}`);
-    return blob;
 }
 async function createTree(blobs, headTree, context, octokit) {
-    core.debug(`git.createTree(blobs: 'blobs[..${blobs.length}]',` +
-        `headTree: '${headTree}')`);
-    const sha = (await octokit.rest.git.createTree({
+    return (await octokit.rest.git.createTree({
         owner: context.repo.owner,
         repo: context.repo.repo,
         base_tree: headTree,
         tree: blobs
     })).data.sha;
-    core.debug(`\t=> ${sha}`);
-    return sha;
 }
 async function createCommit(tree, headCommit, message, context, octokit) {
-    core.debug(`git.createCommit(tree: '${tree}', ` +
-        `headCommit: '${headCommit}', ` +
-        `message: '${message}')`);
-    const sha = (await octokit.rest.git.createCommit({
+    return (await octokit.rest.git.createCommit({
         owner: context.repo.owner,
         repo: context.repo.repo,
         parents: [headCommit],
         message,
         tree
     })).data.sha;
-    core.debug(`\t=> ${sha}`);
-    return sha;
 }
 async function updateRef(ref, sha, force, context, octokit) {
-    core.debug(`git.updateRef(ref: '${ref}', sha: '${sha}', force: '${force}')`);
-    const refSha = (await octokit.rest.git.updateRef({
+    return (await octokit.rest.git.updateRef({
         owner: context.repo.owner,
         repo: context.repo.repo,
         sha,
         force,
         ref
     })).data.object.sha;
-    core.debug(`\t=> ${refSha}`);
-    return refSha;
 }
 
 
@@ -31909,9 +31882,7 @@ async function run() {
         const blobs = [];
         const files = core.getInput('files');
         const workspace = core.getInput('workspace');
-        const globOptions = {
-            followSymbolicLinks: core.getBooleanInput('follow-symlinks')
-        };
+        const followSymbolicLinks = core.getBooleanInput('follow-symlinks');
         core.startGroup(`🗂️ Creating Git Blobs...`);
         for (const pattern of files.split('\n')) {
             // Skip patterns we've already seen
@@ -31924,13 +31895,15 @@ async function run() {
                     continue; // Skip directories
                 // Ensure globbing patterns don't include static files
                 seen.add(`${workspace}/${pattern}`);
-                const blob = await git.createBlob(pattern, workspace, github.context, octokit);
+                const blob = await git.createBlob(pattern, workspace, followSymbolicLinks, github.context, octokit);
                 core.info(`${blob.sha}\t${blob.path}`);
                 blobs.push(blob);
             }
             else {
                 // Treat the pattern as a glob and attempt to locate files
-                const globber = await glob.create(pattern, globOptions);
+                const globber = await glob.create(pattern, {
+                    followSymbolicLinks
+                });
                 for await (const file of globber.globGenerator()) {
                     if (utils.isDirectory(file))
                         continue; // Skip directories
@@ -31938,7 +31911,7 @@ async function run() {
                     if (seen.has(file))
                         continue;
                     seen.add(file);
-                    const blob = await git.createBlob(file, workspace, github.context, octokit);
+                    const blob = await git.createBlob(file, workspace, followSymbolicLinks, github.context, octokit);
                     core.info(`${blob.sha}\t${blob.path}`);
                     blobs.push(blob);
                 }
@@ -31947,7 +31920,6 @@ async function run() {
         core.endGroup();
         core.setOutput('blobs', blobs.map(b => b.sha));
         // Confirm that blobs were made
-        core.debug(`main.blobs.length => ${blobs.length}`);
         if (blobs.length === 0) {
             throw Error(`There were no blobs created as part of the commit`);
         }
@@ -32006,25 +31978,34 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.fileExists = fileExists;
 exports.isDirectory = isDirectory;
-const core = __importStar(__nccwpck_require__(2186));
+exports.relativePath = relativePath;
+exports.absolutePath = absolutePath;
+exports.normalizePath = normalizePath;
 const fs = __importStar(__nccwpck_require__(7147));
+const path = __importStar(__nccwpck_require__(1017));
 function fileExists(file) {
-    core.debug(`utils.fileExists(file: '${file}')`);
     try {
         fs.accessSync(file);
-        core.debug('\t=> true');
         return true;
     }
     catch (_) /* eslint-disable-line @typescript-eslint/no-unused-vars */ {
-        core.debug('\t=>false');
         return false;
     }
 }
 function isDirectory(file) {
-    core.debug(`utils.isDirectory(file: '${file}')`);
-    const isDir = fs.statSync(file).isDirectory();
-    core.debug(`\t=>${isDir}`);
-    return isDir;
+    return fs.statSync(file).isDirectory();
+}
+function relativePath(file, workspace) {
+    if (file.startsWith(workspace)) {
+        return file.replace(workspace, '').substring(1);
+    }
+    return file;
+}
+function absolutePath(file, workspace) {
+    return file.startsWith(workspace) ? file : path.join(workspace, file);
+}
+function normalizePath(file) {
+    return file.replaceAll('\\', '/').replace(/(\/)\/+/g, '$1');
 }
 
 

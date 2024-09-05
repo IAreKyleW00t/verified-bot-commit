@@ -27,9 +27,8 @@ export async function run(): Promise<void> {
     const blobs: GitBlob[] = []
     const files = core.getInput('files')
     const workspace = core.getInput('workspace')
-    const globOptions = {
-      followSymbolicLinks: core.getBooleanInput('follow-symlinks')
-    }
+    const followSymbolicLinks = core.getBooleanInput('follow-symlinks')
+
     core.startGroup(`🗂️ Creating Git Blobs...`)
     for (const pattern of files.split('\n')) {
       // Skip patterns we've already seen
@@ -46,6 +45,7 @@ export async function run(): Promise<void> {
         const blob = await git.createBlob(
           pattern,
           workspace,
+          followSymbolicLinks,
           github.context,
           octokit
         )
@@ -53,7 +53,9 @@ export async function run(): Promise<void> {
         blobs.push(blob)
       } else {
         // Treat the pattern as a glob and attempt to locate files
-        const globber = await glob.create(pattern, globOptions)
+        const globber = await glob.create(pattern, {
+          followSymbolicLinks
+        })
         for await (const file of globber.globGenerator()) {
           if (utils.isDirectory(file)) continue // Skip directories
 
@@ -64,6 +66,7 @@ export async function run(): Promise<void> {
           const blob = await git.createBlob(
             file,
             workspace,
+            followSymbolicLinks,
             github.context,
             octokit
           )
@@ -79,7 +82,6 @@ export async function run(): Promise<void> {
     )
 
     // Confirm that blobs were made
-    core.debug(`main.blobs.length => ${blobs.length}`)
     if (blobs.length === 0) {
       throw Error(`There were no blobs created as part of the commit`)
     }

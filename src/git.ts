@@ -1,5 +1,6 @@
-import * as core from '@actions/core'
 import * as fs from 'fs'
+
+import * as utils from './utils'
 
 import { Context } from '@actions/github/lib/context'
 import { GitHub } from '@actions/github/lib/utils'
@@ -13,23 +14,19 @@ export interface GitBlob {
 }
 
 export function buildCommitMessage(message?: string, file?: string): string {
-  core.debug(`git.buildCommitMessage(message: '${message}', file: '${file}')`)
   // Allow message to be either static or from contents in a file
   const output = file ? fs.readFileSync(file, 'utf-8') : message
 
   // Raise error if output commit message is empty
   if (!output) throw Error('Commit message is empty')
-  else {
-    core.debug(`\t=> ${output}`)
-    return output
-  }
+  else return output
 }
 
 export function normalizeRef(ref: string): string {
-  core.debug(`git.normalizeRef(ref: '${ref}')`)
-  const output = ref.startsWith('heads/') ? ref : `heads/${ref}`
-  core.debug(`\t=> ${output}`)
-  return output
+  // Ensure ref matches format `heads/<ref>`
+  if (ref.startsWith('heads/')) return ref
+  else if (ref.startsWith('refs/')) return ref.replace('refs/', '')
+  else return `heads/${ref}`
 }
 
 export async function getRef(
@@ -37,16 +34,13 @@ export async function getRef(
   context: Context,
   octokit: InstanceType<typeof GitHub>
 ): Promise<string> {
-  core.debug(`git.getRef('${ref}')`)
-  const sha = (
+  return (
     await octokit.rest.git.getRef({
       owner: context.repo.owner,
       repo: context.repo.repo,
       ref
     })
   ).data.object.sha
-  core.debug(`\t=> ${sha}`)
-  return sha
 }
 
 export async function getTree(
@@ -54,57 +48,46 @@ export async function getTree(
   context: Context,
   octokit: InstanceType<typeof GitHub>
 ): Promise<string> {
-  core.debug(`git.getTree('${sha}')`)
-  const treeSha = (
+  return (
     await octokit.rest.git.getCommit({
       owner: context.repo.owner,
       repo: context.repo.repo,
       commit_sha: sha
     })
   ).data.tree.sha
-  core.debug(`\t=> ${treeSha}`)
-  return treeSha
 }
 
-export async function getFileMode(file: string): Promise<GitMode> {
-  core.debug(`git.getFileMode(file: '${file}')`)
-  const stat = fs.statSync(file)
-  core.debug(`\tmode=${stat.mode}`)
-
-  let mode: GitMode
+export function getFileMode(file: string, symlink: boolean): GitMode {
+  const stat = symlink ? fs.lstatSync(file) : fs.statSync(file)
   if (stat.isFile()) {
     // Check if execute bit is set on file for current user
     if (stat.mode & fs.constants.S_IXUSR) {
-      mode = '100755'
+      return '100755'
     } else {
-      mode = '100644'
+      return '100644'
     }
   } else if (stat.isDirectory()) {
-    // TODO: Add logic to account for submodules
-    mode = '040000'
+    // Technically don't need to worry about submodules because
+    // they aren't applicable in our case.
+    return '040000'
   } else if (stat.isSymbolicLink()) {
-    mode = '120000'
+    return '120000'
   } else throw Error(`Unknown file mode for ${file}`)
-  core.debug(`\t=> ${mode}`)
-  return mode
 }
 
 export async function createBlob(
   file: string,
   workspace: string,
+  symlink: boolean,
   context: Context,
   octokit: InstanceType<typeof GitHub>
 ): Promise<GitBlob> {
-  core.debug(`git.createBlob(file: '${file}', workspace: '${workspace}')`)
-
   // Generate relative and absolute paths to file base on workspace
-  const relPath = file.replace(`${workspace}/`, '')
-  const absPath = file.startsWith(workspace) ? file : `${workspace}/${file}`
-  core.debug(`\trelPath=${relPath}`)
-  core.debug(`\tabsPath=${absPath}`)
+  const relPath = utils.normalizePath(utils.relativePath(file, workspace))
+  const absPath = utils.absolutePath(file, workspace)
 
   // Get file data
-  const mode = await getFileMode(absPath)
+  const mode = getFileMode(absPath, symlink)
   const content = Buffer.from(fs.readFileSync(absPath)).toString('base64')
 
   // Send the blob to GitHub
@@ -118,15 +101,12 @@ export async function createBlob(
   ).data.sha
 
   // Format blob for later use in tree
-  const blob: GitBlob = {
+  return {
     path: relPath,
     type: 'blob',
     mode,
     sha
   }
-
-  core.debug(`\t=> ${JSON.stringify(blob)}`)
-  return blob
 }
 
 export async function createTree(
@@ -135,11 +115,7 @@ export async function createTree(
   context: Context,
   octokit: InstanceType<typeof GitHub>
 ): Promise<string> {
-  core.debug(
-    `git.createTree(blobs: 'blobs[..${blobs.length}]',` +
-      `headTree: '${headTree}')`
-  )
-  const sha = (
+  return (
     await octokit.rest.git.createTree({
       owner: context.repo.owner,
       repo: context.repo.repo,
@@ -147,8 +123,6 @@ export async function createTree(
       tree: blobs
     })
   ).data.sha
-  core.debug(`\t=> ${sha}`)
-  return sha
 }
 
 export async function createCommit(
@@ -158,12 +132,7 @@ export async function createCommit(
   context: Context,
   octokit: InstanceType<typeof GitHub>
 ): Promise<string> {
-  core.debug(
-    `git.createCommit(tree: '${tree}', ` +
-      `headCommit: '${headCommit}', ` +
-      `message: '${message}')`
-  )
-  const sha = (
+  return (
     await octokit.rest.git.createCommit({
       owner: context.repo.owner,
       repo: context.repo.repo,
@@ -172,8 +141,6 @@ export async function createCommit(
       tree
     })
   ).data.sha
-  core.debug(`\t=> ${sha}`)
-  return sha
 }
 
 export async function updateRef(
@@ -183,8 +150,7 @@ export async function updateRef(
   context: Context,
   octokit: InstanceType<typeof GitHub>
 ): Promise<string> {
-  core.debug(`git.updateRef(ref: '${ref}', sha: '${sha}', force: '${force}')`)
-  const refSha = (
+  return (
     await octokit.rest.git.updateRef({
       owner: context.repo.owner,
       repo: context.repo.repo,
@@ -193,6 +159,4 @@ export async function updateRef(
       ref
     })
   ).data.object.sha
-  core.debug(`\t=> ${refSha}`)
-  return refSha
 }
