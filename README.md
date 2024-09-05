@@ -119,7 +119,7 @@ and [crazy-max/ghaction-import-gpg](https://github.com/crazy-max/ghaction-import
    npm install
    ```
 
-3. 🏗️ Format, lint, and package your code changes.
+3. 🏗️ Format, lint, test, and package your code changes.
 
    ```sh
    npm run all

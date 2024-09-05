@@ -12,11 +12,15 @@ on:
 jobs:
   test:
     name: Test action
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
     permissions:
       contents: write
     env:
-      TEST_BRANCH: test-${{ github.run_id }}
+      TEST_BRANCH: test-${{ matrix.os }}-${{ github.run_id }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
@@ -33,12 +37,11 @@ jobs:
         run: |
           echo -e "\n### $(date -Iseconds)" | tee -a README.md
           date -Iseconds | tee date.txt
-          uuidgen | tee src/test.txt
-          uuidgen | tee src/test2.txt
+          echo "$GITHUB_RUN_ID" | tee src/test.txt
+          echo "$GITHUB_RUN_ID" | tee src/test2.txt
           mkdir -p "$TEST_BRANCH"
           for i in {1..4}; do
-            UUID=$(uuidgen)
-            echo "$UUID" | tee "$TEST_BRANCH/$i-$UUID"
+            echo "$i-$GITHUB_RUN_ID" | tee "$TEST_BRANCH/$i-$GITHUB_RUN_ID"
           done
 
       - name: Commit changes
@@ -57,7 +60,10 @@ jobs:
       - name: Update test branch locally
         shell: bash
         run: |
-          rm -rf README.md date.txt src/*.txt "$TEST_BRANCH"
+          rm  README.md
+          rm date.txt
+          rm src/*.txt
+          rm -r "$TEST_BRANCH"
           git pull origin "$TEST_BRANCH"
 
       - name: Verify GPG signature
