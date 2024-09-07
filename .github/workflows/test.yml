@@ -12,11 +12,11 @@ on:
 jobs:
   test:
     name: Test action
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}-latest
     strategy:
       fail-fast: true
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [macos, ubuntu, windows]
     permissions:
       contents: write
     env:
