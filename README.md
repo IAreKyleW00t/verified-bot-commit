@@ -22,8 +22,8 @@ The resulting commit will be signed and verified using
 > Using this Action with your own [Personal Access Token (PAT)] is **not** recommended.  
 > See [limitations](#limitations) for more details.
 
-This action supports Linux, macOS and Windows runners (results may vary with
-self-hosted runners).
+> This action supports Linux, macOS and Windows runners (results may vary with
+> self-hosted runners).
 
 ## Quick Start
 
