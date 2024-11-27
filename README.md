@@ -11,15 +11,16 @@
 
 A GitHub Action to create signed and verified commits as the
 `github-actions[bot]` User with the standard `GITHUB_TOKEN`. This is
-accomplished via the GitHub [REST API] by using the [Blob] and [Tree] endpoints to
-build the commit and update the original Ref to point to it. [^1]
+accomplished via the GitHub [REST API] by using the [Blob] and [Tree] endpoints
+to build the commit and update the original Ref to point to it. [^1]
 
 The resulting commit will be signed and verified using
 [GitHub's public PGP key](https://github.com/web-flow.gpg)!
 
 > [!IMPORTANT]
 >
-> Using this Action with your own [Personal Access Token (PAT)] is **not** recommended.  
+> Using this Action with your own [Personal Access Token (PAT)] is **not**
+> recommended.  
 > See [limitations](#limitations) for more details.
 
 > This action supports Linux, macOS and Windows runners (results may vary with
@@ -88,10 +89,11 @@ This Actions requires the following permissions granted to the `GITHUB_TOKEN`.
 ⚠️ The [Blob] API has a 40MiB limit, any files larger than this in your commit
 will fail.
 
-⚠️ Using your own [Personal Access Token (PAT)] will result in an unsigned and unverified
-commit. You should _really_ look into [using your own keys] and [signing
-commits] yourself with the help of Actions like [webfactory/ssh-agent](https://github.com/webfactory/ssh-agent)
-and [crazy-max/ghaction-import-gpg](https://github.com/crazy-max/ghaction-import-gpg).
+⚠️ Using your own [Personal Access Token (PAT)] will result in an unsigned and
+unverified commit. You should _really_ look into [using your own keys] and
+[signing commits] yourself with the help of Actions like
+[webfactory/ssh-agent](https://github.com/webfactory/ssh-agent) and
+[crazy-max/ghaction-import-gpg](https://github.com/crazy-max/ghaction-import-gpg).
 
 ## Development
 
