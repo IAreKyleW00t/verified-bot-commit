@@ -15,7 +15,7 @@ describe('git', () => {
   })
 
   describe('buildCommitMessage', () => {
-    test('accepts a message', async () => {
+    test('accepts a message', () => {
       // Set message
       const message = 'Some message'
 
@@ -24,7 +24,7 @@ describe('git', () => {
       expect(result).toEqual(message)
     })
 
-    test('accepts a message from file', async () => {
+    test('accepts a message from file', () => {
       // Set message
       const message = 'Some message'
 
@@ -46,7 +46,7 @@ describe('git', () => {
       ['feat/test', 'heads/feat/test'],
       ['heads/feat/test', 'heads/feat/test'],
       ['refs/heads/refs', 'heads/refs']
-    ])('handles %s', async (ref, expected) => {
+    ])('handles %s', (ref, expected) => {
       // Check each result
       const result = git.normalizeRef(ref)
       expect(result).toEqual(expected)
@@ -54,7 +54,7 @@ describe('git', () => {
   })
 
   describe('getFileMode', () => {
-    test('returns correct mode for regular file', async () => {
+    test('returns correct mode for regular file', () => {
       // Create file
       const file = path.join(tmpDir, 'test-regular-file.txt')
       fs.closeSync(fs.openSync(file, 'w'))
@@ -64,7 +64,7 @@ describe('git', () => {
       expect(result).toEqual('100644')
     })
 
-    test('returns correct mode for executable file', async () => {
+    test('returns correct mode for executable file', () => {
       // Create file and make it executable
       const file = path.join(tmpDir, 'test-exec')
       fs.closeSync(fs.openSync(file, 'w'))
@@ -75,13 +75,13 @@ describe('git', () => {
       expect(result).toEqual('100755')
     })
 
-    test('returns correct mode for directory', async () => {
+    test('returns correct mode for directory', () => {
       // Check result
       const result = git.getFileMode(tmpDir, true)
       expect(result).toEqual('040000')
     })
 
-    test('returns correct mode for symlinks', async () => {
+    test('returns correct mode for symlinks', () => {
       // Create symlink
       const symlink = path.join(tmpDir, 'link')
       fs.symlinkSync(tmpDir, symlink)
@@ -91,7 +91,7 @@ describe('git', () => {
       expect(result).toEqual('120000')
     })
 
-    test('returns correct mode for symlinks when not following', async () => {
+    test('returns correct mode for symlinks when not following', () => {
       // Create file
       const file = path.join(tmpDir, 'test-file.txt')
       fs.closeSync(fs.openSync(file, 'w'))
