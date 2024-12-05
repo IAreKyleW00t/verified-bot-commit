@@ -15,13 +15,13 @@ describe('utils', () => {
   })
 
   describe('fileExists', () => {
-    test('accepts existing file', async () => {
+    test('accepts existing file', () => {
       // Check result
       const result = utils.fileExists(tmpDir)
       expect(result).toBeTruthy()
     })
 
-    test('rejects file that does not exist', async () => {
+    test('rejects file that does not exist', () => {
       // Set filename
       const file =
         process.platform === 'win32'
@@ -35,13 +35,13 @@ describe('utils', () => {
   })
 
   describe('isDirectory', () => {
-    test('accepts a directory', async () => {
+    test('accepts a directory', () => {
       // Check result
       const result = utils.isDirectory(tmpDir)
       expect(result).toBeTruthy()
     })
 
-    test('rejects a file', async () => {
+    test('rejects a file', () => {
       // Create file
       const file = path.join(tmpDir, 'testfile.txt')
       fs.writeFileSync(file, 'foobar')
@@ -53,7 +53,7 @@ describe('utils', () => {
   })
 
   describe('relativePath', () => {
-    test('resolves a relative path', async () => {
+    test('resolves a relative path', () => {
       // Set path
       const file = path.resolve('just', 'some', 'path')
 
@@ -62,7 +62,7 @@ describe('utils', () => {
       expect(result).toEqual(file)
     })
 
-    test('resolves an absolute path', async () => {
+    test('resolves an absolute path', () => {
       // Set path
       const file = path.resolve(__dirname, 'just', 'some', 'path')
 
@@ -74,7 +74,7 @@ describe('utils', () => {
   })
 
   describe('absolutePath', () => {
-    test('resolves a relative path', async () => {
+    test('resolves a relative path', () => {
       // Set path
       const file = path.resolve('just', 'some', 'path')
 
@@ -84,7 +84,7 @@ describe('utils', () => {
       expect(result).toEqual(expected)
     })
 
-    test('resolves an absolute path', async () => {
+    test('resolves an absolute path', () => {
       // Set path
       const file = path.resolve(__dirname, 'just', 'some', 'path')
 
@@ -95,7 +95,7 @@ describe('utils', () => {
   })
 
   describe('normalizePath', () => {
-    test('normalizes a path', async () => {
+    test('normalizes a path', () => {
       // Set path
       const file = 'just\\\\some/test//path\\here'
 

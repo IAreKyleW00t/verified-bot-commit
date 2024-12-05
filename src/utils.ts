@@ -5,7 +5,9 @@ export function fileExists(file: string): boolean {
   try {
     fs.accessSync(file)
     return true
-  } catch (_) /* eslint-disable-line @typescript-eslint/no-unused-vars */ {
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_) {
     return false
   }
 }
