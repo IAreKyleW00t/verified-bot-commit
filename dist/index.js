@@ -33885,6 +33885,7 @@ async function run() {
         const followSymbolicLinks = coreExports.getBooleanInput('follow-symlinks');
         coreExports.startGroup(`🗂️ Creating Git Blobs...`);
         for (const pattern of files.split('\n')) {
+            coreExports.info(`pattern=${pattern}`);
             // Skip patterns we've already seen
             if (seen.has(pattern))
                 continue;
@@ -33904,7 +33905,9 @@ async function run() {
                 const globber = await globExports.create(pattern, {
                     followSymbolicLinks
                 });
+                coreExports.info(`  globber=${JSON.stringify(globber)}`);
                 for await (const file of globber.globGenerator()) {
+                    coreExports.info(`    file=${file}`);
                     if (isDirectory(file))
                         continue; // Skip directories
                     // Skip files we've already seen

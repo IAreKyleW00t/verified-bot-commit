@@ -31,6 +31,7 @@ export async function run(): Promise<void> {
 
     core.startGroup(`🗂️ Creating Git Blobs...`)
     for (const pattern of files.split('\n')) {
+      core.info(`pattern=${pattern}`)
       // Skip patterns we've already seen
       if (seen.has(pattern)) continue
       seen.add(pattern)
@@ -56,7 +57,9 @@ export async function run(): Promise<void> {
         const globber = await glob.create(pattern, {
           followSymbolicLinks
         })
+        core.info(`  globber=${JSON.stringify(globber)}`)
         for await (const file of globber.globGenerator()) {
+          core.info(`    file=${file}`)
           if (utils.isDirectory(file)) continue // Skip directories
 
           // Skip files we've already seen
