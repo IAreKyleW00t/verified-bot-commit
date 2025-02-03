@@ -37,6 +37,7 @@ export default tseslint.config(
       'i18n-text/no-en': 'off',
       'importPlugin/no-namespace': 'off',
       'importPlugin/no-unresolved': 'off',
+      'import/no-namespace': 'off',
       'no-console': 'off',
       'no-unused-vars': 'off',
       'prettier/prettier': 'error',
