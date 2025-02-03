@@ -1,8 +1,12 @@
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
+import { fileURLToPath } from 'url'
 
-import * as utils from '../src/utils'
+import * as utils from '../src/utils.js'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 describe('utils', () => {
   let tmpDir: string

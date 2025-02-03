@@ -2,9 +2,9 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as glob from '@actions/glob'
 
-import * as utils from './utils'
-import * as git from './git'
-import { GitBlob } from './git'
+import * as utils from './utils.js'
+import * as git from './git.js'
+import { GitBlob } from './git.js'
 
 export async function run(): Promise<void> {
   try {
@@ -78,7 +78,7 @@ export async function run(): Promise<void> {
     core.endGroup()
     core.setOutput(
       'blobs',
-      blobs.map(b => b.sha)
+      blobs.map((b) => b.sha)
     )
 
     // Confirm that blobs were made
