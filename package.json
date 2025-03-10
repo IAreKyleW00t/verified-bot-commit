@@ -45,9 +45,9 @@
     "@jest/globals": "^29.7.0",
     "@tsconfig/recommended": "^1.0.8",
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.13.9",
+    "@types/node": "^22.13.10",
     "@vercel/ncc": "^0.38.3",
-    "eslint": "^9.21.0",
+    "eslint": "^9.22.0",
     "eslint-plugin-github": "^5.1.8",
     "eslint-plugin-jest": "^28.11.0",
     "eslint-plugin-jsonc": "^2.19.1",
@@ -57,6 +57,6 @@
     "prettier-eslint": "^16.3.0",
     "ts-jest": "^29.2.6",
     "typescript": "^5.8.2",
-    "typescript-eslint": "^8.25.0"
+    "typescript-eslint": "^8.26.1"
   }
 }
