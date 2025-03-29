@@ -33,11 +33,11 @@ inputs:
     required: false
     default: 'false'
   no-throttle:
-    description: Disabling the built in throttling mechanism during API requests
+    description: Disables the built in throttling mechanism during API requests
     required: false
     default: 'false'
   no-retry:
-    description: Disabling the built in retry mechanism during API requests
+    description: Disables the built in retry mechanism during API requests
     required: false
     default: 'false'
   max-retries:

@@ -55,21 +55,21 @@ committed by the Action will be left staged.
 >   example.txt
 > ```
 
-| Name              | Type    | Description                                                     | Default                   |
-| ----------------- | ------- | --------------------------------------------------------------- | ------------------------- |
-| `ref`             | String  | The ref to push the commit to                                   | `${{ github.ref }}`       |
-| `files`           | List    | Files/[Glob] patterns to include with the commit [1]            | _required_                |
-| `message`         | String  | Message for the commit [2]                                      | _optional_                |
-| `message-file`    | String  | File to use for the commit message [2]                          | _optional_                |
-| `auto-stage`      | Boolean | Automatically stage all changed files for committing [3]        | `true`                    |
-| `update-local`    | Boolean | Pull changes into your local branch after committing [3]        | `true`                    |
-| `force-push`      | Boolean | Force push the commit                                           | `false`                   |
-| `no-throttle`     | Boolean | Disabling the built in throttling mechanism during API requests | `false`                   |
-| `no-retry`        | Boolean | Disabling the built in retry mechanism during API requests      | `false`                   |
-| `max-retries`     | Number  | Number of retries to attempt when an API request fails          | `1`                       |
-| `follow-symlinks` | Boolean | Follow symbolic links when globbing files                       | `true`                    |
-| `workspace`       | String  | Directory containing checked out files                          | `${{ github.workspace }}` |
-| `token`           | String  | GitHub Token for REST API access [4]                            | `${{ github.token }}`     |
+| Name              | Type    | Description                                                    | Default                   |
+| ----------------- | ------- | -------------------------------------------------------------- | ------------------------- |
+| `ref`             | String  | The ref to push the commit to                                  | `${{ github.ref }}`       |
+| `files`           | List    | Files/[Glob] patterns to include with the commit [1]           | _required_                |
+| `message`         | String  | Message for the commit [2]                                     | _optional_                |
+| `message-file`    | String  | File to use for the commit message [2]                         | _optional_                |
+| `auto-stage`      | Boolean | Automatically stage all changed files for committing [3]       | `true`                    |
+| `update-local`    | Boolean | Pull changes into your local branch after committing [3]       | `true`                    |
+| `force-push`      | Boolean | Force push the commit                                          | `false`                   |
+| `no-throttle`     | Boolean | Disables the built in throttling mechanism during API requests | `false`                   |
+| `no-retry`        | Boolean | Disables the built in retry mechanism during API requests      | `false`                   |
+| `max-retries`     | Number  | Number of retries to attempt when an API request fails         | `1`                       |
+| `follow-symlinks` | Boolean | Follow symbolic links when globbing files                      | `true`                    |
+| `workspace`       | String  | Directory containing checked out files                         | `${{ github.workspace }}` |
+| `token`           | String  | GitHub Token for REST API access [4]                           | `${{ github.token }}`     |
 
 > 1. Files within your `.gitignore` will not be included. You can also negate
 >    any files by prefixing it with `!`
