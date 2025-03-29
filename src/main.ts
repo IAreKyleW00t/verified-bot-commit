@@ -1,15 +1,50 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as exec from '@actions/exec'
+
 import { minimatch } from 'minimatch'
+import { Octokit } from '@octokit/core'
+import { throttling } from '@octokit/plugin-throttling'
+import { retry } from '@octokit/plugin-retry'
 
 import * as git from './git.js'
 import { GitBlob } from './git.js'
 
 export async function run(): Promise<void> {
   try {
-    // Authenticate with GitHub
-    const octokit = github.getOctokit(core.getInput('token'))
+    // Authenticate Octokit with plugins
+    const SafeOctokit = Octokit.plugin(throttling, retry)
+    const maxRetries = parseInt(core.getInput('max-retries'))
+    const noRetry = core.getBooleanInput('no-retry')
+    const noThrottle = core.getBooleanInput('no-throttle')
+    const octokit = new SafeOctokit({
+      auth: core.getInput('token'),
+      request: { retries: maxRetries },
+      retry: { enabled: !noRetry },
+      throttle: {
+        enabled: !noThrottle,
+        onRateLimit: (retryAfter, options, octokit, retryCount) => {
+          octokit.log.warn(
+            `Request quota exhausted for request ${options.method} ${options.url}`
+          )
+
+          if (!noRetry && retryCount < maxRetries) {
+            octokit.log.info(`Retrying after ${retryAfter} seconds...`)
+            return true
+          }
+        },
+        onSecondaryRateLimit: (retryAfter, options, octokit, retryCount) => {
+          octokit.log.warn(
+            `SecondaryRateLimit detected for request ${options.method} ${options.url}`
+          )
+
+          if (!noRetry && retryCount < maxRetries) {
+            octokit.log.info(`Retrying after ${retryAfter} seconds...`)
+            return true
+          }
+        }
+      }
+    })
 
     // Get commit message
     const message = git.buildCommitMessage(
@@ -43,7 +78,7 @@ export async function run(): Promise<void> {
 
     // Create a blob object for each file
     const blobs: GitBlob[] = []
-    const patterns = core.getInput('files').split(/\r?\n/)
+    const patterns = core.getMultilineInput('files')
     const followSymbolicLinks = core.getBooleanInput('follow-symlinks')
 
     core.startGroup(`🗂️ Creating Git Blobs...`)
@@ -114,6 +149,7 @@ export async function run(): Promise<void> {
     core.info(`⏩ Updated refs/${headRef} to point to ${refSha}`)
     core.setOutput('ref', refSha)
 
+    // Update local branch
     const updateLocal = core.getBooleanInput('update-local')
     if (updateLocal) {
       core.startGroup('📍 Updating local branch...')

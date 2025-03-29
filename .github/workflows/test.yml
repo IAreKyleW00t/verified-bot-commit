@@ -45,8 +45,8 @@ jobs:
           echo "$GITHUB_RUN_ID" | tee src/test2.txt
           echo "uncommitted file" | tee blah.txt
           mkdir -p "$TEST_BRANCH"
-          for i in {1..4}; do
-            echo "$i-$GITHUB_RUN_ID" | tee "$TEST_BRANCH/$i-$GITHUB_RUN_ID"
+          for i in {1..100}; do
+            echo "$i-$GITHUB_RUN_ID-$RANDOM" | tee "$TEST_BRANCH/$i-$GITHUB_RUN_ID"
           done
 
       - name: Commit changes
@@ -61,7 +61,7 @@ jobs:
             !src/test.txt
             src/*.txt
             __tests__/**
-            !${{ env.TEST_BRANCH }}/1-*
+            !${{ env.TEST_BRANCH }}/1*-*
             ${{ env.TEST_BRANCH }}/**
 
       - name: Verify GPG signature
@@ -80,24 +80,28 @@ jobs:
           COMMIT: ${{ steps.commit.outputs.commit }}
         run: |
           git status
+          RC=0
 
           FILES=$(git diff-tree --no-commit-id --name-only -r "$COMMIT")
-          echo -e "Changed files:\n$FILES"
-          if [ "$(wc -l <<< "$FILES")" -ne 6 ]; then
-            echo "::error::Unexpected changes in commit"
-            exit 1
+          COUNT=$(wc -l <<< "$FILES")
+          echo -e "Changed files: $COUNT\n$FILES"
+          if [ "$(wc -l <<< "$FILES")" -ne 91 ]; then
+            echo "::error::Expected 91 changed files but got $COUNT"
+            RC=1
           fi
           echo
 
           FILES=$(git diff --cached --name-only)
-          echo -e "Unchanged files:\n$FILES"
-          if [ "$(wc -l <<< "$FILES")" -ne 3 ]; then
-            echo "::error::Unexpected uncommit changes"
-            exit 1
+          COUNT=$(wc -l <<< "$FILES")
+          echo -e "Unchanged files: $COUNT\n$FILES"
+          if [ "$(wc -l <<< "$FILES")" -ne 14 ]; then
+            echo "::error::Expected 14 uncommitted files but got $COUNT"
+            RC=1
           fi
+          exit "$RC"
 
       - name: Delete test branch
-        if: cancelled() == false
+        if: (!cancelled())
         shell: bash
         run: |
           if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then

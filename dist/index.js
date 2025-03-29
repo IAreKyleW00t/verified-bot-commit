@@ -7288,11 +7288,11 @@ function requireBody () {
 	return body;
 }
 
-var request$2;
+var request$3;
 var hasRequiredRequest$1;
 
 function requireRequest$1 () {
-	if (hasRequiredRequest$1) return request$2;
+	if (hasRequiredRequest$1) return request$3;
 	hasRequiredRequest$1 = 1;
 
 	const {
@@ -7791,8 +7791,8 @@ function requireRequest$1 () {
 	  }
 	}
 
-	request$2 = Request;
-	return request$2;
+	request$3 = Request;
+	return request$3;
 }
 
 var dispatcher;
@@ -11523,6 +11523,20 @@ function requirePool () {
 	      ? { ...options.interceptors }
 	      : undefined;
 	    this[kFactory] = factory;
+
+	    this.on('connectionError', (origin, targets, error) => {
+	      // If a connection error occurs, we remove the client from the pool,
+	      // and emit a connectionError event. They will not be re-used.
+	      // Fixes https://github.com/nodejs/undici/issues/3895
+	      for (const target of targets) {
+	        // Do not use kRemoveClient here, as it will close the client,
+	        // but the client cannot be closed in this state.
+	        const idx = this[kClients].indexOf(target);
+	        if (idx !== -1) {
+	          this[kClients].splice(idx, 1);
+	        }
+	      }
+	    });
 	  }
 
 	  [kGetDispatcher] () {
@@ -14984,6 +14998,7 @@ function requireHeaders () {
 	  isValidHeaderName,
 	  isValidHeaderValue
 	} = requireUtil$5();
+	const util = require$$0$2;
 	const { webidl } = requireWebidl();
 	const assert = require$$0$3;
 
@@ -15530,6 +15545,9 @@ function requireHeaders () {
 	  [Symbol.toStringTag]: {
 	    value: 'Headers',
 	    configurable: true
+	  },
+	  [util.inspect.custom]: {
+	    enumerable: false
 	  }
 	});
 
@@ -16138,11 +16156,11 @@ function requireResponse () {
 
 /* globals AbortController */
 
-var request$1;
+var request$2;
 var hasRequiredRequest;
 
 function requireRequest () {
-	if (hasRequiredRequest) return request$1;
+	if (hasRequiredRequest) return request$2;
 	hasRequiredRequest = 1;
 
 	const { extractBody, mixinBody, cloneBody } = requireBody();
@@ -17086,8 +17104,8 @@ function requireRequest () {
 	  }
 	]);
 
-	request$1 = { Request, makeRequest };
-	return request$1;
+	request$2 = { Request, makeRequest };
+	return request$2;
 }
 
 var fetch_1;
@@ -21419,9 +21437,10 @@ function requireUtil$1 () {
 	if (hasRequiredUtil$1) return util$1;
 	hasRequiredUtil$1 = 1;
 
-	const assert = require$$0$3;
-	const { kHeadersList } = requireSymbols$4();
-
+	/**
+	 * @param {string} value
+	 * @returns {boolean}
+	 */
 	function isCTLExcludingHtab (value) {
 	  if (value.length === 0) {
 	    return false
@@ -21682,40 +21701,22 @@ function requireUtil$1 () {
 	  return out.join('; ')
 	}
 
-	let kHeadersListNode;
-
-	function getHeadersList (headers) {
-	  if (headers[kHeadersList]) {
-	    return headers[kHeadersList]
-	  }
-
-	  if (!kHeadersListNode) {
-	    kHeadersListNode = Object.getOwnPropertySymbols(headers).find(
-	      (symbol) => symbol.description === 'headers list'
-	    );
-
-	    assert(kHeadersListNode, 'Headers cannot be parsed');
-	  }
-
-	  const headersList = headers[kHeadersListNode];
-	  assert(headersList);
-
-	  return headersList
-	}
-
 	util$1 = {
 	  isCTLExcludingHtab,
-	  stringify,
-	  getHeadersList
+	  validateCookieName,
+	  validateCookiePath,
+	  validateCookieValue,
+	  toIMFDate,
+	  stringify
 	};
 	return util$1;
 }
 
-var parse$1;
+var parse$2;
 var hasRequiredParse;
 
 function requireParse () {
-	if (hasRequiredParse) return parse$1;
+	if (hasRequiredParse) return parse$2;
 	hasRequiredParse = 1;
 
 	const { maxNameValuePairSize, maxAttributeValueSize } = requireConstants$1();
@@ -22029,11 +22030,11 @@ function requireParse () {
 	  return parseUnparsedAttributes(unparsedAttributes, cookieAttributeList)
 	}
 
-	parse$1 = {
+	parse$2 = {
 	  parseSetCookie,
 	  parseUnparsedAttributes
 	};
-	return parse$1;
+	return parse$2;
 }
 
 var cookies;
@@ -22044,7 +22045,7 @@ function requireCookies () {
 	hasRequiredCookies = 1;
 
 	const { parseSetCookie } = requireParse();
-	const { stringify, getHeadersList } = requireUtil$1();
+	const { stringify } = requireUtil$1();
 	const { webidl } = requireWebidl();
 	const { Headers } = requireHeaders();
 
@@ -22120,14 +22121,13 @@ function requireCookies () {
 
 	  webidl.brandCheck(headers, Headers, { strict: false });
 
-	  const cookies = getHeadersList(headers).cookies;
+	  const cookies = headers.getSetCookie();
 
 	  if (!cookies) {
 	    return []
 	  }
 
-	  // In older versions of undici, cookies is a list of name:value.
-	  return cookies.map((pair) => parseSetCookie(Array.isArray(pair) ? pair[1] : pair))
+	  return cookies.map((pair) => parseSetCookie(pair))
 	}
 
 	/**
@@ -25037,14 +25037,14 @@ function requireLib () {
 	return lib;
 }
 
-var auth$1 = {};
+var auth$2 = {};
 
 var hasRequiredAuth;
 
 function requireAuth () {
-	if (hasRequiredAuth) return auth$1;
+	if (hasRequiredAuth) return auth$2;
 	hasRequiredAuth = 1;
-	var __awaiter = (auth$1 && auth$1.__awaiter) || function (thisArg, _arguments, P, generator) {
+	var __awaiter = (auth$2 && auth$2.__awaiter) || function (thisArg, _arguments, P, generator) {
 	    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
 	    return new (P || (P = Promise))(function (resolve, reject) {
 	        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -25053,8 +25053,8 @@ function requireAuth () {
 	        step((generator = generator.apply(thisArg, _arguments || [])).next());
 	    });
 	};
-	Object.defineProperty(auth$1, "__esModule", { value: true });
-	auth$1.PersonalAccessTokenCredentialHandler = auth$1.BearerCredentialHandler = auth$1.BasicCredentialHandler = void 0;
+	Object.defineProperty(auth$2, "__esModule", { value: true });
+	auth$2.PersonalAccessTokenCredentialHandler = auth$2.BearerCredentialHandler = auth$2.BasicCredentialHandler = void 0;
 	class BasicCredentialHandler {
 	    constructor(username, password) {
 	        this.username = username;
@@ -25076,7 +25076,7 @@ function requireAuth () {
 	        });
 	    }
 	}
-	auth$1.BasicCredentialHandler = BasicCredentialHandler;
+	auth$2.BasicCredentialHandler = BasicCredentialHandler;
 	class BearerCredentialHandler {
 	    constructor(token) {
 	        this.token = token;
@@ -25099,7 +25099,7 @@ function requireAuth () {
 	        });
 	    }
 	}
-	auth$1.BearerCredentialHandler = BearerCredentialHandler;
+	auth$2.BearerCredentialHandler = BearerCredentialHandler;
 	class PersonalAccessTokenCredentialHandler {
 	    constructor(token) {
 	        this.token = token;
@@ -25122,9 +25122,9 @@ function requireAuth () {
 	        });
 	    }
 	}
-	auth$1.PersonalAccessTokenCredentialHandler = PersonalAccessTokenCredentialHandler;
+	auth$2.PersonalAccessTokenCredentialHandler = PersonalAccessTokenCredentialHandler;
 	
-	return auth$1;
+	return auth$2;
 }
 
 var hasRequiredOidcUtils;
@@ -27424,7 +27424,7 @@ function requireUtils$1 () {
 	return utils;
 }
 
-function getUserAgent() {
+function getUserAgent$1() {
     if (typeof navigator === "object" && "userAgent" in navigator) {
         return navigator.userAgent;
     }
@@ -27626,22 +27626,22 @@ function requireBeforeAfterHook () {
 
 var beforeAfterHookExports = requireBeforeAfterHook();
 
-const VERSION$5 = "9.0.6";
+const VERSION$b = "9.0.6";
 
-const userAgent = `octokit-endpoint.js/${VERSION$5} ${getUserAgent()}`;
-const DEFAULTS = {
+const userAgent$1 = `octokit-endpoint.js/${VERSION$b} ${getUserAgent$1()}`;
+const DEFAULTS$1 = {
   method: "GET",
   baseUrl: "https://api.github.com",
   headers: {
     accept: "application/vnd.github.v3+json",
-    "user-agent": userAgent
+    "user-agent": userAgent$1
   },
   mediaType: {
     format: ""
   }
 };
 
-function lowercaseKeys(object) {
+function lowercaseKeys$1(object) {
   if (!object) {
     return {};
   }
@@ -27651,7 +27651,7 @@ function lowercaseKeys(object) {
   }, {});
 }
 
-function isPlainObject$1(value) {
+function isPlainObject$3(value) {
   if (typeof value !== "object" || value === null)
     return false;
   if (Object.prototype.toString.call(value) !== "[object Object]")
@@ -27663,14 +27663,14 @@ function isPlainObject$1(value) {
   return typeof Ctor === "function" && Ctor instanceof Ctor && Function.prototype.call(Ctor) === Function.prototype.call(value);
 }
 
-function mergeDeep(defaults, options) {
+function mergeDeep$1(defaults, options) {
   const result = Object.assign({}, defaults);
   Object.keys(options).forEach((key) => {
-    if (isPlainObject$1(options[key])) {
+    if (isPlainObject$3(options[key])) {
       if (!(key in defaults))
         Object.assign(result, { [key]: options[key] });
       else
-        result[key] = mergeDeep(defaults[key], options[key]);
+        result[key] = mergeDeep$1(defaults[key], options[key]);
     } else {
       Object.assign(result, { [key]: options[key] });
     }
@@ -27678,7 +27678,7 @@ function mergeDeep(defaults, options) {
   return result;
 }
 
-function removeUndefinedProperties(obj) {
+function removeUndefinedProperties$1(obj) {
   for (const key in obj) {
     if (obj[key] === void 0) {
       delete obj[key];
@@ -27687,17 +27687,17 @@ function removeUndefinedProperties(obj) {
   return obj;
 }
 
-function merge(defaults, route, options) {
+function merge$1(defaults, route, options) {
   if (typeof route === "string") {
     let [method, url] = route.split(" ");
     options = Object.assign(url ? { method, url } : { url: method }, options);
   } else {
     options = Object.assign({}, route);
   }
-  options.headers = lowercaseKeys(options.headers);
-  removeUndefinedProperties(options);
-  removeUndefinedProperties(options.headers);
-  const mergedOptions = mergeDeep(defaults || {}, options);
+  options.headers = lowercaseKeys$1(options.headers);
+  removeUndefinedProperties$1(options);
+  removeUndefinedProperties$1(options.headers);
+  const mergedOptions = mergeDeep$1(defaults || {}, options);
   if (options.url === "/graphql") {
     if (defaults && defaults.mediaType.previews?.length) {
       mergedOptions.mediaType.previews = defaults.mediaType.previews.filter(
@@ -27709,7 +27709,7 @@ function merge(defaults, route, options) {
   return mergedOptions;
 }
 
-function addQueryParameters(url, parameters) {
+function addQueryParameters$1(url, parameters) {
   const separator = /\?/.test(url) ? "&" : "?";
   const names = Object.keys(parameters);
   if (names.length === 0) {
@@ -27723,19 +27723,19 @@ function addQueryParameters(url, parameters) {
   }).join("&");
 }
 
-const urlVariableRegex = /\{[^{}}]+\}/g;
-function removeNonChars(variableName) {
+const urlVariableRegex$1 = /\{[^{}}]+\}/g;
+function removeNonChars$1(variableName) {
   return variableName.replace(/(?:^\W+)|(?:(?<!\W)\W+$)/g, "").split(/,/);
 }
-function extractUrlVariableNames(url) {
-  const matches = url.match(urlVariableRegex);
+function extractUrlVariableNames$1(url) {
+  const matches = url.match(urlVariableRegex$1);
   if (!matches) {
     return [];
   }
-  return matches.map(removeNonChars).reduce((a, b) => a.concat(b), []);
+  return matches.map(removeNonChars$1).reduce((a, b) => a.concat(b), []);
 }
 
-function omit(object, keysToOmit) {
+function omit$1(object, keysToOmit) {
   const result = { __proto__: null };
   for (const key of Object.keys(object)) {
     if (keysToOmit.indexOf(key) === -1) {
@@ -27745,7 +27745,7 @@ function omit(object, keysToOmit) {
   return result;
 }
 
-function encodeReserved(str) {
+function encodeReserved$1(str) {
   return str.split(/(%[0-9A-Fa-f]{2})/g).map(function(part) {
     if (!/%[0-9A-Fa-f]/.test(part)) {
       part = encodeURI(part).replace(/%5B/g, "[").replace(/%5D/g, "]");
@@ -27753,67 +27753,67 @@ function encodeReserved(str) {
     return part;
   }).join("");
 }
-function encodeUnreserved(str) {
+function encodeUnreserved$1(str) {
   return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
     return "%" + c.charCodeAt(0).toString(16).toUpperCase();
   });
 }
-function encodeValue(operator, value, key) {
-  value = operator === "+" || operator === "#" ? encodeReserved(value) : encodeUnreserved(value);
+function encodeValue$1(operator, value, key) {
+  value = operator === "+" || operator === "#" ? encodeReserved$1(value) : encodeUnreserved$1(value);
   if (key) {
-    return encodeUnreserved(key) + "=" + value;
+    return encodeUnreserved$1(key) + "=" + value;
   } else {
     return value;
   }
 }
-function isDefined(value) {
+function isDefined$1(value) {
   return value !== void 0 && value !== null;
 }
-function isKeyOperator(operator) {
+function isKeyOperator$1(operator) {
   return operator === ";" || operator === "&" || operator === "?";
 }
-function getValues(context, operator, key, modifier) {
+function getValues$1(context, operator, key, modifier) {
   var value = context[key], result = [];
-  if (isDefined(value) && value !== "") {
+  if (isDefined$1(value) && value !== "") {
     if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
       value = value.toString();
       if (modifier && modifier !== "*") {
         value = value.substring(0, parseInt(modifier, 10));
       }
       result.push(
-        encodeValue(operator, value, isKeyOperator(operator) ? key : "")
+        encodeValue$1(operator, value, isKeyOperator$1(operator) ? key : "")
       );
     } else {
       if (modifier === "*") {
         if (Array.isArray(value)) {
-          value.filter(isDefined).forEach(function(value2) {
+          value.filter(isDefined$1).forEach(function(value2) {
             result.push(
-              encodeValue(operator, value2, isKeyOperator(operator) ? key : "")
+              encodeValue$1(operator, value2, isKeyOperator$1(operator) ? key : "")
             );
           });
         } else {
           Object.keys(value).forEach(function(k) {
-            if (isDefined(value[k])) {
-              result.push(encodeValue(operator, value[k], k));
+            if (isDefined$1(value[k])) {
+              result.push(encodeValue$1(operator, value[k], k));
             }
           });
         }
       } else {
         const tmp = [];
         if (Array.isArray(value)) {
-          value.filter(isDefined).forEach(function(value2) {
-            tmp.push(encodeValue(operator, value2));
+          value.filter(isDefined$1).forEach(function(value2) {
+            tmp.push(encodeValue$1(operator, value2));
           });
         } else {
           Object.keys(value).forEach(function(k) {
-            if (isDefined(value[k])) {
-              tmp.push(encodeUnreserved(k));
-              tmp.push(encodeValue(operator, value[k].toString()));
+            if (isDefined$1(value[k])) {
+              tmp.push(encodeUnreserved$1(k));
+              tmp.push(encodeValue$1(operator, value[k].toString()));
             }
           });
         }
-        if (isKeyOperator(operator)) {
-          result.push(encodeUnreserved(key) + "=" + tmp.join(","));
+        if (isKeyOperator$1(operator)) {
+          result.push(encodeUnreserved$1(key) + "=" + tmp.join(","));
         } else if (tmp.length !== 0) {
           result.push(tmp.join(","));
         }
@@ -27821,23 +27821,23 @@ function getValues(context, operator, key, modifier) {
     }
   } else {
     if (operator === ";") {
-      if (isDefined(value)) {
-        result.push(encodeUnreserved(key));
+      if (isDefined$1(value)) {
+        result.push(encodeUnreserved$1(key));
       }
     } else if (value === "" && (operator === "&" || operator === "?")) {
-      result.push(encodeUnreserved(key) + "=");
+      result.push(encodeUnreserved$1(key) + "=");
     } else if (value === "") {
       result.push("");
     }
   }
   return result;
 }
-function parseUrl(template) {
+function parseUrl$1(template) {
   return {
-    expand: expand$1.bind(null, template)
+    expand: expand$2.bind(null, template)
   };
 }
-function expand$1(template, context) {
+function expand$2(template, context) {
   var operators = ["+", "#", ".", "/", ";", "?", "&"];
   template = template.replace(
     /\{([^\{\}]+)\}|([^\{\}]+)/g,
@@ -27851,7 +27851,7 @@ function expand$1(template, context) {
         }
         expression.split(/,/g).forEach(function(variable) {
           var tmp = /([^:\*]*)(?::(\d+)|(\*))?/.exec(variable);
-          values.push(getValues(context, operator, tmp[1], tmp[2] || tmp[3]));
+          values.push(getValues$1(context, operator, tmp[1], tmp[2] || tmp[3]));
         });
         if (operator && operator !== "+") {
           var separator = ",";
@@ -27865,7 +27865,7 @@ function expand$1(template, context) {
           return values.join(",");
         }
       } else {
-        return encodeReserved(literal);
+        return encodeReserved$1(literal);
       }
     }
   );
@@ -27876,12 +27876,12 @@ function expand$1(template, context) {
   }
 }
 
-function parse(options) {
+function parse$1(options) {
   let method = options.method.toUpperCase();
   let url = (options.url || "/").replace(/:([a-z]\w+)/g, "{$1}");
   let headers = Object.assign({}, options.headers);
   let body;
-  let parameters = omit(options, [
+  let parameters = omit$1(options, [
     "method",
     "baseUrl",
     "url",
@@ -27889,13 +27889,13 @@ function parse(options) {
     "request",
     "mediaType"
   ]);
-  const urlVariableNames = extractUrlVariableNames(url);
-  url = parseUrl(url).expand(parameters);
+  const urlVariableNames = extractUrlVariableNames$1(url);
+  url = parseUrl$1(url).expand(parameters);
   if (!/^http/.test(url)) {
     url = options.baseUrl + url;
   }
   const omittedParameters = Object.keys(options).filter((option) => urlVariableNames.includes(option)).concat("baseUrl");
-  const remainingParameters = omit(parameters, omittedParameters);
+  const remainingParameters = omit$1(parameters, omittedParameters);
   const isBinaryRequest = /application\/octet-stream/i.test(headers.accept);
   if (!isBinaryRequest) {
     if (options.mediaType.format) {
@@ -27917,7 +27917,7 @@ function parse(options) {
     }
   }
   if (["GET", "HEAD"].includes(method)) {
-    url = addQueryParameters(url, remainingParameters);
+    url = addQueryParameters$1(url, remainingParameters);
   } else {
     if ("data" in remainingParameters) {
       body = remainingParameters.data;
@@ -27940,26 +27940,26 @@ function parse(options) {
   );
 }
 
-function endpointWithDefaults(defaults, route, options) {
-  return parse(merge(defaults, route, options));
+function endpointWithDefaults$1(defaults, route, options) {
+  return parse$1(merge$1(defaults, route, options));
 }
 
-function withDefaults$2(oldDefaults, newDefaults) {
-  const DEFAULTS = merge(oldDefaults, newDefaults);
-  const endpoint = endpointWithDefaults.bind(null, DEFAULTS);
+function withDefaults$5(oldDefaults, newDefaults) {
+  const DEFAULTS = merge$1(oldDefaults, newDefaults);
+  const endpoint = endpointWithDefaults$1.bind(null, DEFAULTS);
   return Object.assign(endpoint, {
     DEFAULTS,
-    defaults: withDefaults$2.bind(null, DEFAULTS),
-    merge: merge.bind(null, DEFAULTS),
-    parse
+    defaults: withDefaults$5.bind(null, DEFAULTS),
+    merge: merge$1.bind(null, DEFAULTS),
+    parse: parse$1
   });
 }
 
-const endpoint = withDefaults$2(null, DEFAULTS);
+const endpoint$1 = withDefaults$5(null, DEFAULTS$1);
 
-const VERSION$4 = "8.4.1";
+const VERSION$a = "8.4.1";
 
-function isPlainObject(value) {
+function isPlainObject$2(value) {
   if (typeof value !== "object" || value === null)
     return false;
   if (Object.prototype.toString.call(value) !== "[object Object]")
@@ -28085,7 +28085,7 @@ var once = /*@__PURE__*/getDefaultExportFromCjs(onceExports);
 
 const logOnceCode = once((deprecation) => console.warn(deprecation));
 const logOnceHeaders = once((deprecation) => console.warn(deprecation));
-class RequestError extends Error {
+let RequestError$1 = class RequestError extends Error {
   constructor(message, statusCode, options) {
     super(message);
     if (Error.captureStackTrace) {
@@ -28133,16 +28133,16 @@ class RequestError extends Error {
       }
     });
   }
-}
+};
 
 function getBufferResponse(response) {
   return response.arrayBuffer();
 }
 
-function fetchWrapper(requestOptions) {
+function fetchWrapper$1(requestOptions) {
   const log = requestOptions.request && requestOptions.request.log ? requestOptions.request.log : console;
   const parseSuccessResponseBody = requestOptions.request?.parseSuccessResponseBody !== false;
-  if (isPlainObject(requestOptions.body) || Array.isArray(requestOptions.body)) {
+  if (isPlainObject$2(requestOptions.body) || Array.isArray(requestOptions.body)) {
     requestOptions.body = JSON.stringify(requestOptions.body);
   }
   let headers = {};
@@ -28186,7 +28186,7 @@ function fetchWrapper(requestOptions) {
       if (status < 400) {
         return;
       }
-      throw new RequestError(response.statusText, status, {
+      throw new RequestError$1(response.statusText, status, {
         response: {
           url,
           status,
@@ -28197,19 +28197,19 @@ function fetchWrapper(requestOptions) {
       });
     }
     if (status === 304) {
-      throw new RequestError("Not modified", status, {
+      throw new RequestError$1("Not modified", status, {
         response: {
           url,
           status,
           headers,
-          data: await getResponseData(response)
+          data: await getResponseData$1(response)
         },
         request: requestOptions
       });
     }
     if (status >= 400) {
-      const data = await getResponseData(response);
-      const error = new RequestError(toErrorMessage(data), status, {
+      const data = await getResponseData$1(response);
+      const error = new RequestError$1(toErrorMessage$1(data), status, {
         response: {
           url,
           status,
@@ -28220,7 +28220,7 @@ function fetchWrapper(requestOptions) {
       });
       throw error;
     }
-    return parseSuccessResponseBody ? await getResponseData(response) : response.body;
+    return parseSuccessResponseBody ? await getResponseData$1(response) : response.body;
   }).then((data) => {
     return {
       status,
@@ -28229,7 +28229,7 @@ function fetchWrapper(requestOptions) {
       data
     };
   }).catch((error) => {
-    if (error instanceof RequestError)
+    if (error instanceof RequestError$1)
       throw error;
     else if (error.name === "AbortError")
       throw error;
@@ -28241,12 +28241,12 @@ function fetchWrapper(requestOptions) {
         message = error.cause;
       }
     }
-    throw new RequestError(message, 500, {
+    throw new RequestError$1(message, 500, {
       request: requestOptions
     });
   });
 }
-async function getResponseData(response) {
+async function getResponseData$1(response) {
   const contentType = response.headers.get("content-type");
   if (/application\/json/.test(contentType)) {
     return response.json().catch(() => response.text()).catch(() => "");
@@ -28256,7 +28256,7 @@ async function getResponseData(response) {
   }
   return getBufferResponse(response);
 }
-function toErrorMessage(data) {
+function toErrorMessage$1(data) {
   if (typeof data === "string")
     return data;
   let suffix;
@@ -28274,49 +28274,49 @@ function toErrorMessage(data) {
   return `Unknown error: ${JSON.stringify(data)}`;
 }
 
-function withDefaults$1(oldEndpoint, newDefaults) {
+function withDefaults$4(oldEndpoint, newDefaults) {
   const endpoint = oldEndpoint.defaults(newDefaults);
   const newApi = function(route, parameters) {
     const endpointOptions = endpoint.merge(route, parameters);
     if (!endpointOptions.request || !endpointOptions.request.hook) {
-      return fetchWrapper(endpoint.parse(endpointOptions));
+      return fetchWrapper$1(endpoint.parse(endpointOptions));
     }
     const request = (route2, parameters2) => {
-      return fetchWrapper(
+      return fetchWrapper$1(
         endpoint.parse(endpoint.merge(route2, parameters2))
       );
     };
     Object.assign(request, {
       endpoint,
-      defaults: withDefaults$1.bind(null, endpoint)
+      defaults: withDefaults$4.bind(null, endpoint)
     });
     return endpointOptions.request.hook(request, endpointOptions);
   };
   return Object.assign(newApi, {
     endpoint,
-    defaults: withDefaults$1.bind(null, endpoint)
+    defaults: withDefaults$4.bind(null, endpoint)
   });
 }
 
-const request = withDefaults$1(endpoint, {
+const request$1 = withDefaults$4(endpoint$1, {
   headers: {
-    "user-agent": `octokit-request.js/${VERSION$4} ${getUserAgent()}`
+    "user-agent": `octokit-request.js/${VERSION$a} ${getUserAgent$1()}`
   }
 });
 
 // pkg/dist-src/index.js
 
 // pkg/dist-src/version.js
-var VERSION$3 = "7.1.0";
+var VERSION$9 = "7.1.1";
 
 // pkg/dist-src/error.js
-function _buildMessageForResponseErrors(data) {
+function _buildMessageForResponseErrors$1(data) {
   return `Request failed due to following response errors:
 ` + data.errors.map((e) => ` - ${e.message}`).join("\n");
 }
-var GraphqlResponseError = class extends Error {
+var GraphqlResponseError$1 = class GraphqlResponseError extends Error {
   constructor(request2, headers, response) {
-    super(_buildMessageForResponseErrors(response));
+    super(_buildMessageForResponseErrors$1(response));
     this.request = request2;
     this.headers = headers;
     this.response = response;
@@ -28330,7 +28330,7 @@ var GraphqlResponseError = class extends Error {
 };
 
 // pkg/dist-src/graphql.js
-var NON_VARIABLE_OPTIONS = [
+var NON_VARIABLE_OPTIONS$1 = [
   "method",
   "baseUrl",
   "url",
@@ -28339,9 +28339,9 @@ var NON_VARIABLE_OPTIONS = [
   "query",
   "mediaType"
 ];
-var FORBIDDEN_VARIABLE_OPTIONS = ["query", "method", "url"];
-var GHES_V3_SUFFIX_REGEX = /\/api\/v3\/?$/;
-function graphql(request2, query, options) {
+var FORBIDDEN_VARIABLE_OPTIONS$1 = ["query", "method", "url"];
+var GHES_V3_SUFFIX_REGEX$1 = /\/api\/v3\/?$/;
+function graphql$1(request2, query, options) {
   if (options) {
     if (typeof query === "string" && "query" in options) {
       return Promise.reject(
@@ -28349,8 +28349,7 @@ function graphql(request2, query, options) {
       );
     }
     for (const key in options) {
-      if (!FORBIDDEN_VARIABLE_OPTIONS.includes(key))
-        continue;
+      if (!FORBIDDEN_VARIABLE_OPTIONS$1.includes(key)) continue;
       return Promise.reject(
         new Error(
           `[@octokit/graphql] "${key}" cannot be used as variable name`
@@ -28362,7 +28361,7 @@ function graphql(request2, query, options) {
   const requestOptions = Object.keys(
     parsedOptions
   ).reduce((result, key) => {
-    if (NON_VARIABLE_OPTIONS.includes(key)) {
+    if (NON_VARIABLE_OPTIONS$1.includes(key)) {
       result[key] = parsedOptions[key];
       return result;
     }
@@ -28373,8 +28372,8 @@ function graphql(request2, query, options) {
     return result;
   }, {});
   const baseUrl = parsedOptions.baseUrl || request2.endpoint.DEFAULTS.baseUrl;
-  if (GHES_V3_SUFFIX_REGEX.test(baseUrl)) {
-    requestOptions.url = baseUrl.replace(GHES_V3_SUFFIX_REGEX, "/api/graphql");
+  if (GHES_V3_SUFFIX_REGEX$1.test(baseUrl)) {
+    requestOptions.url = baseUrl.replace(GHES_V3_SUFFIX_REGEX$1, "/api/graphql");
   }
   return request2(requestOptions).then((response) => {
     if (response.data.errors) {
@@ -28382,7 +28381,7 @@ function graphql(request2, query, options) {
       for (const key of Object.keys(response.headers)) {
         headers[key] = response.headers[key];
       }
-      throw new GraphqlResponseError(
+      throw new GraphqlResponseError$1(
         requestOptions,
         headers,
         response.data
@@ -28393,27 +28392,27 @@ function graphql(request2, query, options) {
 }
 
 // pkg/dist-src/with-defaults.js
-function withDefaults(request2, newDefaults) {
+function withDefaults$3(request2, newDefaults) {
   const newRequest = request2.defaults(newDefaults);
   const newApi = (query, options) => {
-    return graphql(newRequest, query, options);
+    return graphql$1(newRequest, query, options);
   };
   return Object.assign(newApi, {
-    defaults: withDefaults.bind(null, newRequest),
+    defaults: withDefaults$3.bind(null, newRequest),
     endpoint: newRequest.endpoint
   });
 }
 
 // pkg/dist-src/index.js
-withDefaults(request, {
+withDefaults$3(request$1, {
   headers: {
-    "user-agent": `octokit-graphql.js/${VERSION$3} ${getUserAgent()}`
+    "user-agent": `octokit-graphql.js/${VERSION$9} ${getUserAgent$1()}`
   },
   method: "POST",
   url: "/graphql"
 });
-function withCustomRequest(customRequest) {
-  return withDefaults(customRequest, {
+function withCustomRequest$1(customRequest) {
+  return withDefaults$3(customRequest, {
     method: "POST",
     url: "/graphql"
   });
@@ -28422,7 +28421,7 @@ function withCustomRequest(customRequest) {
 const REGEX_IS_INSTALLATION_LEGACY = /^v1\./;
 const REGEX_IS_INSTALLATION = /^ghs_/;
 const REGEX_IS_USER_TO_SERVER = /^ghu_/;
-async function auth(token) {
+async function auth$1(token) {
   const isApp = token.split(/\./).length === 3;
   const isInstallation = REGEX_IS_INSTALLATION_LEGACY.test(token) || REGEX_IS_INSTALLATION.test(token);
   const isUserToServer = REGEX_IS_USER_TO_SERVER.test(token);
@@ -28434,23 +28433,23 @@ async function auth(token) {
   };
 }
 
-function withAuthorizationPrefix(token) {
+function withAuthorizationPrefix$1(token) {
   if (token.split(/\./).length === 3) {
     return `bearer ${token}`;
   }
   return `token ${token}`;
 }
 
-async function hook(token, request, route, parameters) {
+async function hook$1(token, request, route, parameters) {
   const endpoint = request.endpoint.merge(
     route,
     parameters
   );
-  endpoint.headers.authorization = withAuthorizationPrefix(token);
+  endpoint.headers.authorization = withAuthorizationPrefix$1(token);
   return request(endpoint);
 }
 
-const createTokenAuth = function createTokenAuth2(token) {
+const createTokenAuth$1 = function createTokenAuth2(token) {
   if (!token) {
     throw new Error("[@octokit/auth-token] No token passed to createTokenAuth");
   }
@@ -28460,25 +28459,25 @@ const createTokenAuth = function createTokenAuth2(token) {
     );
   }
   token = token.replace(/^(token|bearer) +/i, "");
-  return Object.assign(auth.bind(null, token), {
-    hook: hook.bind(null, token)
+  return Object.assign(auth$1.bind(null, token), {
+    hook: hook$1.bind(null, token)
   });
 };
 
 // pkg/dist-src/index.js
 
 // pkg/dist-src/version.js
-var VERSION$2 = "5.2.0";
+var VERSION$8 = "5.2.1";
 
 // pkg/dist-src/index.js
-var noop = () => {
+var noop$2 = () => {
 };
-var consoleWarn = console.warn.bind(console);
-var consoleError = console.error.bind(console);
-var userAgentTrail = `octokit-core.js/${VERSION$2} ${getUserAgent()}`;
-var Octokit = class {
+var consoleWarn$1 = console.warn.bind(console);
+var consoleError$1 = console.error.bind(console);
+var userAgentTrail$1 = `octokit-core.js/${VERSION$8} ${getUserAgent$1()}`;
+var Octokit$1 = class Octokit {
   static {
-    this.VERSION = VERSION$2;
+    this.VERSION = VERSION$8;
   }
   static defaults(defaults) {
     const OctokitWithDefaults = class extends this {
@@ -28525,7 +28524,7 @@ var Octokit = class {
   constructor(options = {}) {
     const hook = new beforeAfterHookExports.Collection();
     const requestDefaults = {
-      baseUrl: request.endpoint.DEFAULTS.baseUrl,
+      baseUrl: request$1.endpoint.DEFAULTS.baseUrl,
       headers: {},
       request: Object.assign({}, options.request, {
         // @ts-ignore internal usage only, no need to type
@@ -28536,7 +28535,7 @@ var Octokit = class {
         format: ""
       }
     };
-    requestDefaults.headers["user-agent"] = options.userAgent ? `${options.userAgent} ${userAgentTrail}` : userAgentTrail;
+    requestDefaults.headers["user-agent"] = options.userAgent ? `${options.userAgent} ${userAgentTrail$1}` : userAgentTrail$1;
     if (options.baseUrl) {
       requestDefaults.baseUrl = options.baseUrl;
     }
@@ -28546,14 +28545,14 @@ var Octokit = class {
     if (options.timeZone) {
       requestDefaults.headers["time-zone"] = options.timeZone;
     }
-    this.request = request.defaults(requestDefaults);
-    this.graphql = withCustomRequest(this.request).defaults(requestDefaults);
+    this.request = request$1.defaults(requestDefaults);
+    this.graphql = withCustomRequest$1(this.request).defaults(requestDefaults);
     this.log = Object.assign(
       {
-        debug: noop,
-        info: noop,
-        warn: consoleWarn,
-        error: consoleError
+        debug: noop$2,
+        info: noop$2,
+        warn: consoleWarn$1,
+        error: consoleError$1
       },
       options.log
     );
@@ -28564,7 +28563,7 @@ var Octokit = class {
           type: "unauthenticated"
         });
       } else {
-        const auth = createTokenAuth(options.auth);
+        const auth = createTokenAuth$1(options.auth);
         hook.wrap("request", auth.hook);
         this.auth = auth;
       }
@@ -28598,12 +28597,12 @@ var Octokit = class {
 
 var distWeb$1 = /*#__PURE__*/Object.freeze({
 	__proto__: null,
-	Octokit: Octokit
+	Octokit: Octokit$1
 });
 
 var require$$2 = /*@__PURE__*/getAugmentedNamespace(distWeb$1);
 
-const VERSION$1 = "10.4.1";
+const VERSION$7 = "10.4.1";
 
 const Endpoints = {
   actions: {
@@ -30723,7 +30722,7 @@ function restEndpointMethods(octokit) {
     rest: api
   };
 }
-restEndpointMethods.VERSION = VERSION$1;
+restEndpointMethods.VERSION = VERSION$7;
 function legacyRestEndpointMethods(octokit) {
   const api = endpointsToMethods(octokit);
   return {
@@ -30731,7 +30730,7 @@ function legacyRestEndpointMethods(octokit) {
     rest: api
   };
 }
-legacyRestEndpointMethods.VERSION = VERSION$1;
+legacyRestEndpointMethods.VERSION = VERSION$7;
 
 var distSrc = /*#__PURE__*/Object.freeze({
 	__proto__: null,
@@ -30742,7 +30741,7 @@ var distSrc = /*#__PURE__*/Object.freeze({
 var require$$3 = /*@__PURE__*/getAugmentedNamespace(distSrc);
 
 // pkg/dist-src/version.js
-var VERSION = "9.2.2";
+var VERSION$6 = "9.2.2";
 
 // pkg/dist-src/normalize-paginated-list-response.js
 function normalizePaginatedListResponse(response) {
@@ -31102,7 +31101,7 @@ function paginateRest(octokit) {
     })
   };
 }
-paginateRest.VERSION = VERSION;
+paginateRest.VERSION = VERSION$6;
 
 var distWeb = /*#__PURE__*/Object.freeze({
 	__proto__: null,
@@ -31516,7 +31515,7 @@ function requireBraceExpansion () {
 }
 
 var braceExpansionExports = requireBraceExpansion();
-var expand = /*@__PURE__*/getDefaultExportFromCjs(braceExpansionExports);
+var expand$1 = /*@__PURE__*/getDefaultExportFromCjs(braceExpansionExports);
 
 const MAX_PATTERN_LENGTH = 1024 * 64;
 const assertValidPattern = (pattern) => {
@@ -32371,8 +32370,8 @@ const path = {
     posix: { sep: '/' },
 };
 /* c8 ignore stop */
-const sep = defaultPlatform === 'win32' ? path.win32.sep : path.posix.sep;
-minimatch.sep = sep;
+const sep$1 = defaultPlatform === 'win32' ? path.win32.sep : path.posix.sep;
+minimatch.sep = sep$1;
 const GLOBSTAR = Symbol('globstar **');
 minimatch.GLOBSTAR = GLOBSTAR;
 // any single thing other than /
@@ -32445,7 +32444,7 @@ const braceExpand = (pattern, options = {}) => {
         // shortcut. no need to expand.
         return [pattern];
     }
-    return expand(pattern);
+    return expand$1(pattern);
 };
 minimatch.braceExpand = braceExpand;
 // parse a component of the expanded set.
@@ -33292,6 +33291,3013 @@ minimatch.Minimatch = Minimatch;
 minimatch.escape = escape;
 minimatch.unescape = unescape;
 
+function getUserAgent() {
+  if (typeof navigator === "object" && "userAgent" in navigator) {
+    return navigator.userAgent;
+  }
+
+  if (typeof process === "object" && process.version !== undefined) {
+    return `Node.js/${process.version.substr(1)} (${process.platform}; ${
+      process.arch
+    })`;
+  }
+
+  return "<environment undetectable>";
+}
+
+// @ts-check
+
+function register(state, name, method, options) {
+  if (typeof method !== "function") {
+    throw new Error("method for before hook must be a function");
+  }
+
+  if (!options) {
+    options = {};
+  }
+
+  if (Array.isArray(name)) {
+    return name.reverse().reduce((callback, name) => {
+      return register.bind(null, state, name, callback, options);
+    }, method)();
+  }
+
+  return Promise.resolve().then(() => {
+    if (!state.registry[name]) {
+      return method(options);
+    }
+
+    return state.registry[name].reduce((method, registered) => {
+      return registered.hook.bind(null, method, options);
+    }, method)();
+  });
+}
+
+// @ts-check
+
+function addHook(state, kind, name, hook) {
+  const orig = hook;
+  if (!state.registry[name]) {
+    state.registry[name] = [];
+  }
+
+  if (kind === "before") {
+    hook = (method, options) => {
+      return Promise.resolve()
+        .then(orig.bind(null, options))
+        .then(method.bind(null, options));
+    };
+  }
+
+  if (kind === "after") {
+    hook = (method, options) => {
+      let result;
+      return Promise.resolve()
+        .then(method.bind(null, options))
+        .then((result_) => {
+          result = result_;
+          return orig(result, options);
+        })
+        .then(() => {
+          return result;
+        });
+    };
+  }
+
+  if (kind === "error") {
+    hook = (method, options) => {
+      return Promise.resolve()
+        .then(method.bind(null, options))
+        .catch((error) => {
+          return orig(error, options);
+        });
+    };
+  }
+
+  state.registry[name].push({
+    hook: hook,
+    orig: orig,
+  });
+}
+
+// @ts-check
+
+function removeHook(state, name, method) {
+  if (!state.registry[name]) {
+    return;
+  }
+
+  const index = state.registry[name]
+    .map((registered) => {
+      return registered.orig;
+    })
+    .indexOf(method);
+
+  if (index === -1) {
+    return;
+  }
+
+  state.registry[name].splice(index, 1);
+}
+
+// @ts-check
+
+
+// bind with array of arguments: https://stackoverflow.com/a/21792913
+const bind = Function.bind;
+const bindable = bind.bind(bind);
+
+function bindApi(hook, state, name) {
+  const removeHookRef = bindable(removeHook, null).apply(
+    null,
+    [state]
+  );
+  hook.api = { remove: removeHookRef };
+  hook.remove = removeHookRef;
+  ["before", "error", "after", "wrap"].forEach((kind) => {
+    const args = [state, kind];
+    hook[kind] = hook.api[kind] = bindable(addHook, null).apply(null, args);
+  });
+}
+
+function Collection() {
+  const state = {
+    registry: {},
+  };
+
+  const hook = register.bind(null, state);
+  bindApi(hook, state);
+
+  return hook;
+}
+
+var Hook = { Collection };
+
+// pkg/dist-src/defaults.js
+
+// pkg/dist-src/version.js
+var VERSION$5 = "0.0.0-development";
+
+// pkg/dist-src/defaults.js
+var userAgent = `octokit-endpoint.js/${VERSION$5} ${getUserAgent()}`;
+var DEFAULTS = {
+  method: "GET",
+  baseUrl: "https://api.github.com",
+  headers: {
+    accept: "application/vnd.github.v3+json",
+    "user-agent": userAgent
+  },
+  mediaType: {
+    format: ""
+  }
+};
+
+// pkg/dist-src/util/lowercase-keys.js
+function lowercaseKeys(object) {
+  if (!object) {
+    return {};
+  }
+  return Object.keys(object).reduce((newObj, key) => {
+    newObj[key.toLowerCase()] = object[key];
+    return newObj;
+  }, {});
+}
+
+// pkg/dist-src/util/is-plain-object.js
+function isPlainObject$1(value) {
+  if (typeof value !== "object" || value === null) return false;
+  if (Object.prototype.toString.call(value) !== "[object Object]") return false;
+  const proto = Object.getPrototypeOf(value);
+  if (proto === null) return true;
+  const Ctor = Object.prototype.hasOwnProperty.call(proto, "constructor") && proto.constructor;
+  return typeof Ctor === "function" && Ctor instanceof Ctor && Function.prototype.call(Ctor) === Function.prototype.call(value);
+}
+
+// pkg/dist-src/util/merge-deep.js
+function mergeDeep(defaults, options) {
+  const result = Object.assign({}, defaults);
+  Object.keys(options).forEach((key) => {
+    if (isPlainObject$1(options[key])) {
+      if (!(key in defaults)) Object.assign(result, { [key]: options[key] });
+      else result[key] = mergeDeep(defaults[key], options[key]);
+    } else {
+      Object.assign(result, { [key]: options[key] });
+    }
+  });
+  return result;
+}
+
+// pkg/dist-src/util/remove-undefined-properties.js
+function removeUndefinedProperties(obj) {
+  for (const key in obj) {
+    if (obj[key] === void 0) {
+      delete obj[key];
+    }
+  }
+  return obj;
+}
+
+// pkg/dist-src/merge.js
+function merge(defaults, route, options) {
+  if (typeof route === "string") {
+    let [method, url] = route.split(" ");
+    options = Object.assign(url ? { method, url } : { url: method }, options);
+  } else {
+    options = Object.assign({}, route);
+  }
+  options.headers = lowercaseKeys(options.headers);
+  removeUndefinedProperties(options);
+  removeUndefinedProperties(options.headers);
+  const mergedOptions = mergeDeep(defaults || {}, options);
+  if (options.url === "/graphql") {
+    if (defaults && defaults.mediaType.previews?.length) {
+      mergedOptions.mediaType.previews = defaults.mediaType.previews.filter(
+        (preview) => !mergedOptions.mediaType.previews.includes(preview)
+      ).concat(mergedOptions.mediaType.previews);
+    }
+    mergedOptions.mediaType.previews = (mergedOptions.mediaType.previews || []).map((preview) => preview.replace(/-preview/, ""));
+  }
+  return mergedOptions;
+}
+
+// pkg/dist-src/util/add-query-parameters.js
+function addQueryParameters(url, parameters) {
+  const separator = /\?/.test(url) ? "&" : "?";
+  const names = Object.keys(parameters);
+  if (names.length === 0) {
+    return url;
+  }
+  return url + separator + names.map((name) => {
+    if (name === "q") {
+      return "q=" + parameters.q.split("+").map(encodeURIComponent).join("+");
+    }
+    return `${name}=${encodeURIComponent(parameters[name])}`;
+  }).join("&");
+}
+
+// pkg/dist-src/util/extract-url-variable-names.js
+var urlVariableRegex = /\{[^{}}]+\}/g;
+function removeNonChars(variableName) {
+  return variableName.replace(/(?:^\W+)|(?:(?<!\W)\W+$)/g, "").split(/,/);
+}
+function extractUrlVariableNames(url) {
+  const matches = url.match(urlVariableRegex);
+  if (!matches) {
+    return [];
+  }
+  return matches.map(removeNonChars).reduce((a, b) => a.concat(b), []);
+}
+
+// pkg/dist-src/util/omit.js
+function omit(object, keysToOmit) {
+  const result = { __proto__: null };
+  for (const key of Object.keys(object)) {
+    if (keysToOmit.indexOf(key) === -1) {
+      result[key] = object[key];
+    }
+  }
+  return result;
+}
+
+// pkg/dist-src/util/url-template.js
+function encodeReserved(str) {
+  return str.split(/(%[0-9A-Fa-f]{2})/g).map(function(part) {
+    if (!/%[0-9A-Fa-f]/.test(part)) {
+      part = encodeURI(part).replace(/%5B/g, "[").replace(/%5D/g, "]");
+    }
+    return part;
+  }).join("");
+}
+function encodeUnreserved(str) {
+  return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
+    return "%" + c.charCodeAt(0).toString(16).toUpperCase();
+  });
+}
+function encodeValue(operator, value, key) {
+  value = operator === "+" || operator === "#" ? encodeReserved(value) : encodeUnreserved(value);
+  if (key) {
+    return encodeUnreserved(key) + "=" + value;
+  } else {
+    return value;
+  }
+}
+function isDefined(value) {
+  return value !== void 0 && value !== null;
+}
+function isKeyOperator(operator) {
+  return operator === ";" || operator === "&" || operator === "?";
+}
+function getValues(context, operator, key, modifier) {
+  var value = context[key], result = [];
+  if (isDefined(value) && value !== "") {
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+      value = value.toString();
+      if (modifier && modifier !== "*") {
+        value = value.substring(0, parseInt(modifier, 10));
+      }
+      result.push(
+        encodeValue(operator, value, isKeyOperator(operator) ? key : "")
+      );
+    } else {
+      if (modifier === "*") {
+        if (Array.isArray(value)) {
+          value.filter(isDefined).forEach(function(value2) {
+            result.push(
+              encodeValue(operator, value2, isKeyOperator(operator) ? key : "")
+            );
+          });
+        } else {
+          Object.keys(value).forEach(function(k) {
+            if (isDefined(value[k])) {
+              result.push(encodeValue(operator, value[k], k));
+            }
+          });
+        }
+      } else {
+        const tmp = [];
+        if (Array.isArray(value)) {
+          value.filter(isDefined).forEach(function(value2) {
+            tmp.push(encodeValue(operator, value2));
+          });
+        } else {
+          Object.keys(value).forEach(function(k) {
+            if (isDefined(value[k])) {
+              tmp.push(encodeUnreserved(k));
+              tmp.push(encodeValue(operator, value[k].toString()));
+            }
+          });
+        }
+        if (isKeyOperator(operator)) {
+          result.push(encodeUnreserved(key) + "=" + tmp.join(","));
+        } else if (tmp.length !== 0) {
+          result.push(tmp.join(","));
+        }
+      }
+    }
+  } else {
+    if (operator === ";") {
+      if (isDefined(value)) {
+        result.push(encodeUnreserved(key));
+      }
+    } else if (value === "" && (operator === "&" || operator === "?")) {
+      result.push(encodeUnreserved(key) + "=");
+    } else if (value === "") {
+      result.push("");
+    }
+  }
+  return result;
+}
+function parseUrl(template) {
+  return {
+    expand: expand.bind(null, template)
+  };
+}
+function expand(template, context) {
+  var operators = ["+", "#", ".", "/", ";", "?", "&"];
+  template = template.replace(
+    /\{([^\{\}]+)\}|([^\{\}]+)/g,
+    function(_, expression, literal) {
+      if (expression) {
+        let operator = "";
+        const values = [];
+        if (operators.indexOf(expression.charAt(0)) !== -1) {
+          operator = expression.charAt(0);
+          expression = expression.substr(1);
+        }
+        expression.split(/,/g).forEach(function(variable) {
+          var tmp = /([^:\*]*)(?::(\d+)|(\*))?/.exec(variable);
+          values.push(getValues(context, operator, tmp[1], tmp[2] || tmp[3]));
+        });
+        if (operator && operator !== "+") {
+          var separator = ",";
+          if (operator === "?") {
+            separator = "&";
+          } else if (operator !== "#") {
+            separator = operator;
+          }
+          return (values.length !== 0 ? operator : "") + values.join(separator);
+        } else {
+          return values.join(",");
+        }
+      } else {
+        return encodeReserved(literal);
+      }
+    }
+  );
+  if (template === "/") {
+    return template;
+  } else {
+    return template.replace(/\/$/, "");
+  }
+}
+
+// pkg/dist-src/parse.js
+function parse(options) {
+  let method = options.method.toUpperCase();
+  let url = (options.url || "/").replace(/:([a-z]\w+)/g, "{$1}");
+  let headers = Object.assign({}, options.headers);
+  let body;
+  let parameters = omit(options, [
+    "method",
+    "baseUrl",
+    "url",
+    "headers",
+    "request",
+    "mediaType"
+  ]);
+  const urlVariableNames = extractUrlVariableNames(url);
+  url = parseUrl(url).expand(parameters);
+  if (!/^http/.test(url)) {
+    url = options.baseUrl + url;
+  }
+  const omittedParameters = Object.keys(options).filter((option) => urlVariableNames.includes(option)).concat("baseUrl");
+  const remainingParameters = omit(parameters, omittedParameters);
+  const isBinaryRequest = /application\/octet-stream/i.test(headers.accept);
+  if (!isBinaryRequest) {
+    if (options.mediaType.format) {
+      headers.accept = headers.accept.split(/,/).map(
+        (format) => format.replace(
+          /application\/vnd(\.\w+)(\.v3)?(\.\w+)?(\+json)?$/,
+          `application/vnd$1$2.${options.mediaType.format}`
+        )
+      ).join(",");
+    }
+    if (url.endsWith("/graphql")) {
+      if (options.mediaType.previews?.length) {
+        const previewsFromAcceptHeader = headers.accept.match(/(?<![\w-])[\w-]+(?=-preview)/g) || [];
+        headers.accept = previewsFromAcceptHeader.concat(options.mediaType.previews).map((preview) => {
+          const format = options.mediaType.format ? `.${options.mediaType.format}` : "+json";
+          return `application/vnd.github.${preview}-preview${format}`;
+        }).join(",");
+      }
+    }
+  }
+  if (["GET", "HEAD"].includes(method)) {
+    url = addQueryParameters(url, remainingParameters);
+  } else {
+    if ("data" in remainingParameters) {
+      body = remainingParameters.data;
+    } else {
+      if (Object.keys(remainingParameters).length) {
+        body = remainingParameters;
+      }
+    }
+  }
+  if (!headers["content-type"] && typeof body !== "undefined") {
+    headers["content-type"] = "application/json; charset=utf-8";
+  }
+  if (["PATCH", "PUT"].includes(method) && typeof body === "undefined") {
+    body = "";
+  }
+  return Object.assign(
+    { method, url, headers },
+    typeof body !== "undefined" ? { body } : null,
+    options.request ? { request: options.request } : null
+  );
+}
+
+// pkg/dist-src/endpoint-with-defaults.js
+function endpointWithDefaults(defaults, route, options) {
+  return parse(merge(defaults, route, options));
+}
+
+// pkg/dist-src/with-defaults.js
+function withDefaults$2(oldDefaults, newDefaults) {
+  const DEFAULTS2 = merge(oldDefaults, newDefaults);
+  const endpoint2 = endpointWithDefaults.bind(null, DEFAULTS2);
+  return Object.assign(endpoint2, {
+    DEFAULTS: DEFAULTS2,
+    defaults: withDefaults$2.bind(null, DEFAULTS2),
+    merge: merge.bind(null, DEFAULTS2),
+    parse
+  });
+}
+
+// pkg/dist-src/index.js
+var endpoint = withDefaults$2(null, DEFAULTS);
+
+var fastContentTypeParse = {};
+
+var hasRequiredFastContentTypeParse;
+
+function requireFastContentTypeParse () {
+	if (hasRequiredFastContentTypeParse) return fastContentTypeParse;
+	hasRequiredFastContentTypeParse = 1;
+
+	const NullObject = function NullObject () { };
+	NullObject.prototype = Object.create(null);
+
+	/**
+	 * RegExp to match *( ";" parameter ) in RFC 7231 sec 3.1.1.1
+	 *
+	 * parameter     = token "=" ( token / quoted-string )
+	 * token         = 1*tchar
+	 * tchar         = "!" / "#" / "$" / "%" / "&" / "'" / "*"
+	 *               / "+" / "-" / "." / "^" / "_" / "`" / "|" / "~"
+	 *               / DIGIT / ALPHA
+	 *               ; any VCHAR, except delimiters
+	 * quoted-string = DQUOTE *( qdtext / quoted-pair ) DQUOTE
+	 * qdtext        = HTAB / SP / %x21 / %x23-5B / %x5D-7E / obs-text
+	 * obs-text      = %x80-FF
+	 * quoted-pair   = "\" ( HTAB / SP / VCHAR / obs-text )
+	 */
+	const paramRE = /; *([!#$%&'*+.^\w`|~-]+)=("(?:[\v\u0020\u0021\u0023-\u005b\u005d-\u007e\u0080-\u00ff]|\\[\v\u0020-\u00ff])*"|[!#$%&'*+.^\w`|~-]+) */gu;
+
+	/**
+	 * RegExp to match quoted-pair in RFC 7230 sec 3.2.6
+	 *
+	 * quoted-pair = "\" ( HTAB / SP / VCHAR / obs-text )
+	 * obs-text    = %x80-FF
+	 */
+	const quotedPairRE = /\\([\v\u0020-\u00ff])/gu;
+
+	/**
+	 * RegExp to match type in RFC 7231 sec 3.1.1.1
+	 *
+	 * media-type = type "/" subtype
+	 * type       = token
+	 * subtype    = token
+	 */
+	const mediaTypeRE = /^[!#$%&'*+.^\w|~-]+\/[!#$%&'*+.^\w|~-]+$/u;
+
+	// default ContentType to prevent repeated object creation
+	const defaultContentType = { type: '', parameters: new NullObject() };
+	Object.freeze(defaultContentType.parameters);
+	Object.freeze(defaultContentType);
+
+	/**
+	 * Parse media type to object.
+	 *
+	 * @param {string|object} header
+	 * @return {Object}
+	 * @public
+	 */
+
+	function parse (header) {
+	  if (typeof header !== 'string') {
+	    throw new TypeError('argument header is required and must be a string')
+	  }
+
+	  let index = header.indexOf(';');
+	  const type = index !== -1
+	    ? header.slice(0, index).trim()
+	    : header.trim();
+
+	  if (mediaTypeRE.test(type) === false) {
+	    throw new TypeError('invalid media type')
+	  }
+
+	  const result = {
+	    type: type.toLowerCase(),
+	    parameters: new NullObject()
+	  };
+
+	  // parse parameters
+	  if (index === -1) {
+	    return result
+	  }
+
+	  let key;
+	  let match;
+	  let value;
+
+	  paramRE.lastIndex = index;
+
+	  while ((match = paramRE.exec(header))) {
+	    if (match.index !== index) {
+	      throw new TypeError('invalid parameter format')
+	    }
+
+	    index += match[0].length;
+	    key = match[1].toLowerCase();
+	    value = match[2];
+
+	    if (value[0] === '"') {
+	      // remove quotes and escapes
+	      value = value
+	        .slice(1, value.length - 1);
+
+	      quotedPairRE.test(value) && (value = value.replace(quotedPairRE, '$1'));
+	    }
+
+	    result.parameters[key] = value;
+	  }
+
+	  if (index !== header.length) {
+	    throw new TypeError('invalid parameter format')
+	  }
+
+	  return result
+	}
+
+	function safeParse (header) {
+	  if (typeof header !== 'string') {
+	    return defaultContentType
+	  }
+
+	  let index = header.indexOf(';');
+	  const type = index !== -1
+	    ? header.slice(0, index).trim()
+	    : header.trim();
+
+	  if (mediaTypeRE.test(type) === false) {
+	    return defaultContentType
+	  }
+
+	  const result = {
+	    type: type.toLowerCase(),
+	    parameters: new NullObject()
+	  };
+
+	  // parse parameters
+	  if (index === -1) {
+	    return result
+	  }
+
+	  let key;
+	  let match;
+	  let value;
+
+	  paramRE.lastIndex = index;
+
+	  while ((match = paramRE.exec(header))) {
+	    if (match.index !== index) {
+	      return defaultContentType
+	    }
+
+	    index += match[0].length;
+	    key = match[1].toLowerCase();
+	    value = match[2];
+
+	    if (value[0] === '"') {
+	      // remove quotes and escapes
+	      value = value
+	        .slice(1, value.length - 1);
+
+	      quotedPairRE.test(value) && (value = value.replace(quotedPairRE, '$1'));
+	    }
+
+	    result.parameters[key] = value;
+	  }
+
+	  if (index !== header.length) {
+	    return defaultContentType
+	  }
+
+	  return result
+	}
+
+	fastContentTypeParse.default = { parse, safeParse };
+	fastContentTypeParse.parse = parse;
+	fastContentTypeParse.safeParse = safeParse;
+	fastContentTypeParse.defaultContentType = defaultContentType;
+	return fastContentTypeParse;
+}
+
+var fastContentTypeParseExports = requireFastContentTypeParse();
+
+class RequestError extends Error {
+  name;
+  /**
+   * http status code
+   */
+  status;
+  /**
+   * Request options that lead to the error.
+   */
+  request;
+  /**
+   * Response object if a response was received
+   */
+  response;
+  constructor(message, statusCode, options) {
+    super(message);
+    this.name = "HttpError";
+    this.status = Number.parseInt(statusCode);
+    if (Number.isNaN(this.status)) {
+      this.status = 0;
+    }
+    if ("response" in options) {
+      this.response = options.response;
+    }
+    const requestCopy = Object.assign({}, options.request);
+    if (options.request.headers.authorization) {
+      requestCopy.headers = Object.assign({}, options.request.headers, {
+        authorization: options.request.headers.authorization.replace(
+          /(?<! ) .*$/,
+          " [REDACTED]"
+        )
+      });
+    }
+    requestCopy.url = requestCopy.url.replace(/\bclient_secret=\w+/g, "client_secret=[REDACTED]").replace(/\baccess_token=\w+/g, "access_token=[REDACTED]");
+    this.request = requestCopy;
+  }
+}
+
+// pkg/dist-src/index.js
+
+// pkg/dist-src/version.js
+var VERSION$4 = "0.0.0-development";
+
+// pkg/dist-src/defaults.js
+var defaults_default = {
+  headers: {
+    "user-agent": `octokit-request.js/${VERSION$4} ${getUserAgent()}`
+  }
+};
+
+// pkg/dist-src/is-plain-object.js
+function isPlainObject(value) {
+  if (typeof value !== "object" || value === null) return false;
+  if (Object.prototype.toString.call(value) !== "[object Object]") return false;
+  const proto = Object.getPrototypeOf(value);
+  if (proto === null) return true;
+  const Ctor = Object.prototype.hasOwnProperty.call(proto, "constructor") && proto.constructor;
+  return typeof Ctor === "function" && Ctor instanceof Ctor && Function.prototype.call(Ctor) === Function.prototype.call(value);
+}
+async function fetchWrapper(requestOptions) {
+  const fetch = requestOptions.request?.fetch || globalThis.fetch;
+  if (!fetch) {
+    throw new Error(
+      "fetch is not set. Please pass a fetch implementation as new Octokit({ request: { fetch }}). Learn more at https://github.com/octokit/octokit.js/#fetch-missing"
+    );
+  }
+  const log = requestOptions.request?.log || console;
+  const parseSuccessResponseBody = requestOptions.request?.parseSuccessResponseBody !== false;
+  const body = isPlainObject(requestOptions.body) || Array.isArray(requestOptions.body) ? JSON.stringify(requestOptions.body) : requestOptions.body;
+  const requestHeaders = Object.fromEntries(
+    Object.entries(requestOptions.headers).map(([name, value]) => [
+      name,
+      String(value)
+    ])
+  );
+  let fetchResponse;
+  try {
+    fetchResponse = await fetch(requestOptions.url, {
+      method: requestOptions.method,
+      body,
+      redirect: requestOptions.request?.redirect,
+      headers: requestHeaders,
+      signal: requestOptions.request?.signal,
+      // duplex must be set if request.body is ReadableStream or Async Iterables.
+      // See https://fetch.spec.whatwg.org/#dom-requestinit-duplex.
+      ...requestOptions.body && { duplex: "half" }
+    });
+  } catch (error) {
+    let message = "Unknown Error";
+    if (error instanceof Error) {
+      if (error.name === "AbortError") {
+        error.status = 500;
+        throw error;
+      }
+      message = error.message;
+      if (error.name === "TypeError" && "cause" in error) {
+        if (error.cause instanceof Error) {
+          message = error.cause.message;
+        } else if (typeof error.cause === "string") {
+          message = error.cause;
+        }
+      }
+    }
+    const requestError = new RequestError(message, 500, {
+      request: requestOptions
+    });
+    requestError.cause = error;
+    throw requestError;
+  }
+  const status = fetchResponse.status;
+  const url = fetchResponse.url;
+  const responseHeaders = {};
+  for (const [key, value] of fetchResponse.headers) {
+    responseHeaders[key] = value;
+  }
+  const octokitResponse = {
+    url,
+    status,
+    headers: responseHeaders,
+    data: ""
+  };
+  if ("deprecation" in responseHeaders) {
+    const matches = responseHeaders.link && responseHeaders.link.match(/<([^<>]+)>; rel="deprecation"/);
+    const deprecationLink = matches && matches.pop();
+    log.warn(
+      `[@octokit/request] "${requestOptions.method} ${requestOptions.url}" is deprecated. It is scheduled to be removed on ${responseHeaders.sunset}${deprecationLink ? `. See ${deprecationLink}` : ""}`
+    );
+  }
+  if (status === 204 || status === 205) {
+    return octokitResponse;
+  }
+  if (requestOptions.method === "HEAD") {
+    if (status < 400) {
+      return octokitResponse;
+    }
+    throw new RequestError(fetchResponse.statusText, status, {
+      response: octokitResponse,
+      request: requestOptions
+    });
+  }
+  if (status === 304) {
+    octokitResponse.data = await getResponseData(fetchResponse);
+    throw new RequestError("Not modified", status, {
+      response: octokitResponse,
+      request: requestOptions
+    });
+  }
+  if (status >= 400) {
+    octokitResponse.data = await getResponseData(fetchResponse);
+    throw new RequestError(toErrorMessage(octokitResponse.data), status, {
+      response: octokitResponse,
+      request: requestOptions
+    });
+  }
+  octokitResponse.data = parseSuccessResponseBody ? await getResponseData(fetchResponse) : fetchResponse.body;
+  return octokitResponse;
+}
+async function getResponseData(response) {
+  const contentType = response.headers.get("content-type");
+  if (!contentType) {
+    return response.text().catch(() => "");
+  }
+  const mimetype = fastContentTypeParseExports.safeParse(contentType);
+  if (isJSONResponse(mimetype)) {
+    let text = "";
+    try {
+      text = await response.text();
+      return JSON.parse(text);
+    } catch (err) {
+      return text;
+    }
+  } else if (mimetype.type.startsWith("text/") || mimetype.parameters.charset?.toLowerCase() === "utf-8") {
+    return response.text().catch(() => "");
+  } else {
+    return response.arrayBuffer().catch(() => new ArrayBuffer(0));
+  }
+}
+function isJSONResponse(mimetype) {
+  return mimetype.type === "application/json" || mimetype.type === "application/scim+json";
+}
+function toErrorMessage(data) {
+  if (typeof data === "string") {
+    return data;
+  }
+  if (data instanceof ArrayBuffer) {
+    return "Unknown error";
+  }
+  if ("message" in data) {
+    const suffix = "documentation_url" in data ? ` - ${data.documentation_url}` : "";
+    return Array.isArray(data.errors) ? `${data.message}: ${data.errors.map((v) => JSON.stringify(v)).join(", ")}${suffix}` : `${data.message}${suffix}`;
+  }
+  return `Unknown error: ${JSON.stringify(data)}`;
+}
+
+// pkg/dist-src/with-defaults.js
+function withDefaults$1(oldEndpoint, newDefaults) {
+  const endpoint2 = oldEndpoint.defaults(newDefaults);
+  const newApi = function(route, parameters) {
+    const endpointOptions = endpoint2.merge(route, parameters);
+    if (!endpointOptions.request || !endpointOptions.request.hook) {
+      return fetchWrapper(endpoint2.parse(endpointOptions));
+    }
+    const request2 = (route2, parameters2) => {
+      return fetchWrapper(
+        endpoint2.parse(endpoint2.merge(route2, parameters2))
+      );
+    };
+    Object.assign(request2, {
+      endpoint: endpoint2,
+      defaults: withDefaults$1.bind(null, endpoint2)
+    });
+    return endpointOptions.request.hook(request2, endpointOptions);
+  };
+  return Object.assign(newApi, {
+    endpoint: endpoint2,
+    defaults: withDefaults$1.bind(null, endpoint2)
+  });
+}
+
+// pkg/dist-src/index.js
+var request = withDefaults$1(endpoint, defaults_default);
+
+// pkg/dist-src/index.js
+
+// pkg/dist-src/version.js
+var VERSION$3 = "0.0.0-development";
+
+// pkg/dist-src/error.js
+function _buildMessageForResponseErrors(data) {
+  return `Request failed due to following response errors:
+` + data.errors.map((e) => ` - ${e.message}`).join("\n");
+}
+var GraphqlResponseError = class extends Error {
+  constructor(request2, headers, response) {
+    super(_buildMessageForResponseErrors(response));
+    this.request = request2;
+    this.headers = headers;
+    this.response = response;
+    this.errors = response.errors;
+    this.data = response.data;
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
+  }
+  name = "GraphqlResponseError";
+  errors;
+  data;
+};
+
+// pkg/dist-src/graphql.js
+var NON_VARIABLE_OPTIONS = [
+  "method",
+  "baseUrl",
+  "url",
+  "headers",
+  "request",
+  "query",
+  "mediaType",
+  "operationName"
+];
+var FORBIDDEN_VARIABLE_OPTIONS = ["query", "method", "url"];
+var GHES_V3_SUFFIX_REGEX = /\/api\/v3\/?$/;
+function graphql(request2, query, options) {
+  if (options) {
+    if (typeof query === "string" && "query" in options) {
+      return Promise.reject(
+        new Error(`[@octokit/graphql] "query" cannot be used as variable name`)
+      );
+    }
+    for (const key in options) {
+      if (!FORBIDDEN_VARIABLE_OPTIONS.includes(key)) continue;
+      return Promise.reject(
+        new Error(
+          `[@octokit/graphql] "${key}" cannot be used as variable name`
+        )
+      );
+    }
+  }
+  const parsedOptions = typeof query === "string" ? Object.assign({ query }, options) : query;
+  const requestOptions = Object.keys(
+    parsedOptions
+  ).reduce((result, key) => {
+    if (NON_VARIABLE_OPTIONS.includes(key)) {
+      result[key] = parsedOptions[key];
+      return result;
+    }
+    if (!result.variables) {
+      result.variables = {};
+    }
+    result.variables[key] = parsedOptions[key];
+    return result;
+  }, {});
+  const baseUrl = parsedOptions.baseUrl || request2.endpoint.DEFAULTS.baseUrl;
+  if (GHES_V3_SUFFIX_REGEX.test(baseUrl)) {
+    requestOptions.url = baseUrl.replace(GHES_V3_SUFFIX_REGEX, "/api/graphql");
+  }
+  return request2(requestOptions).then((response) => {
+    if (response.data.errors) {
+      const headers = {};
+      for (const key of Object.keys(response.headers)) {
+        headers[key] = response.headers[key];
+      }
+      throw new GraphqlResponseError(
+        requestOptions,
+        headers,
+        response.data
+      );
+    }
+    return response.data.data;
+  });
+}
+
+// pkg/dist-src/with-defaults.js
+function withDefaults(request2, newDefaults) {
+  const newRequest = request2.defaults(newDefaults);
+  const newApi = (query, options) => {
+    return graphql(newRequest, query, options);
+  };
+  return Object.assign(newApi, {
+    defaults: withDefaults.bind(null, newRequest),
+    endpoint: newRequest.endpoint
+  });
+}
+
+// pkg/dist-src/index.js
+withDefaults(request, {
+  headers: {
+    "user-agent": `octokit-graphql.js/${VERSION$3} ${getUserAgent()}`
+  },
+  method: "POST",
+  url: "/graphql"
+});
+function withCustomRequest(customRequest) {
+  return withDefaults(customRequest, {
+    method: "POST",
+    url: "/graphql"
+  });
+}
+
+// pkg/dist-src/is-jwt.js
+var b64url = "(?:[a-zA-Z0-9_-]+)";
+var sep = "\\.";
+var jwtRE = new RegExp(`^${b64url}${sep}${b64url}${sep}${b64url}$`);
+var isJWT = jwtRE.test.bind(jwtRE);
+
+// pkg/dist-src/auth.js
+async function auth(token) {
+  const isApp = isJWT(token);
+  const isInstallation = token.startsWith("v1.") || token.startsWith("ghs_");
+  const isUserToServer = token.startsWith("ghu_");
+  const tokenType = isApp ? "app" : isInstallation ? "installation" : isUserToServer ? "user-to-server" : "oauth";
+  return {
+    type: "token",
+    token,
+    tokenType
+  };
+}
+
+// pkg/dist-src/with-authorization-prefix.js
+function withAuthorizationPrefix(token) {
+  if (token.split(/\./).length === 3) {
+    return `bearer ${token}`;
+  }
+  return `token ${token}`;
+}
+
+// pkg/dist-src/hook.js
+async function hook(token, request, route, parameters) {
+  const endpoint = request.endpoint.merge(
+    route,
+    parameters
+  );
+  endpoint.headers.authorization = withAuthorizationPrefix(token);
+  return request(endpoint);
+}
+
+// pkg/dist-src/index.js
+var createTokenAuth = function createTokenAuth2(token) {
+  if (!token) {
+    throw new Error("[@octokit/auth-token] No token passed to createTokenAuth");
+  }
+  if (typeof token !== "string") {
+    throw new Error(
+      "[@octokit/auth-token] Token passed to createTokenAuth is not a string"
+    );
+  }
+  token = token.replace(/^(token|bearer) +/i, "");
+  return Object.assign(auth.bind(null, token), {
+    hook: hook.bind(null, token)
+  });
+};
+
+const VERSION$2 = "6.1.4";
+
+const noop$1 = () => {
+};
+const consoleWarn = console.warn.bind(console);
+const consoleError = console.error.bind(console);
+const userAgentTrail = `octokit-core.js/${VERSION$2} ${getUserAgent()}`;
+class Octokit {
+  static VERSION = VERSION$2;
+  static defaults(defaults) {
+    const OctokitWithDefaults = class extends this {
+      constructor(...args) {
+        const options = args[0] || {};
+        if (typeof defaults === "function") {
+          super(defaults(options));
+          return;
+        }
+        super(
+          Object.assign(
+            {},
+            defaults,
+            options,
+            options.userAgent && defaults.userAgent ? {
+              userAgent: `${options.userAgent} ${defaults.userAgent}`
+            } : null
+          )
+        );
+      }
+    };
+    return OctokitWithDefaults;
+  }
+  static plugins = [];
+  /**
+   * Attach a plugin (or many) to your Octokit instance.
+   *
+   * @example
+   * const API = Octokit.plugin(plugin1, plugin2, plugin3, ...)
+   */
+  static plugin(...newPlugins) {
+    const currentPlugins = this.plugins;
+    const NewOctokit = class extends this {
+      static plugins = currentPlugins.concat(
+        newPlugins.filter((plugin) => !currentPlugins.includes(plugin))
+      );
+    };
+    return NewOctokit;
+  }
+  constructor(options = {}) {
+    const hook = new Hook.Collection();
+    const requestDefaults = {
+      baseUrl: request.endpoint.DEFAULTS.baseUrl,
+      headers: {},
+      request: Object.assign({}, options.request, {
+        // @ts-ignore internal usage only, no need to type
+        hook: hook.bind(null, "request")
+      }),
+      mediaType: {
+        previews: [],
+        format: ""
+      }
+    };
+    requestDefaults.headers["user-agent"] = options.userAgent ? `${options.userAgent} ${userAgentTrail}` : userAgentTrail;
+    if (options.baseUrl) {
+      requestDefaults.baseUrl = options.baseUrl;
+    }
+    if (options.previews) {
+      requestDefaults.mediaType.previews = options.previews;
+    }
+    if (options.timeZone) {
+      requestDefaults.headers["time-zone"] = options.timeZone;
+    }
+    this.request = request.defaults(requestDefaults);
+    this.graphql = withCustomRequest(this.request).defaults(requestDefaults);
+    this.log = Object.assign(
+      {
+        debug: noop$1,
+        info: noop$1,
+        warn: consoleWarn,
+        error: consoleError
+      },
+      options.log
+    );
+    this.hook = hook;
+    if (!options.authStrategy) {
+      if (!options.auth) {
+        this.auth = async () => ({
+          type: "unauthenticated"
+        });
+      } else {
+        const auth = createTokenAuth(options.auth);
+        hook.wrap("request", auth.hook);
+        this.auth = auth;
+      }
+    } else {
+      const { authStrategy, ...otherOptions } = options;
+      const auth = authStrategy(
+        Object.assign(
+          {
+            request: this.request,
+            log: this.log,
+            // we pass the current octokit instance as well as its constructor options
+            // to allow for authentication strategies that return a new octokit instance
+            // that shares the same internal state as the current one. The original
+            // requirement for this was the "event-octokit" authentication strategy
+            // of https://github.com/probot/octokit-auth-probot.
+            octokit: this,
+            octokitOptions: otherOptions
+          },
+          options.auth
+        )
+      );
+      hook.wrap("request", auth.hook);
+      this.auth = auth;
+    }
+    const classConstructor = this.constructor;
+    for (let i = 0; i < classConstructor.plugins.length; ++i) {
+      Object.assign(this, classConstructor.plugins[i](this, options));
+    }
+  }
+  // assigned during constructor
+  request;
+  graphql;
+  log;
+  hook;
+  // TODO: type `octokit.auth` based on passed options.authStrategy
+  auth;
+}
+
+var light$1 = {exports: {}};
+
+/**
+  * This file contains the Bottleneck library (MIT), compiled to ES2017, and without Clustering support.
+  * https://github.com/SGrondin/bottleneck
+  */
+var light = light$1.exports;
+
+var hasRequiredLight;
+
+function requireLight () {
+	if (hasRequiredLight) return light$1.exports;
+	hasRequiredLight = 1;
+	(function (module, exports) {
+		(function (global, factory) {
+			module.exports = factory() ;
+		}(light, (function () {
+			var commonjsGlobal$1 = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof commonjsGlobal !== 'undefined' ? commonjsGlobal : typeof self !== 'undefined' ? self : {};
+
+			function getCjsExportFromNamespace (n) {
+				return n && n['default'] || n;
+			}
+
+			var load = function(received, defaults, onto = {}) {
+			  var k, ref, v;
+			  for (k in defaults) {
+			    v = defaults[k];
+			    onto[k] = (ref = received[k]) != null ? ref : v;
+			  }
+			  return onto;
+			};
+
+			var overwrite = function(received, defaults, onto = {}) {
+			  var k, v;
+			  for (k in received) {
+			    v = received[k];
+			    if (defaults[k] !== void 0) {
+			      onto[k] = v;
+			    }
+			  }
+			  return onto;
+			};
+
+			var parser = {
+				load: load,
+				overwrite: overwrite
+			};
+
+			var DLList;
+
+			DLList = class DLList {
+			  constructor(incr, decr) {
+			    this.incr = incr;
+			    this.decr = decr;
+			    this._first = null;
+			    this._last = null;
+			    this.length = 0;
+			  }
+
+			  push(value) {
+			    var node;
+			    this.length++;
+			    if (typeof this.incr === "function") {
+			      this.incr();
+			    }
+			    node = {
+			      value,
+			      prev: this._last,
+			      next: null
+			    };
+			    if (this._last != null) {
+			      this._last.next = node;
+			      this._last = node;
+			    } else {
+			      this._first = this._last = node;
+			    }
+			    return void 0;
+			  }
+
+			  shift() {
+			    var value;
+			    if (this._first == null) {
+			      return;
+			    } else {
+			      this.length--;
+			      if (typeof this.decr === "function") {
+			        this.decr();
+			      }
+			    }
+			    value = this._first.value;
+			    if ((this._first = this._first.next) != null) {
+			      this._first.prev = null;
+			    } else {
+			      this._last = null;
+			    }
+			    return value;
+			  }
+
+			  first() {
+			    if (this._first != null) {
+			      return this._first.value;
+			    }
+			  }
+
+			  getArray() {
+			    var node, ref, results;
+			    node = this._first;
+			    results = [];
+			    while (node != null) {
+			      results.push((ref = node, node = node.next, ref.value));
+			    }
+			    return results;
+			  }
+
+			  forEachShift(cb) {
+			    var node;
+			    node = this.shift();
+			    while (node != null) {
+			      (cb(node), node = this.shift());
+			    }
+			    return void 0;
+			  }
+
+			  debug() {
+			    var node, ref, ref1, ref2, results;
+			    node = this._first;
+			    results = [];
+			    while (node != null) {
+			      results.push((ref = node, node = node.next, {
+			        value: ref.value,
+			        prev: (ref1 = ref.prev) != null ? ref1.value : void 0,
+			        next: (ref2 = ref.next) != null ? ref2.value : void 0
+			      }));
+			    }
+			    return results;
+			  }
+
+			};
+
+			var DLList_1 = DLList;
+
+			var Events;
+
+			Events = class Events {
+			  constructor(instance) {
+			    this.instance = instance;
+			    this._events = {};
+			    if ((this.instance.on != null) || (this.instance.once != null) || (this.instance.removeAllListeners != null)) {
+			      throw new Error("An Emitter already exists for this object");
+			    }
+			    this.instance.on = (name, cb) => {
+			      return this._addListener(name, "many", cb);
+			    };
+			    this.instance.once = (name, cb) => {
+			      return this._addListener(name, "once", cb);
+			    };
+			    this.instance.removeAllListeners = (name = null) => {
+			      if (name != null) {
+			        return delete this._events[name];
+			      } else {
+			        return this._events = {};
+			      }
+			    };
+			  }
+
+			  _addListener(name, status, cb) {
+			    var base;
+			    if ((base = this._events)[name] == null) {
+			      base[name] = [];
+			    }
+			    this._events[name].push({cb, status});
+			    return this.instance;
+			  }
+
+			  listenerCount(name) {
+			    if (this._events[name] != null) {
+			      return this._events[name].length;
+			    } else {
+			      return 0;
+			    }
+			  }
+
+			  async trigger(name, ...args) {
+			    var e, promises;
+			    try {
+			      if (name !== "debug") {
+			        this.trigger("debug", `Event triggered: ${name}`, args);
+			      }
+			      if (this._events[name] == null) {
+			        return;
+			      }
+			      this._events[name] = this._events[name].filter(function(listener) {
+			        return listener.status !== "none";
+			      });
+			      promises = this._events[name].map(async(listener) => {
+			        var e, returned;
+			        if (listener.status === "none") {
+			          return;
+			        }
+			        if (listener.status === "once") {
+			          listener.status = "none";
+			        }
+			        try {
+			          returned = typeof listener.cb === "function" ? listener.cb(...args) : void 0;
+			          if (typeof (returned != null ? returned.then : void 0) === "function") {
+			            return (await returned);
+			          } else {
+			            return returned;
+			          }
+			        } catch (error) {
+			          e = error;
+			          {
+			            this.trigger("error", e);
+			          }
+			          return null;
+			        }
+			      });
+			      return ((await Promise.all(promises))).find(function(x) {
+			        return x != null;
+			      });
+			    } catch (error) {
+			      e = error;
+			      {
+			        this.trigger("error", e);
+			      }
+			      return null;
+			    }
+			  }
+
+			};
+
+			var Events_1 = Events;
+
+			var DLList$1, Events$1, Queues;
+
+			DLList$1 = DLList_1;
+
+			Events$1 = Events_1;
+
+			Queues = class Queues {
+			  constructor(num_priorities) {
+			    this.Events = new Events$1(this);
+			    this._length = 0;
+			    this._lists = (function() {
+			      var j, ref, results;
+			      results = [];
+			      for (j = 1, ref = num_priorities; (1 <= ref ? j <= ref : j >= ref); 1 <= ref ? ++j : --j) {
+			        results.push(new DLList$1((() => {
+			          return this.incr();
+			        }), (() => {
+			          return this.decr();
+			        })));
+			      }
+			      return results;
+			    }).call(this);
+			  }
+
+			  incr() {
+			    if (this._length++ === 0) {
+			      return this.Events.trigger("leftzero");
+			    }
+			  }
+
+			  decr() {
+			    if (--this._length === 0) {
+			      return this.Events.trigger("zero");
+			    }
+			  }
+
+			  push(job) {
+			    return this._lists[job.options.priority].push(job);
+			  }
+
+			  queued(priority) {
+			    if (priority != null) {
+			      return this._lists[priority].length;
+			    } else {
+			      return this._length;
+			    }
+			  }
+
+			  shiftAll(fn) {
+			    return this._lists.forEach(function(list) {
+			      return list.forEachShift(fn);
+			    });
+			  }
+
+			  getFirst(arr = this._lists) {
+			    var j, len, list;
+			    for (j = 0, len = arr.length; j < len; j++) {
+			      list = arr[j];
+			      if (list.length > 0) {
+			        return list;
+			      }
+			    }
+			    return [];
+			  }
+
+			  shiftLastFrom(priority) {
+			    return this.getFirst(this._lists.slice(priority).reverse()).shift();
+			  }
+
+			};
+
+			var Queues_1 = Queues;
+
+			var BottleneckError;
+
+			BottleneckError = class BottleneckError extends Error {};
+
+			var BottleneckError_1 = BottleneckError;
+
+			var BottleneckError$1, DEFAULT_PRIORITY, Job, NUM_PRIORITIES, parser$1;
+
+			NUM_PRIORITIES = 10;
+
+			DEFAULT_PRIORITY = 5;
+
+			parser$1 = parser;
+
+			BottleneckError$1 = BottleneckError_1;
+
+			Job = class Job {
+			  constructor(task, args, options, jobDefaults, rejectOnDrop, Events, _states, Promise) {
+			    this.task = task;
+			    this.args = args;
+			    this.rejectOnDrop = rejectOnDrop;
+			    this.Events = Events;
+			    this._states = _states;
+			    this.Promise = Promise;
+			    this.options = parser$1.load(options, jobDefaults);
+			    this.options.priority = this._sanitizePriority(this.options.priority);
+			    if (this.options.id === jobDefaults.id) {
+			      this.options.id = `${this.options.id}-${this._randomIndex()}`;
+			    }
+			    this.promise = new this.Promise((_resolve, _reject) => {
+			      this._resolve = _resolve;
+			      this._reject = _reject;
+			    });
+			    this.retryCount = 0;
+			  }
+
+			  _sanitizePriority(priority) {
+			    var sProperty;
+			    sProperty = ~~priority !== priority ? DEFAULT_PRIORITY : priority;
+			    if (sProperty < 0) {
+			      return 0;
+			    } else if (sProperty > NUM_PRIORITIES - 1) {
+			      return NUM_PRIORITIES - 1;
+			    } else {
+			      return sProperty;
+			    }
+			  }
+
+			  _randomIndex() {
+			    return Math.random().toString(36).slice(2);
+			  }
+
+			  doDrop({error, message = "This job has been dropped by Bottleneck"} = {}) {
+			    if (this._states.remove(this.options.id)) {
+			      if (this.rejectOnDrop) {
+			        this._reject(error != null ? error : new BottleneckError$1(message));
+			      }
+			      this.Events.trigger("dropped", {args: this.args, options: this.options, task: this.task, promise: this.promise});
+			      return true;
+			    } else {
+			      return false;
+			    }
+			  }
+
+			  _assertStatus(expected) {
+			    var status;
+			    status = this._states.jobStatus(this.options.id);
+			    if (!(status === expected || (expected === "DONE" && status === null))) {
+			      throw new BottleneckError$1(`Invalid job status ${status}, expected ${expected}. Please open an issue at https://github.com/SGrondin/bottleneck/issues`);
+			    }
+			  }
+
+			  doReceive() {
+			    this._states.start(this.options.id);
+			    return this.Events.trigger("received", {args: this.args, options: this.options});
+			  }
+
+			  doQueue(reachedHWM, blocked) {
+			    this._assertStatus("RECEIVED");
+			    this._states.next(this.options.id);
+			    return this.Events.trigger("queued", {args: this.args, options: this.options, reachedHWM, blocked});
+			  }
+
+			  doRun() {
+			    if (this.retryCount === 0) {
+			      this._assertStatus("QUEUED");
+			      this._states.next(this.options.id);
+			    } else {
+			      this._assertStatus("EXECUTING");
+			    }
+			    return this.Events.trigger("scheduled", {args: this.args, options: this.options});
+			  }
+
+			  async doExecute(chained, clearGlobalState, run, free) {
+			    var error, eventInfo, passed;
+			    if (this.retryCount === 0) {
+			      this._assertStatus("RUNNING");
+			      this._states.next(this.options.id);
+			    } else {
+			      this._assertStatus("EXECUTING");
+			    }
+			    eventInfo = {args: this.args, options: this.options, retryCount: this.retryCount};
+			    this.Events.trigger("executing", eventInfo);
+			    try {
+			      passed = (await (chained != null ? chained.schedule(this.options, this.task, ...this.args) : this.task(...this.args)));
+			      if (clearGlobalState()) {
+			        this.doDone(eventInfo);
+			        await free(this.options, eventInfo);
+			        this._assertStatus("DONE");
+			        return this._resolve(passed);
+			      }
+			    } catch (error1) {
+			      error = error1;
+			      return this._onFailure(error, eventInfo, clearGlobalState, run, free);
+			    }
+			  }
+
+			  doExpire(clearGlobalState, run, free) {
+			    var error, eventInfo;
+			    if (this._states.jobStatus(this.options.id === "RUNNING")) {
+			      this._states.next(this.options.id);
+			    }
+			    this._assertStatus("EXECUTING");
+			    eventInfo = {args: this.args, options: this.options, retryCount: this.retryCount};
+			    error = new BottleneckError$1(`This job timed out after ${this.options.expiration} ms.`);
+			    return this._onFailure(error, eventInfo, clearGlobalState, run, free);
+			  }
+
+			  async _onFailure(error, eventInfo, clearGlobalState, run, free) {
+			    var retry, retryAfter;
+			    if (clearGlobalState()) {
+			      retry = (await this.Events.trigger("failed", error, eventInfo));
+			      if (retry != null) {
+			        retryAfter = ~~retry;
+			        this.Events.trigger("retry", `Retrying ${this.options.id} after ${retryAfter} ms`, eventInfo);
+			        this.retryCount++;
+			        return run(retryAfter);
+			      } else {
+			        this.doDone(eventInfo);
+			        await free(this.options, eventInfo);
+			        this._assertStatus("DONE");
+			        return this._reject(error);
+			      }
+			    }
+			  }
+
+			  doDone(eventInfo) {
+			    this._assertStatus("EXECUTING");
+			    this._states.next(this.options.id);
+			    return this.Events.trigger("done", eventInfo);
+			  }
+
+			};
+
+			var Job_1 = Job;
+
+			var BottleneckError$2, LocalDatastore, parser$2;
+
+			parser$2 = parser;
+
+			BottleneckError$2 = BottleneckError_1;
+
+			LocalDatastore = class LocalDatastore {
+			  constructor(instance, storeOptions, storeInstanceOptions) {
+			    this.instance = instance;
+			    this.storeOptions = storeOptions;
+			    this.clientId = this.instance._randomIndex();
+			    parser$2.load(storeInstanceOptions, storeInstanceOptions, this);
+			    this._nextRequest = this._lastReservoirRefresh = this._lastReservoirIncrease = Date.now();
+			    this._running = 0;
+			    this._done = 0;
+			    this._unblockTime = 0;
+			    this.ready = this.Promise.resolve();
+			    this.clients = {};
+			    this._startHeartbeat();
+			  }
+
+			  _startHeartbeat() {
+			    var base;
+			    if ((this.heartbeat == null) && (((this.storeOptions.reservoirRefreshInterval != null) && (this.storeOptions.reservoirRefreshAmount != null)) || ((this.storeOptions.reservoirIncreaseInterval != null) && (this.storeOptions.reservoirIncreaseAmount != null)))) {
+			      return typeof (base = (this.heartbeat = setInterval(() => {
+			        var amount, incr, maximum, now, reservoir;
+			        now = Date.now();
+			        if ((this.storeOptions.reservoirRefreshInterval != null) && now >= this._lastReservoirRefresh + this.storeOptions.reservoirRefreshInterval) {
+			          this._lastReservoirRefresh = now;
+			          this.storeOptions.reservoir = this.storeOptions.reservoirRefreshAmount;
+			          this.instance._drainAll(this.computeCapacity());
+			        }
+			        if ((this.storeOptions.reservoirIncreaseInterval != null) && now >= this._lastReservoirIncrease + this.storeOptions.reservoirIncreaseInterval) {
+			          ({
+			            reservoirIncreaseAmount: amount,
+			            reservoirIncreaseMaximum: maximum,
+			            reservoir
+			          } = this.storeOptions);
+			          this._lastReservoirIncrease = now;
+			          incr = maximum != null ? Math.min(amount, maximum - reservoir) : amount;
+			          if (incr > 0) {
+			            this.storeOptions.reservoir += incr;
+			            return this.instance._drainAll(this.computeCapacity());
+			          }
+			        }
+			      }, this.heartbeatInterval))).unref === "function" ? base.unref() : void 0;
+			    } else {
+			      return clearInterval(this.heartbeat);
+			    }
+			  }
+
+			  async __publish__(message) {
+			    await this.yieldLoop();
+			    return this.instance.Events.trigger("message", message.toString());
+			  }
+
+			  async __disconnect__(flush) {
+			    await this.yieldLoop();
+			    clearInterval(this.heartbeat);
+			    return this.Promise.resolve();
+			  }
+
+			  yieldLoop(t = 0) {
+			    return new this.Promise(function(resolve, reject) {
+			      return setTimeout(resolve, t);
+			    });
+			  }
+
+			  computePenalty() {
+			    var ref;
+			    return (ref = this.storeOptions.penalty) != null ? ref : (15 * this.storeOptions.minTime) || 5000;
+			  }
+
+			  async __updateSettings__(options) {
+			    await this.yieldLoop();
+			    parser$2.overwrite(options, options, this.storeOptions);
+			    this._startHeartbeat();
+			    this.instance._drainAll(this.computeCapacity());
+			    return true;
+			  }
+
+			  async __running__() {
+			    await this.yieldLoop();
+			    return this._running;
+			  }
+
+			  async __queued__() {
+			    await this.yieldLoop();
+			    return this.instance.queued();
+			  }
+
+			  async __done__() {
+			    await this.yieldLoop();
+			    return this._done;
+			  }
+
+			  async __groupCheck__(time) {
+			    await this.yieldLoop();
+			    return (this._nextRequest + this.timeout) < time;
+			  }
+
+			  computeCapacity() {
+			    var maxConcurrent, reservoir;
+			    ({maxConcurrent, reservoir} = this.storeOptions);
+			    if ((maxConcurrent != null) && (reservoir != null)) {
+			      return Math.min(maxConcurrent - this._running, reservoir);
+			    } else if (maxConcurrent != null) {
+			      return maxConcurrent - this._running;
+			    } else if (reservoir != null) {
+			      return reservoir;
+			    } else {
+			      return null;
+			    }
+			  }
+
+			  conditionsCheck(weight) {
+			    var capacity;
+			    capacity = this.computeCapacity();
+			    return (capacity == null) || weight <= capacity;
+			  }
+
+			  async __incrementReservoir__(incr) {
+			    var reservoir;
+			    await this.yieldLoop();
+			    reservoir = this.storeOptions.reservoir += incr;
+			    this.instance._drainAll(this.computeCapacity());
+			    return reservoir;
+			  }
+
+			  async __currentReservoir__() {
+			    await this.yieldLoop();
+			    return this.storeOptions.reservoir;
+			  }
+
+			  isBlocked(now) {
+			    return this._unblockTime >= now;
+			  }
+
+			  check(weight, now) {
+			    return this.conditionsCheck(weight) && (this._nextRequest - now) <= 0;
+			  }
+
+			  async __check__(weight) {
+			    var now;
+			    await this.yieldLoop();
+			    now = Date.now();
+			    return this.check(weight, now);
+			  }
+
+			  async __register__(index, weight, expiration) {
+			    var now, wait;
+			    await this.yieldLoop();
+			    now = Date.now();
+			    if (this.conditionsCheck(weight)) {
+			      this._running += weight;
+			      if (this.storeOptions.reservoir != null) {
+			        this.storeOptions.reservoir -= weight;
+			      }
+			      wait = Math.max(this._nextRequest - now, 0);
+			      this._nextRequest = now + wait + this.storeOptions.minTime;
+			      return {
+			        success: true,
+			        wait,
+			        reservoir: this.storeOptions.reservoir
+			      };
+			    } else {
+			      return {
+			        success: false
+			      };
+			    }
+			  }
+
+			  strategyIsBlock() {
+			    return this.storeOptions.strategy === 3;
+			  }
+
+			  async __submit__(queueLength, weight) {
+			    var blocked, now, reachedHWM;
+			    await this.yieldLoop();
+			    if ((this.storeOptions.maxConcurrent != null) && weight > this.storeOptions.maxConcurrent) {
+			      throw new BottleneckError$2(`Impossible to add a job having a weight of ${weight} to a limiter having a maxConcurrent setting of ${this.storeOptions.maxConcurrent}`);
+			    }
+			    now = Date.now();
+			    reachedHWM = (this.storeOptions.highWater != null) && queueLength === this.storeOptions.highWater && !this.check(weight, now);
+			    blocked = this.strategyIsBlock() && (reachedHWM || this.isBlocked(now));
+			    if (blocked) {
+			      this._unblockTime = now + this.computePenalty();
+			      this._nextRequest = this._unblockTime + this.storeOptions.minTime;
+			      this.instance._dropAllQueued();
+			    }
+			    return {
+			      reachedHWM,
+			      blocked,
+			      strategy: this.storeOptions.strategy
+			    };
+			  }
+
+			  async __free__(index, weight) {
+			    await this.yieldLoop();
+			    this._running -= weight;
+			    this._done += weight;
+			    this.instance._drainAll(this.computeCapacity());
+			    return {
+			      running: this._running
+			    };
+			  }
+
+			};
+
+			var LocalDatastore_1 = LocalDatastore;
+
+			var BottleneckError$3, States;
+
+			BottleneckError$3 = BottleneckError_1;
+
+			States = class States {
+			  constructor(status1) {
+			    this.status = status1;
+			    this._jobs = {};
+			    this.counts = this.status.map(function() {
+			      return 0;
+			    });
+			  }
+
+			  next(id) {
+			    var current, next;
+			    current = this._jobs[id];
+			    next = current + 1;
+			    if ((current != null) && next < this.status.length) {
+			      this.counts[current]--;
+			      this.counts[next]++;
+			      return this._jobs[id]++;
+			    } else if (current != null) {
+			      this.counts[current]--;
+			      return delete this._jobs[id];
+			    }
+			  }
+
+			  start(id) {
+			    var initial;
+			    initial = 0;
+			    this._jobs[id] = initial;
+			    return this.counts[initial]++;
+			  }
+
+			  remove(id) {
+			    var current;
+			    current = this._jobs[id];
+			    if (current != null) {
+			      this.counts[current]--;
+			      delete this._jobs[id];
+			    }
+			    return current != null;
+			  }
+
+			  jobStatus(id) {
+			    var ref;
+			    return (ref = this.status[this._jobs[id]]) != null ? ref : null;
+			  }
+
+			  statusJobs(status) {
+			    var k, pos, ref, results, v;
+			    if (status != null) {
+			      pos = this.status.indexOf(status);
+			      if (pos < 0) {
+			        throw new BottleneckError$3(`status must be one of ${this.status.join(', ')}`);
+			      }
+			      ref = this._jobs;
+			      results = [];
+			      for (k in ref) {
+			        v = ref[k];
+			        if (v === pos) {
+			          results.push(k);
+			        }
+			      }
+			      return results;
+			    } else {
+			      return Object.keys(this._jobs);
+			    }
+			  }
+
+			  statusCounts() {
+			    return this.counts.reduce(((acc, v, i) => {
+			      acc[this.status[i]] = v;
+			      return acc;
+			    }), {});
+			  }
+
+			};
+
+			var States_1 = States;
+
+			var DLList$2, Sync;
+
+			DLList$2 = DLList_1;
+
+			Sync = class Sync {
+			  constructor(name, Promise) {
+			    this.schedule = this.schedule.bind(this);
+			    this.name = name;
+			    this.Promise = Promise;
+			    this._running = 0;
+			    this._queue = new DLList$2();
+			  }
+
+			  isEmpty() {
+			    return this._queue.length === 0;
+			  }
+
+			  async _tryToRun() {
+			    var args, cb, error, reject, resolve, returned, task;
+			    if ((this._running < 1) && this._queue.length > 0) {
+			      this._running++;
+			      ({task, args, resolve, reject} = this._queue.shift());
+			      cb = (await (async function() {
+			        try {
+			          returned = (await task(...args));
+			          return function() {
+			            return resolve(returned);
+			          };
+			        } catch (error1) {
+			          error = error1;
+			          return function() {
+			            return reject(error);
+			          };
+			        }
+			      })());
+			      this._running--;
+			      this._tryToRun();
+			      return cb();
+			    }
+			  }
+
+			  schedule(task, ...args) {
+			    var promise, reject, resolve;
+			    resolve = reject = null;
+			    promise = new this.Promise(function(_resolve, _reject) {
+			      resolve = _resolve;
+			      return reject = _reject;
+			    });
+			    this._queue.push({task, args, resolve, reject});
+			    this._tryToRun();
+			    return promise;
+			  }
+
+			};
+
+			var Sync_1 = Sync;
+
+			var version = "2.19.5";
+			var version$1 = {
+				version: version
+			};
+
+			var version$2 = /*#__PURE__*/Object.freeze({
+				version: version,
+				default: version$1
+			});
+
+			var require$$2 = () => console.log('You must import the full version of Bottleneck in order to use this feature.');
+
+			var require$$3 = () => console.log('You must import the full version of Bottleneck in order to use this feature.');
+
+			var require$$4 = () => console.log('You must import the full version of Bottleneck in order to use this feature.');
+
+			var Events$2, Group, IORedisConnection$1, RedisConnection$1, Scripts$1, parser$3;
+
+			parser$3 = parser;
+
+			Events$2 = Events_1;
+
+			RedisConnection$1 = require$$2;
+
+			IORedisConnection$1 = require$$3;
+
+			Scripts$1 = require$$4;
+
+			Group = (function() {
+			  class Group {
+			    constructor(limiterOptions = {}) {
+			      this.deleteKey = this.deleteKey.bind(this);
+			      this.limiterOptions = limiterOptions;
+			      parser$3.load(this.limiterOptions, this.defaults, this);
+			      this.Events = new Events$2(this);
+			      this.instances = {};
+			      this.Bottleneck = Bottleneck_1;
+			      this._startAutoCleanup();
+			      this.sharedConnection = this.connection != null;
+			      if (this.connection == null) {
+			        if (this.limiterOptions.datastore === "redis") {
+			          this.connection = new RedisConnection$1(Object.assign({}, this.limiterOptions, {Events: this.Events}));
+			        } else if (this.limiterOptions.datastore === "ioredis") {
+			          this.connection = new IORedisConnection$1(Object.assign({}, this.limiterOptions, {Events: this.Events}));
+			        }
+			      }
+			    }
+
+			    key(key = "") {
+			      var ref;
+			      return (ref = this.instances[key]) != null ? ref : (() => {
+			        var limiter;
+			        limiter = this.instances[key] = new this.Bottleneck(Object.assign(this.limiterOptions, {
+			          id: `${this.id}-${key}`,
+			          timeout: this.timeout,
+			          connection: this.connection
+			        }));
+			        this.Events.trigger("created", limiter, key);
+			        return limiter;
+			      })();
+			    }
+
+			    async deleteKey(key = "") {
+			      var deleted, instance;
+			      instance = this.instances[key];
+			      if (this.connection) {
+			        deleted = (await this.connection.__runCommand__(['del', ...Scripts$1.allKeys(`${this.id}-${key}`)]));
+			      }
+			      if (instance != null) {
+			        delete this.instances[key];
+			        await instance.disconnect();
+			      }
+			      return (instance != null) || deleted > 0;
+			    }
+
+			    limiters() {
+			      var k, ref, results, v;
+			      ref = this.instances;
+			      results = [];
+			      for (k in ref) {
+			        v = ref[k];
+			        results.push({
+			          key: k,
+			          limiter: v
+			        });
+			      }
+			      return results;
+			    }
+
+			    keys() {
+			      return Object.keys(this.instances);
+			    }
+
+			    async clusterKeys() {
+			      var cursor, end, found, i, k, keys, len, next, start;
+			      if (this.connection == null) {
+			        return this.Promise.resolve(this.keys());
+			      }
+			      keys = [];
+			      cursor = null;
+			      start = `b_${this.id}-`.length;
+			      end = "_settings".length;
+			      while (cursor !== 0) {
+			        [next, found] = (await this.connection.__runCommand__(["scan", cursor != null ? cursor : 0, "match", `b_${this.id}-*_settings`, "count", 10000]));
+			        cursor = ~~next;
+			        for (i = 0, len = found.length; i < len; i++) {
+			          k = found[i];
+			          keys.push(k.slice(start, -end));
+			        }
+			      }
+			      return keys;
+			    }
+
+			    _startAutoCleanup() {
+			      var base;
+			      clearInterval(this.interval);
+			      return typeof (base = (this.interval = setInterval(async() => {
+			        var e, k, ref, results, time, v;
+			        time = Date.now();
+			        ref = this.instances;
+			        results = [];
+			        for (k in ref) {
+			          v = ref[k];
+			          try {
+			            if ((await v._store.__groupCheck__(time))) {
+			              results.push(this.deleteKey(k));
+			            } else {
+			              results.push(void 0);
+			            }
+			          } catch (error) {
+			            e = error;
+			            results.push(v.Events.trigger("error", e));
+			          }
+			        }
+			        return results;
+			      }, this.timeout / 2))).unref === "function" ? base.unref() : void 0;
+			    }
+
+			    updateSettings(options = {}) {
+			      parser$3.overwrite(options, this.defaults, this);
+			      parser$3.overwrite(options, options, this.limiterOptions);
+			      if (options.timeout != null) {
+			        return this._startAutoCleanup();
+			      }
+			    }
+
+			    disconnect(flush = true) {
+			      var ref;
+			      if (!this.sharedConnection) {
+			        return (ref = this.connection) != null ? ref.disconnect(flush) : void 0;
+			      }
+			    }
+
+			  }
+			  Group.prototype.defaults = {
+			    timeout: 1000 * 60 * 5,
+			    connection: null,
+			    Promise: Promise,
+			    id: "group-key"
+			  };
+
+			  return Group;
+
+			}).call(commonjsGlobal$1);
+
+			var Group_1 = Group;
+
+			var Batcher, Events$3, parser$4;
+
+			parser$4 = parser;
+
+			Events$3 = Events_1;
+
+			Batcher = (function() {
+			  class Batcher {
+			    constructor(options = {}) {
+			      this.options = options;
+			      parser$4.load(this.options, this.defaults, this);
+			      this.Events = new Events$3(this);
+			      this._arr = [];
+			      this._resetPromise();
+			      this._lastFlush = Date.now();
+			    }
+
+			    _resetPromise() {
+			      return this._promise = new this.Promise((res, rej) => {
+			        return this._resolve = res;
+			      });
+			    }
+
+			    _flush() {
+			      clearTimeout(this._timeout);
+			      this._lastFlush = Date.now();
+			      this._resolve();
+			      this.Events.trigger("batch", this._arr);
+			      this._arr = [];
+			      return this._resetPromise();
+			    }
+
+			    add(data) {
+			      var ret;
+			      this._arr.push(data);
+			      ret = this._promise;
+			      if (this._arr.length === this.maxSize) {
+			        this._flush();
+			      } else if ((this.maxTime != null) && this._arr.length === 1) {
+			        this._timeout = setTimeout(() => {
+			          return this._flush();
+			        }, this.maxTime);
+			      }
+			      return ret;
+			    }
+
+			  }
+			  Batcher.prototype.defaults = {
+			    maxTime: null,
+			    maxSize: null,
+			    Promise: Promise
+			  };
+
+			  return Batcher;
+
+			}).call(commonjsGlobal$1);
+
+			var Batcher_1 = Batcher;
+
+			var require$$4$1 = () => console.log('You must import the full version of Bottleneck in order to use this feature.');
+
+			var require$$8 = getCjsExportFromNamespace(version$2);
+
+			var Bottleneck, DEFAULT_PRIORITY$1, Events$4, Job$1, LocalDatastore$1, NUM_PRIORITIES$1, Queues$1, RedisDatastore$1, States$1, Sync$1, parser$5,
+			  splice = [].splice;
+
+			NUM_PRIORITIES$1 = 10;
+
+			DEFAULT_PRIORITY$1 = 5;
+
+			parser$5 = parser;
+
+			Queues$1 = Queues_1;
+
+			Job$1 = Job_1;
+
+			LocalDatastore$1 = LocalDatastore_1;
+
+			RedisDatastore$1 = require$$4$1;
+
+			Events$4 = Events_1;
+
+			States$1 = States_1;
+
+			Sync$1 = Sync_1;
+
+			Bottleneck = (function() {
+			  class Bottleneck {
+			    constructor(options = {}, ...invalid) {
+			      var storeInstanceOptions, storeOptions;
+			      this._addToQueue = this._addToQueue.bind(this);
+			      this._validateOptions(options, invalid);
+			      parser$5.load(options, this.instanceDefaults, this);
+			      this._queues = new Queues$1(NUM_PRIORITIES$1);
+			      this._scheduled = {};
+			      this._states = new States$1(["RECEIVED", "QUEUED", "RUNNING", "EXECUTING"].concat(this.trackDoneStatus ? ["DONE"] : []));
+			      this._limiter = null;
+			      this.Events = new Events$4(this);
+			      this._submitLock = new Sync$1("submit", this.Promise);
+			      this._registerLock = new Sync$1("register", this.Promise);
+			      storeOptions = parser$5.load(options, this.storeDefaults, {});
+			      this._store = (function() {
+			        if (this.datastore === "redis" || this.datastore === "ioredis" || (this.connection != null)) {
+			          storeInstanceOptions = parser$5.load(options, this.redisStoreDefaults, {});
+			          return new RedisDatastore$1(this, storeOptions, storeInstanceOptions);
+			        } else if (this.datastore === "local") {
+			          storeInstanceOptions = parser$5.load(options, this.localStoreDefaults, {});
+			          return new LocalDatastore$1(this, storeOptions, storeInstanceOptions);
+			        } else {
+			          throw new Bottleneck.prototype.BottleneckError(`Invalid datastore type: ${this.datastore}`);
+			        }
+			      }).call(this);
+			      this._queues.on("leftzero", () => {
+			        var ref;
+			        return (ref = this._store.heartbeat) != null ? typeof ref.ref === "function" ? ref.ref() : void 0 : void 0;
+			      });
+			      this._queues.on("zero", () => {
+			        var ref;
+			        return (ref = this._store.heartbeat) != null ? typeof ref.unref === "function" ? ref.unref() : void 0 : void 0;
+			      });
+			    }
+
+			    _validateOptions(options, invalid) {
+			      if (!((options != null) && typeof options === "object" && invalid.length === 0)) {
+			        throw new Bottleneck.prototype.BottleneckError("Bottleneck v2 takes a single object argument. Refer to https://github.com/SGrondin/bottleneck#upgrading-to-v2 if you're upgrading from Bottleneck v1.");
+			      }
+			    }
+
+			    ready() {
+			      return this._store.ready;
+			    }
+
+			    clients() {
+			      return this._store.clients;
+			    }
+
+			    channel() {
+			      return `b_${this.id}`;
+			    }
+
+			    channel_client() {
+			      return `b_${this.id}_${this._store.clientId}`;
+			    }
+
+			    publish(message) {
+			      return this._store.__publish__(message);
+			    }
+
+			    disconnect(flush = true) {
+			      return this._store.__disconnect__(flush);
+			    }
+
+			    chain(_limiter) {
+			      this._limiter = _limiter;
+			      return this;
+			    }
+
+			    queued(priority) {
+			      return this._queues.queued(priority);
+			    }
+
+			    clusterQueued() {
+			      return this._store.__queued__();
+			    }
+
+			    empty() {
+			      return this.queued() === 0 && this._submitLock.isEmpty();
+			    }
+
+			    running() {
+			      return this._store.__running__();
+			    }
+
+			    done() {
+			      return this._store.__done__();
+			    }
+
+			    jobStatus(id) {
+			      return this._states.jobStatus(id);
+			    }
+
+			    jobs(status) {
+			      return this._states.statusJobs(status);
+			    }
+
+			    counts() {
+			      return this._states.statusCounts();
+			    }
+
+			    _randomIndex() {
+			      return Math.random().toString(36).slice(2);
+			    }
+
+			    check(weight = 1) {
+			      return this._store.__check__(weight);
+			    }
+
+			    _clearGlobalState(index) {
+			      if (this._scheduled[index] != null) {
+			        clearTimeout(this._scheduled[index].expiration);
+			        delete this._scheduled[index];
+			        return true;
+			      } else {
+			        return false;
+			      }
+			    }
+
+			    async _free(index, job, options, eventInfo) {
+			      var e, running;
+			      try {
+			        ({running} = (await this._store.__free__(index, options.weight)));
+			        this.Events.trigger("debug", `Freed ${options.id}`, eventInfo);
+			        if (running === 0 && this.empty()) {
+			          return this.Events.trigger("idle");
+			        }
+			      } catch (error1) {
+			        e = error1;
+			        return this.Events.trigger("error", e);
+			      }
+			    }
+
+			    _run(index, job, wait) {
+			      var clearGlobalState, free, run;
+			      job.doRun();
+			      clearGlobalState = this._clearGlobalState.bind(this, index);
+			      run = this._run.bind(this, index, job);
+			      free = this._free.bind(this, index, job);
+			      return this._scheduled[index] = {
+			        timeout: setTimeout(() => {
+			          return job.doExecute(this._limiter, clearGlobalState, run, free);
+			        }, wait),
+			        expiration: job.options.expiration != null ? setTimeout(function() {
+			          return job.doExpire(clearGlobalState, run, free);
+			        }, wait + job.options.expiration) : void 0,
+			        job: job
+			      };
+			    }
+
+			    _drainOne(capacity) {
+			      return this._registerLock.schedule(() => {
+			        var args, index, next, options, queue;
+			        if (this.queued() === 0) {
+			          return this.Promise.resolve(null);
+			        }
+			        queue = this._queues.getFirst();
+			        ({options, args} = next = queue.first());
+			        if ((capacity != null) && options.weight > capacity) {
+			          return this.Promise.resolve(null);
+			        }
+			        this.Events.trigger("debug", `Draining ${options.id}`, {args, options});
+			        index = this._randomIndex();
+			        return this._store.__register__(index, options.weight, options.expiration).then(({success, wait, reservoir}) => {
+			          var empty;
+			          this.Events.trigger("debug", `Drained ${options.id}`, {success, args, options});
+			          if (success) {
+			            queue.shift();
+			            empty = this.empty();
+			            if (empty) {
+			              this.Events.trigger("empty");
+			            }
+			            if (reservoir === 0) {
+			              this.Events.trigger("depleted", empty);
+			            }
+			            this._run(index, next, wait);
+			            return this.Promise.resolve(options.weight);
+			          } else {
+			            return this.Promise.resolve(null);
+			          }
+			        });
+			      });
+			    }
+
+			    _drainAll(capacity, total = 0) {
+			      return this._drainOne(capacity).then((drained) => {
+			        var newCapacity;
+			        if (drained != null) {
+			          newCapacity = capacity != null ? capacity - drained : capacity;
+			          return this._drainAll(newCapacity, total + drained);
+			        } else {
+			          return this.Promise.resolve(total);
+			        }
+			      }).catch((e) => {
+			        return this.Events.trigger("error", e);
+			      });
+			    }
+
+			    _dropAllQueued(message) {
+			      return this._queues.shiftAll(function(job) {
+			        return job.doDrop({message});
+			      });
+			    }
+
+			    stop(options = {}) {
+			      var done, waitForExecuting;
+			      options = parser$5.load(options, this.stopDefaults);
+			      waitForExecuting = (at) => {
+			        var finished;
+			        finished = () => {
+			          var counts;
+			          counts = this._states.counts;
+			          return (counts[0] + counts[1] + counts[2] + counts[3]) === at;
+			        };
+			        return new this.Promise((resolve, reject) => {
+			          if (finished()) {
+			            return resolve();
+			          } else {
+			            return this.on("done", () => {
+			              if (finished()) {
+			                this.removeAllListeners("done");
+			                return resolve();
+			              }
+			            });
+			          }
+			        });
+			      };
+			      done = options.dropWaitingJobs ? (this._run = function(index, next) {
+			        return next.doDrop({
+			          message: options.dropErrorMessage
+			        });
+			      }, this._drainOne = () => {
+			        return this.Promise.resolve(null);
+			      }, this._registerLock.schedule(() => {
+			        return this._submitLock.schedule(() => {
+			          var k, ref, v;
+			          ref = this._scheduled;
+			          for (k in ref) {
+			            v = ref[k];
+			            if (this.jobStatus(v.job.options.id) === "RUNNING") {
+			              clearTimeout(v.timeout);
+			              clearTimeout(v.expiration);
+			              v.job.doDrop({
+			                message: options.dropErrorMessage
+			              });
+			            }
+			          }
+			          this._dropAllQueued(options.dropErrorMessage);
+			          return waitForExecuting(0);
+			        });
+			      })) : this.schedule({
+			        priority: NUM_PRIORITIES$1 - 1,
+			        weight: 0
+			      }, () => {
+			        return waitForExecuting(1);
+			      });
+			      this._receive = function(job) {
+			        return job._reject(new Bottleneck.prototype.BottleneckError(options.enqueueErrorMessage));
+			      };
+			      this.stop = () => {
+			        return this.Promise.reject(new Bottleneck.prototype.BottleneckError("stop() has already been called"));
+			      };
+			      return done;
+			    }
+
+			    async _addToQueue(job) {
+			      var args, blocked, error, options, reachedHWM, shifted, strategy;
+			      ({args, options} = job);
+			      try {
+			        ({reachedHWM, blocked, strategy} = (await this._store.__submit__(this.queued(), options.weight)));
+			      } catch (error1) {
+			        error = error1;
+			        this.Events.trigger("debug", `Could not queue ${options.id}`, {args, options, error});
+			        job.doDrop({error});
+			        return false;
+			      }
+			      if (blocked) {
+			        job.doDrop();
+			        return true;
+			      } else if (reachedHWM) {
+			        shifted = strategy === Bottleneck.prototype.strategy.LEAK ? this._queues.shiftLastFrom(options.priority) : strategy === Bottleneck.prototype.strategy.OVERFLOW_PRIORITY ? this._queues.shiftLastFrom(options.priority + 1) : strategy === Bottleneck.prototype.strategy.OVERFLOW ? job : void 0;
+			        if (shifted != null) {
+			          shifted.doDrop();
+			        }
+			        if ((shifted == null) || strategy === Bottleneck.prototype.strategy.OVERFLOW) {
+			          if (shifted == null) {
+			            job.doDrop();
+			          }
+			          return reachedHWM;
+			        }
+			      }
+			      job.doQueue(reachedHWM, blocked);
+			      this._queues.push(job);
+			      await this._drainAll();
+			      return reachedHWM;
+			    }
+
+			    _receive(job) {
+			      if (this._states.jobStatus(job.options.id) != null) {
+			        job._reject(new Bottleneck.prototype.BottleneckError(`A job with the same id already exists (id=${job.options.id})`));
+			        return false;
+			      } else {
+			        job.doReceive();
+			        return this._submitLock.schedule(this._addToQueue, job);
+			      }
+			    }
+
+			    submit(...args) {
+			      var cb, fn, job, options, ref, ref1, task;
+			      if (typeof args[0] === "function") {
+			        ref = args, [fn, ...args] = ref, [cb] = splice.call(args, -1);
+			        options = parser$5.load({}, this.jobDefaults);
+			      } else {
+			        ref1 = args, [options, fn, ...args] = ref1, [cb] = splice.call(args, -1);
+			        options = parser$5.load(options, this.jobDefaults);
+			      }
+			      task = (...args) => {
+			        return new this.Promise(function(resolve, reject) {
+			          return fn(...args, function(...args) {
+			            return (args[0] != null ? reject : resolve)(args);
+			          });
+			        });
+			      };
+			      job = new Job$1(task, args, options, this.jobDefaults, this.rejectOnDrop, this.Events, this._states, this.Promise);
+			      job.promise.then(function(args) {
+			        return typeof cb === "function" ? cb(...args) : void 0;
+			      }).catch(function(args) {
+			        if (Array.isArray(args)) {
+			          return typeof cb === "function" ? cb(...args) : void 0;
+			        } else {
+			          return typeof cb === "function" ? cb(args) : void 0;
+			        }
+			      });
+			      return this._receive(job);
+			    }
+
+			    schedule(...args) {
+			      var job, options, task;
+			      if (typeof args[0] === "function") {
+			        [task, ...args] = args;
+			        options = {};
+			      } else {
+			        [options, task, ...args] = args;
+			      }
+			      job = new Job$1(task, args, options, this.jobDefaults, this.rejectOnDrop, this.Events, this._states, this.Promise);
+			      this._receive(job);
+			      return job.promise;
+			    }
+
+			    wrap(fn) {
+			      var schedule, wrapped;
+			      schedule = this.schedule.bind(this);
+			      wrapped = function(...args) {
+			        return schedule(fn.bind(this), ...args);
+			      };
+			      wrapped.withOptions = function(options, ...args) {
+			        return schedule(options, fn, ...args);
+			      };
+			      return wrapped;
+			    }
+
+			    async updateSettings(options = {}) {
+			      await this._store.__updateSettings__(parser$5.overwrite(options, this.storeDefaults));
+			      parser$5.overwrite(options, this.instanceDefaults, this);
+			      return this;
+			    }
+
+			    currentReservoir() {
+			      return this._store.__currentReservoir__();
+			    }
+
+			    incrementReservoir(incr = 0) {
+			      return this._store.__incrementReservoir__(incr);
+			    }
+
+			  }
+			  Bottleneck.default = Bottleneck;
+
+			  Bottleneck.Events = Events$4;
+
+			  Bottleneck.version = Bottleneck.prototype.version = require$$8.version;
+
+			  Bottleneck.strategy = Bottleneck.prototype.strategy = {
+			    LEAK: 1,
+			    OVERFLOW: 2,
+			    OVERFLOW_PRIORITY: 4,
+			    BLOCK: 3
+			  };
+
+			  Bottleneck.BottleneckError = Bottleneck.prototype.BottleneckError = BottleneckError_1;
+
+			  Bottleneck.Group = Bottleneck.prototype.Group = Group_1;
+
+			  Bottleneck.RedisConnection = Bottleneck.prototype.RedisConnection = require$$2;
+
+			  Bottleneck.IORedisConnection = Bottleneck.prototype.IORedisConnection = require$$3;
+
+			  Bottleneck.Batcher = Bottleneck.prototype.Batcher = Batcher_1;
+
+			  Bottleneck.prototype.jobDefaults = {
+			    priority: DEFAULT_PRIORITY$1,
+			    weight: 1,
+			    expiration: null,
+			    id: "<no-id>"
+			  };
+
+			  Bottleneck.prototype.storeDefaults = {
+			    maxConcurrent: null,
+			    minTime: 0,
+			    highWater: null,
+			    strategy: Bottleneck.prototype.strategy.LEAK,
+			    penalty: null,
+			    reservoir: null,
+			    reservoirRefreshInterval: null,
+			    reservoirRefreshAmount: null,
+			    reservoirIncreaseInterval: null,
+			    reservoirIncreaseAmount: null,
+			    reservoirIncreaseMaximum: null
+			  };
+
+			  Bottleneck.prototype.localStoreDefaults = {
+			    Promise: Promise,
+			    timeout: null,
+			    heartbeatInterval: 250
+			  };
+
+			  Bottleneck.prototype.redisStoreDefaults = {
+			    Promise: Promise,
+			    timeout: null,
+			    heartbeatInterval: 5000,
+			    clientTimeout: 10000,
+			    Redis: null,
+			    clientOptions: {},
+			    clusterNodes: null,
+			    clearDatastore: false,
+			    connection: null
+			  };
+
+			  Bottleneck.prototype.instanceDefaults = {
+			    datastore: "local",
+			    connection: null,
+			    id: "<no-id>",
+			    rejectOnDrop: true,
+			    trackDoneStatus: false,
+			    Promise: Promise
+			  };
+
+			  Bottleneck.prototype.stopDefaults = {
+			    enqueueErrorMessage: "This limiter has been stopped and cannot accept new jobs.",
+			    dropWaitingJobs: true,
+			    dropErrorMessage: "This limiter has been stopped."
+			  };
+
+			  return Bottleneck;
+
+			}).call(commonjsGlobal$1);
+
+			var Bottleneck_1 = Bottleneck;
+
+			var lib = Bottleneck_1;
+
+			return lib;
+
+		}))); 
+	} (light$1));
+	return light$1.exports;
+}
+
+var lightExports = requireLight();
+var Bottleneck = /*@__PURE__*/getDefaultExportFromCjs(lightExports);
+
+// pkg/dist-src/index.js
+
+// pkg/dist-src/version.js
+var VERSION$1 = "0.0.0-development";
+
+// pkg/dist-src/wrap-request.js
+var noop = () => Promise.resolve();
+function wrapRequest$1(state, request, options) {
+  return state.retryLimiter.schedule(doRequest, state, request, options);
+}
+async function doRequest(state, request, options) {
+  const isWrite = options.method !== "GET" && options.method !== "HEAD";
+  const { pathname } = new URL(options.url, "http://github.test");
+  const isSearch = options.method === "GET" && pathname.startsWith("/search/");
+  const isGraphQL = pathname.startsWith("/graphql");
+  const retryCount = ~~request.retryCount;
+  const jobOptions = retryCount > 0 ? { priority: 0, weight: 0 } : {};
+  if (state.clustering) {
+    jobOptions.expiration = 1e3 * 60;
+  }
+  if (isWrite || isGraphQL) {
+    await state.write.key(state.id).schedule(jobOptions, noop);
+  }
+  if (isWrite && state.triggersNotification(pathname)) {
+    await state.notifications.key(state.id).schedule(jobOptions, noop);
+  }
+  if (isSearch) {
+    await state.search.key(state.id).schedule(jobOptions, noop);
+  }
+  const req = state.global.key(state.id).schedule(jobOptions, request, options);
+  if (isGraphQL) {
+    const res = await req;
+    if (res.data.errors != null && res.data.errors.some((error) => error.type === "RATE_LIMITED")) {
+      const error = Object.assign(new Error("GraphQL Rate Limit Exceeded"), {
+        response: res,
+        data: res.data
+      });
+      throw error;
+    }
+  }
+  return req;
+}
+
+// pkg/dist-src/generated/triggers-notification-paths.js
+var triggers_notification_paths_default = [
+  "/orgs/{org}/invitations",
+  "/orgs/{org}/invitations/{invitation_id}",
+  "/orgs/{org}/teams/{team_slug}/discussions",
+  "/orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments",
+  "/repos/{owner}/{repo}/collaborators/{username}",
+  "/repos/{owner}/{repo}/commits/{commit_sha}/comments",
+  "/repos/{owner}/{repo}/issues",
+  "/repos/{owner}/{repo}/issues/{issue_number}/comments",
+  "/repos/{owner}/{repo}/issues/{issue_number}/sub_issue",
+  "/repos/{owner}/{repo}/issues/{issue_number}/sub_issues/priority",
+  "/repos/{owner}/{repo}/pulls",
+  "/repos/{owner}/{repo}/pulls/{pull_number}/comments",
+  "/repos/{owner}/{repo}/pulls/{pull_number}/comments/{comment_id}/replies",
+  "/repos/{owner}/{repo}/pulls/{pull_number}/merge",
+  "/repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers",
+  "/repos/{owner}/{repo}/pulls/{pull_number}/reviews",
+  "/repos/{owner}/{repo}/releases",
+  "/teams/{team_id}/discussions",
+  "/teams/{team_id}/discussions/{discussion_number}/comments"
+];
+
+// pkg/dist-src/route-matcher.js
+function routeMatcher(paths) {
+  const regexes = paths.map(
+    (path) => path.split("/").map((c) => c.startsWith("{") ? "(?:.+?)" : c).join("/")
+  );
+  const regex2 = `^(?:${regexes.map((r) => `(?:${r})`).join("|")})[^/]*$`;
+  return new RegExp(regex2, "i");
+}
+
+// pkg/dist-src/index.js
+var regex = routeMatcher(triggers_notification_paths_default);
+var triggersNotification = regex.test.bind(regex);
+var groups = {};
+var createGroups = function(Bottleneck, common) {
+  groups.global = new Bottleneck.Group({
+    id: "octokit-global",
+    maxConcurrent: 10,
+    ...common
+  });
+  groups.search = new Bottleneck.Group({
+    id: "octokit-search",
+    maxConcurrent: 1,
+    minTime: 2e3,
+    ...common
+  });
+  groups.write = new Bottleneck.Group({
+    id: "octokit-write",
+    maxConcurrent: 1,
+    minTime: 1e3,
+    ...common
+  });
+  groups.notifications = new Bottleneck.Group({
+    id: "octokit-notifications",
+    maxConcurrent: 1,
+    minTime: 3e3,
+    ...common
+  });
+};
+function throttling(octokit, octokitOptions) {
+  const {
+    enabled = true,
+    Bottleneck: Bottleneck$1 = Bottleneck,
+    id = "no-id",
+    timeout = 1e3 * 60 * 2,
+    // Redis TTL: 2 minutes
+    connection
+  } = octokitOptions.throttle || {};
+  if (!enabled) {
+    return {};
+  }
+  const common = { timeout };
+  if (typeof connection !== "undefined") {
+    common.connection = connection;
+  }
+  if (groups.global == null) {
+    createGroups(Bottleneck$1, common);
+  }
+  const state = Object.assign(
+    {
+      clustering: connection != null,
+      triggersNotification,
+      fallbackSecondaryRateRetryAfter: 60,
+      retryAfterBaseValue: 1e3,
+      retryLimiter: new Bottleneck$1(),
+      id,
+      ...groups
+    },
+    octokitOptions.throttle
+  );
+  if (typeof state.onSecondaryRateLimit !== "function" || typeof state.onRateLimit !== "function") {
+    throw new Error(`octokit/plugin-throttling error:
+        You must pass the onSecondaryRateLimit and onRateLimit error handlers.
+        See https://octokit.github.io/rest.js/#throttling
+
+        const octokit = new Octokit({
+          throttle: {
+            onSecondaryRateLimit: (retryAfter, options) => {/* ... */},
+            onRateLimit: (retryAfter, options) => {/* ... */}
+          }
+        })
+    `);
+  }
+  const events = {};
+  const emitter = new Bottleneck$1.Events(events);
+  events.on("secondary-limit", state.onSecondaryRateLimit);
+  events.on("rate-limit", state.onRateLimit);
+  events.on(
+    "error",
+    (e) => octokit.log.warn("Error in throttling-plugin limit handler", e)
+  );
+  state.retryLimiter.on("failed", async function(error, info) {
+    const [state2, request, options] = info.args;
+    const { pathname } = new URL(options.url, "http://github.test");
+    const shouldRetryGraphQL = pathname.startsWith("/graphql") && error.status !== 401;
+    if (!(shouldRetryGraphQL || error.status === 403 || error.status === 429)) {
+      return;
+    }
+    const retryCount = ~~request.retryCount;
+    request.retryCount = retryCount;
+    options.request.retryCount = retryCount;
+    const { wantRetry, retryAfter = 0 } = await async function() {
+      if (/\bsecondary rate\b/i.test(error.message)) {
+        const retryAfter2 = Number(error.response.headers["retry-after"]) || state2.fallbackSecondaryRateRetryAfter;
+        const wantRetry2 = await emitter.trigger(
+          "secondary-limit",
+          retryAfter2,
+          options,
+          octokit,
+          retryCount
+        );
+        return { wantRetry: wantRetry2, retryAfter: retryAfter2 };
+      }
+      if (error.response.headers != null && error.response.headers["x-ratelimit-remaining"] === "0" || (error.response.data?.errors ?? []).some(
+        (error2) => error2.type === "RATE_LIMITED"
+      )) {
+        const rateLimitReset = new Date(
+          ~~error.response.headers["x-ratelimit-reset"] * 1e3
+        ).getTime();
+        const retryAfter2 = Math.max(
+          // Add one second so we retry _after_ the reset time
+          // https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#exceeding-the-rate-limit
+          Math.ceil((rateLimitReset - Date.now()) / 1e3) + 1,
+          0
+        );
+        const wantRetry2 = await emitter.trigger(
+          "rate-limit",
+          retryAfter2,
+          options,
+          octokit,
+          retryCount
+        );
+        return { wantRetry: wantRetry2, retryAfter: retryAfter2 };
+      }
+      return {};
+    }();
+    if (wantRetry) {
+      request.retryCount++;
+      return retryAfter * state2.retryAfterBaseValue;
+    }
+  });
+  octokit.hook.wrap("request", wrapRequest$1.bind(null, state));
+  return {};
+}
+throttling.VERSION = VERSION$1;
+throttling.triggersNotification = triggersNotification;
+
+// pkg/dist-src/version.js
+var VERSION = "0.0.0-development";
+
+// pkg/dist-src/error-request.js
+async function errorRequest(state, octokit, error, options) {
+  if (!error.request || !error.request.request) {
+    throw error;
+  }
+  if (error.status >= 400 && !state.doNotRetry.includes(error.status)) {
+    const retries = options.request.retries != null ? options.request.retries : state.retries;
+    const retryAfter = Math.pow((options.request.retryCount || 0) + 1, 2);
+    throw octokit.retry.retryRequest(error, retries, retryAfter);
+  }
+  throw error;
+}
+async function wrapRequest(state, octokit, request, options) {
+  const limiter = new Bottleneck();
+  limiter.on("failed", function(error, info) {
+    const maxRetries = ~~error.request.request.retries;
+    const after = ~~error.request.request.retryAfter;
+    options.request.retryCount = info.retryCount + 1;
+    if (maxRetries > info.retryCount) {
+      return after * state.retryAfterBaseValue;
+    }
+  });
+  return limiter.schedule(
+    requestWithGraphqlErrorHandling.bind(null, state, octokit, request),
+    options
+  );
+}
+async function requestWithGraphqlErrorHandling(state, octokit, request, options) {
+  const response = await request(request, options);
+  if (response.data && response.data.errors && response.data.errors.length > 0 && /Something went wrong while executing your query/.test(
+    response.data.errors[0].message
+  )) {
+    const error = new RequestError(response.data.errors[0].message, 500, {
+      request: options,
+      response
+    });
+    return errorRequest(state, octokit, error, options);
+  }
+  return response;
+}
+
+// pkg/dist-src/index.js
+function retry(octokit, octokitOptions) {
+  const state = Object.assign(
+    {
+      enabled: true,
+      retryAfterBaseValue: 1e3,
+      doNotRetry: [400, 401, 403, 404, 410, 422, 451],
+      retries: 3
+    },
+    octokitOptions.retry
+  );
+  if (state.enabled) {
+    octokit.hook.error("request", errorRequest.bind(null, state, octokit));
+    octokit.hook.wrap("request", wrapRequest.bind(null, state, octokit));
+  }
+  return {
+    retry: {
+      retryRequest: (error, retries, retryAfter) => {
+        error.request.request = Object.assign({}, error.request.request, {
+          retries,
+          retryAfter
+        });
+        return error;
+      }
+    }
+  };
+}
+retry.VERSION = VERSION;
+
 function buildCommitMessage(message, file) {
     // Allow message to be either static or from contents in a file
     const output = file ? fs.readFileSync(file, 'utf-8') : message;
@@ -33311,14 +36317,14 @@ function normalizeRef(ref) {
         return `heads/${ref}`;
 }
 async function getRef(ref, context, octokit) {
-    return (await octokit.rest.git.getRef({
+    return (await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
         owner: context.repo.owner,
         repo: context.repo.repo,
         ref
     })).data.object.sha;
 }
 async function getTree(sha, context, octokit) {
-    return (await octokit.rest.git.getCommit({
+    return (await octokit.request('GET /repos/{owner}/{repo}/git/commits/{commit_sha}', {
         owner: context.repo.owner,
         repo: context.repo.repo,
         commit_sha: sha
@@ -33356,7 +36362,7 @@ async function createBlob(file, workspace, symlink, context, octokit) {
     const mode = getFileMode(absPath, symlink);
     const content = Buffer.from(fs.readFileSync(absPath)).toString('base64');
     // Send the blob to GitHub
-    const sha = (await octokit.rest.git.createBlob({
+    const sha = (await octokit.request('POST /repos/{owner}/{repo}/git/blobs', {
         owner: context.repo.owner,
         repo: context.repo.repo,
         encoding: 'base64',
@@ -33371,7 +36377,7 @@ async function createBlob(file, workspace, symlink, context, octokit) {
     };
 }
 async function createTree(blobs, headTree, context, octokit) {
-    return (await octokit.rest.git.createTree({
+    return (await octokit.request('POST /repos/{owner}/{repo}/git/trees', {
         owner: context.repo.owner,
         repo: context.repo.repo,
         base_tree: headTree,
@@ -33379,7 +36385,7 @@ async function createTree(blobs, headTree, context, octokit) {
     })).data.sha;
 }
 async function createCommit(tree, headCommit, message, context, octokit) {
-    return (await octokit.rest.git.createCommit({
+    return (await octokit.request('POST /repos/{owner}/{repo}/git/commits', {
         owner: context.repo.owner,
         repo: context.repo.repo,
         parents: [headCommit],
@@ -33388,7 +36394,7 @@ async function createCommit(tree, headCommit, message, context, octokit) {
     })).data.sha;
 }
 async function updateRef(ref, sha, force, context, octokit) {
-    return (await octokit.rest.git.updateRef({
+    return (await octokit.request('PATCH /repos/{owner}/{repo}/git/refs/{ref}', {
         owner: context.repo.owner,
         repo: context.repo.repo,
         sha,
@@ -33399,8 +36405,33 @@ async function updateRef(ref, sha, force, context, octokit) {
 
 async function run() {
     try {
-        // Authenticate with GitHub
-        const octokit = githubExports.getOctokit(coreExports.getInput('token'));
+        // Authenticate Octokit with plugins
+        const SafeOctokit = Octokit.plugin(throttling, retry);
+        const maxRetries = parseInt(coreExports.getInput('max-retries'));
+        const noRetry = coreExports.getBooleanInput('no-retry');
+        const noThrottle = coreExports.getBooleanInput('no-throttle');
+        const octokit = new SafeOctokit({
+            auth: coreExports.getInput('token'),
+            request: { retries: maxRetries },
+            retry: { enabled: !noRetry },
+            throttle: {
+                enabled: !noThrottle,
+                onRateLimit: (retryAfter, options, octokit, retryCount) => {
+                    octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
+                    if (!noRetry && retryCount < maxRetries) {
+                        octokit.log.info(`Retrying after ${retryAfter} seconds...`);
+                        return true;
+                    }
+                },
+                onSecondaryRateLimit: (retryAfter, options, octokit, retryCount) => {
+                    octokit.log.warn(`SecondaryRateLimit detected for request ${options.method} ${options.url}`);
+                    if (!noRetry && retryCount < maxRetries) {
+                        octokit.log.info(`Retrying after ${retryAfter} seconds...`);
+                        return true;
+                    }
+                }
+            }
+        });
         // Get commit message
         const message = buildCommitMessage(coreExports.getInput('message'), coreExports.getInput('message-file'));
         // Lookup HEAD commit and tree
@@ -33427,7 +36458,7 @@ async function run() {
         const changedFiles = execOutput.trim().split(/\r?\n/);
         // Create a blob object for each file
         const blobs = [];
-        const patterns = coreExports.getInput('files').split(/\r?\n/);
+        const patterns = coreExports.getMultilineInput('files');
         const followSymbolicLinks = coreExports.getBooleanInput('follow-symlinks');
         coreExports.startGroup(`🗂️ Creating Git Blobs...`);
         for (const file of changedFiles) {
@@ -33470,6 +36501,7 @@ async function run() {
         const refSha = await updateRef(headRef, commit, forcePush, githubExports.context, octokit);
         coreExports.info(`⏩ Updated refs/${headRef} to point to ${refSha}`);
         coreExports.setOutput('ref', refSha);
+        // Update local branch
         const updateLocal = coreExports.getBooleanInput('update-local');
         if (updateLocal) {
             coreExports.startGroup('📍 Updating local branch...');
