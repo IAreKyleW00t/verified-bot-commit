@@ -26,11 +26,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          sparse-checkout: |
-            dist
-            src
-            README.md
 
       - name: Create test branch
         id: branch
@@ -44,8 +39,11 @@ jobs:
         run: |
           echo -e "\n### $(date -Iseconds)" | tee -a README.md
           date -Iseconds | tee date.txt
+          date -Iseconds | tee test-ignore.txt
+          echo "$GITHUB_RUN_ID" | tee __tests__/ignore/test-abcdef.txt
           echo "$GITHUB_RUN_ID" | tee src/test.txt
           echo "$GITHUB_RUN_ID" | tee src/test2.txt
+          echo "uncommitted file" | tee blah.txt
           mkdir -p "$TEST_BRANCH"
           for i in {1..4}; do
             echo "$i-$GITHUB_RUN_ID" | tee "$TEST_BRANCH/$i-$GITHUB_RUN_ID"
@@ -62,16 +60,8 @@ jobs:
             date.txt
             src/test.txt
             src/*.txt
+            __tests__/**
             ${{ env.TEST_BRANCH }}/**
-
-      - name: Update test branch locally
-        shell: bash
-        run: |
-          rm  README.md
-          rm date.txt
-          rm src/*.txt
-          rm -r "$TEST_BRANCH"
-          git pull origin "$TEST_BRANCH"
 
       - name: Verify GPG signature
         shell: bash
@@ -89,9 +79,16 @@ jobs:
           COMMIT: ${{ steps.commit.outputs.commit }}
         run: |
           FILES=$(git diff-tree --no-commit-id --name-only -r "$COMMIT")
-          echo "$FILES"
+          echo -e "Changed files:\n$FILES"
           if [ "$(wc -l <<< "$FILES")" -ne 8 ]; then
             echo "::error::Unexpected changes in commit"
+            exit 1
+          fi
+
+          FILES=$(git diff --cached --name-only)
+          echo -e "Unchanged files:\n$FILES"
+          if [ "$(wc -l <<< "$FILES")" -ne 1 ]; then
+            echo "::error::Unexpected uncommit changes"
             exit 1
           fi
 
