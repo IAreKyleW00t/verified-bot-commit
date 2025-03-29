@@ -30366,9 +30366,12 @@ async function run() {
         const refSha = await git.updateRef(headRef, commit, forcePush, github.context, octokit);
         core.info(`⏩ Updated refs/${headRef} to point to ${refSha}`);
         core.setOutput('ref', refSha);
-        core.startGroup('📍 Updating local branch...');
-        await exec.exec('git', ['pull', 'origin', `refs/${headRef}`], execOpts);
-        core.endGroup();
+        const updateLocal = core.getBooleanInput('update-local');
+        if (updateLocal) {
+            core.startGroup('📍 Updating local branch...');
+            await exec.exec('git', ['pull', 'origin', `refs/${headRef}`], execOpts);
+            core.endGroup();
+        }
     }
     catch (error) {
         if (error instanceof Error)
