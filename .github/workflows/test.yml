@@ -58,9 +58,10 @@ jobs:
           files: |
             README.md
             date.txt
-            src/test.txt
+            !src/test.txt
             src/*.txt
             __tests__/**
+            !${{ env.TEST_BRANCH }}/1-*
             ${{ env.TEST_BRANCH }}/**
 
       - name: Verify GPG signature
@@ -78,16 +79,19 @@ jobs:
         env:
           COMMIT: ${{ steps.commit.outputs.commit }}
         run: |
+          git status
+
           FILES=$(git diff-tree --no-commit-id --name-only -r "$COMMIT")
           echo -e "Changed files:\n$FILES"
-          if [ "$(wc -l <<< "$FILES")" -ne 8 ]; then
+          if [ "$(wc -l <<< "$FILES")" -ne 6 ]; then
             echo "::error::Unexpected changes in commit"
             exit 1
           fi
+          echo
 
           FILES=$(git diff --cached --name-only)
           echo -e "Unchanged files:\n$FILES"
-          if [ "$(wc -l <<< "$FILES")" -ne 1 ]; then
+          if [ "$(wc -l <<< "$FILES")" -ne 3 ]; then
             echo "::error::Unexpected uncommit changes"
             exit 1
           fi

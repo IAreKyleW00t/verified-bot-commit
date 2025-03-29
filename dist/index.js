@@ -30304,10 +30304,13 @@ async function run() {
         const headCommit = await git.getRef(headRef, github.context, octokit);
         const headTree = await git.getTree(headCommit, github.context, octokit);
         // Get list of changed files
+        const workspace = core.getInput('workspace');
+        const execOpts = { cwd: workspace };
         let execOutput = '';
         core.startGroup('🪁 Getting changed files...');
-        await exec.exec('git', ['add', '-A']);
+        await exec.exec('git', ['add', '-A'], execOpts);
         await exec.exec('git', ['diff', '--cached', '--name-only'], {
+            ...execOpts,
             listeners: {
                 stdout: (data) => {
                     execOutput += data.toString();
@@ -30319,16 +30322,26 @@ async function run() {
         // Create a blob object for each file
         const blobs = [];
         const patterns = core.getInput('files').split(/\r?\n/);
-        const workspace = core.getInput('workspace');
         const followSymbolicLinks = core.getBooleanInput('follow-symlinks');
         core.startGroup(`🗂️ Creating Git Blobs...`);
         for (const file of changedFiles) {
-            // Only include files that match pattern
             for (const pattern of patterns) {
+                // Skip blank and comment patterns
+                if (pattern.startsWith('#') || pattern.length === 0) {
+                    continue;
+                }
+                // Skip the file entirely if a pattern specifically negates it
+                if (pattern.startsWith('!')) {
+                    if ((0, minimatch_1.minimatch)(file, pattern.substring(1)))
+                        break;
+                    continue;
+                }
+                // Only include files that match a pattern
                 if ((0, minimatch_1.minimatch)(file, pattern)) {
                     const blob = await git.createBlob(file, workspace, followSymbolicLinks, github.context, octokit);
                     core.info(`${blob.sha}\t${blob.path}`);
                     blobs.push(blob);
+                    break;
                 }
             }
         }
@@ -30351,7 +30364,7 @@ async function run() {
         core.info(`⏩ Updated refs/${headRef} to point to ${refSha}`);
         core.setOutput('ref', refSha);
         core.startGroup('📍 Updating local branch...');
-        await exec.exec('git', ['pull', 'origin', `refs/${headRef}`]);
+        await exec.exec('git', ['pull', 'origin', `refs/${headRef}`], execOpts);
         core.endGroup();
     }
     catch (error) {
