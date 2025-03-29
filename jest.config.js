@@ -1,11 +1,22 @@
+/** @type {import('ts-jest').JestConfigWithTsJest} **/
 export default {
-  preset: 'ts-jest/presets/default-esm',
-  verbose: true,
   clearMocks: true,
-  moduleFileExtensions: ['js', 'ts'],
-  moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1'
-  },
+  extensionsToTreatAsEsm: ['.ts'],
+  moduleFileExtensions: ['ts', 'js'],
+  preset: 'ts-jest',
+  reporters: ['default'],
+  resolver: 'ts-jest-resolver',
+  testEnvironment: 'node',
   testMatch: ['**/*.test.ts'],
-  testPathIgnorePatterns: ['/node_modules/', '/dist/']
+  testPathIgnorePatterns: ['/dist/', '/node_modules/'],
+  transform: {
+    '^.+\\.ts$': [
+      'ts-jest',
+      {
+        tsconfig: 'tsconfig.eslint.json',
+        useESM: true
+      }
+    ]
+  },
+  verbose: true
 }

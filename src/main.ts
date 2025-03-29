@@ -3,8 +3,8 @@ import * as github from '@actions/github'
 import * as exec from '@actions/exec'
 import { minimatch } from 'minimatch'
 
-import * as git from './git'
-import { GitBlob } from './git'
+import * as git from './git.js'
+import { GitBlob } from './git.js'
 
 export async function run(): Promise<void> {
   try {
@@ -78,7 +78,7 @@ export async function run(): Promise<void> {
     core.endGroup()
     core.setOutput(
       'blobs',
-      blobs.map(b => b.sha)
+      blobs.map((b) => b.sha)
     )
 
     // Confirm that blobs were made
