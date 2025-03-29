@@ -1,6 +1,5 @@
 import * as fs from 'fs'
-
-import * as utils from './utils'
+import * as path from 'path'
 
 import { Context } from '@actions/github/lib/context'
 import { GitHub } from '@actions/github/lib/utils'
@@ -83,8 +82,10 @@ export async function createBlob(
   octokit: InstanceType<typeof GitHub>
 ): Promise<GitBlob> {
   // Generate relative and absolute paths to file base on workspace
-  const relPath = utils.normalizePath(utils.relativePath(file, workspace))
-  const absPath = utils.absolutePath(file, workspace)
+  const relPath = file.startsWith(workspace)
+    ? file.replace(workspace, '').substring(1)
+    : file
+  const absPath = file.startsWith(workspace) ? file : path.join(workspace, file)
 
   // Get file data
   const mode = getFileMode(absPath, symlink)

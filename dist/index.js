@@ -2089,1229 +2089,6 @@ exports.getOctokitOptions = getOctokitOptions;
 
 /***/ }),
 
-/***/ 7206:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.hashFiles = exports.create = void 0;
-const internal_globber_1 = __nccwpck_require__(103);
-const internal_hash_files_1 = __nccwpck_require__(3608);
-/**
- * Constructs a globber
- *
- * @param patterns  Patterns separated by newlines
- * @param options   Glob options
- */
-function create(patterns, options) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return yield internal_globber_1.DefaultGlobber.create(patterns, options);
-    });
-}
-exports.create = create;
-/**
- * Computes the sha256 hash of a glob
- *
- * @param patterns  Patterns separated by newlines
- * @param currentWorkspace  Workspace used when matching files
- * @param options   Glob options
- * @param verbose   Enables verbose logging
- */
-function hashFiles(patterns, currentWorkspace = '', options, verbose = false) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let followSymbolicLinks = true;
-        if (options && typeof options.followSymbolicLinks === 'boolean') {
-            followSymbolicLinks = options.followSymbolicLinks;
-        }
-        const globber = yield create(patterns, { followSymbolicLinks });
-        return (0, internal_hash_files_1.hashFiles)(globber, currentWorkspace, verbose);
-    });
-}
-exports.hashFiles = hashFiles;
-//# sourceMappingURL=glob.js.map
-
-/***/ }),
-
-/***/ 8164:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getOptions = void 0;
-const core = __importStar(__nccwpck_require__(7484));
-/**
- * Returns a copy with defaults filled in.
- */
-function getOptions(copy) {
-    const result = {
-        followSymbolicLinks: true,
-        implicitDescendants: true,
-        matchDirectories: true,
-        omitBrokenSymbolicLinks: true,
-        excludeHiddenFiles: false
-    };
-    if (copy) {
-        if (typeof copy.followSymbolicLinks === 'boolean') {
-            result.followSymbolicLinks = copy.followSymbolicLinks;
-            core.debug(`followSymbolicLinks '${result.followSymbolicLinks}'`);
-        }
-        if (typeof copy.implicitDescendants === 'boolean') {
-            result.implicitDescendants = copy.implicitDescendants;
-            core.debug(`implicitDescendants '${result.implicitDescendants}'`);
-        }
-        if (typeof copy.matchDirectories === 'boolean') {
-            result.matchDirectories = copy.matchDirectories;
-            core.debug(`matchDirectories '${result.matchDirectories}'`);
-        }
-        if (typeof copy.omitBrokenSymbolicLinks === 'boolean') {
-            result.omitBrokenSymbolicLinks = copy.omitBrokenSymbolicLinks;
-            core.debug(`omitBrokenSymbolicLinks '${result.omitBrokenSymbolicLinks}'`);
-        }
-        if (typeof copy.excludeHiddenFiles === 'boolean') {
-            result.excludeHiddenFiles = copy.excludeHiddenFiles;
-            core.debug(`excludeHiddenFiles '${result.excludeHiddenFiles}'`);
-        }
-    }
-    return result;
-}
-exports.getOptions = getOptions;
-//# sourceMappingURL=internal-glob-options-helper.js.map
-
-/***/ }),
-
-/***/ 103:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __asyncValues = (this && this.__asyncValues) || function (o) {
-    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-    var m = o[Symbol.asyncIterator], i;
-    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
-    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
-    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
-};
-var __await = (this && this.__await) || function (v) { return this instanceof __await ? (this.v = v, this) : new __await(v); }
-var __asyncGenerator = (this && this.__asyncGenerator) || function (thisArg, _arguments, generator) {
-    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-    var g = generator.apply(thisArg, _arguments || []), i, q = [];
-    return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i;
-    function verb(n) { if (g[n]) i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
-    function resume(n, v) { try { step(g[n](v)); } catch (e) { settle(q[0][3], e); } }
-    function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r); }
-    function fulfill(value) { resume("next", value); }
-    function reject(value) { resume("throw", value); }
-    function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.DefaultGlobber = void 0;
-const core = __importStar(__nccwpck_require__(7484));
-const fs = __importStar(__nccwpck_require__(9896));
-const globOptionsHelper = __importStar(__nccwpck_require__(8164));
-const path = __importStar(__nccwpck_require__(6928));
-const patternHelper = __importStar(__nccwpck_require__(8891));
-const internal_match_kind_1 = __nccwpck_require__(2644);
-const internal_pattern_1 = __nccwpck_require__(5370);
-const internal_search_state_1 = __nccwpck_require__(9890);
-const IS_WINDOWS = process.platform === 'win32';
-class DefaultGlobber {
-    constructor(options) {
-        this.patterns = [];
-        this.searchPaths = [];
-        this.options = globOptionsHelper.getOptions(options);
-    }
-    getSearchPaths() {
-        // Return a copy
-        return this.searchPaths.slice();
-    }
-    glob() {
-        var _a, e_1, _b, _c;
-        return __awaiter(this, void 0, void 0, function* () {
-            const result = [];
-            try {
-                for (var _d = true, _e = __asyncValues(this.globGenerator()), _f; _f = yield _e.next(), _a = _f.done, !_a; _d = true) {
-                    _c = _f.value;
-                    _d = false;
-                    const itemPath = _c;
-                    result.push(itemPath);
-                }
-            }
-            catch (e_1_1) { e_1 = { error: e_1_1 }; }
-            finally {
-                try {
-                    if (!_d && !_a && (_b = _e.return)) yield _b.call(_e);
-                }
-                finally { if (e_1) throw e_1.error; }
-            }
-            return result;
-        });
-    }
-    globGenerator() {
-        return __asyncGenerator(this, arguments, function* globGenerator_1() {
-            // Fill in defaults options
-            const options = globOptionsHelper.getOptions(this.options);
-            // Implicit descendants?
-            const patterns = [];
-            for (const pattern of this.patterns) {
-                patterns.push(pattern);
-                if (options.implicitDescendants &&
-                    (pattern.trailingSeparator ||
-                        pattern.segments[pattern.segments.length - 1] !== '**')) {
-                    patterns.push(new internal_pattern_1.Pattern(pattern.negate, true, pattern.segments.concat('**')));
-                }
-            }
-            // Push the search paths
-            const stack = [];
-            for (const searchPath of patternHelper.getSearchPaths(patterns)) {
-                core.debug(`Search path '${searchPath}'`);
-                // Exists?
-                try {
-                    // Intentionally using lstat. Detection for broken symlink
-                    // will be performed later (if following symlinks).
-                    yield __await(fs.promises.lstat(searchPath));
-                }
-                catch (err) {
-                    if (err.code === 'ENOENT') {
-                        continue;
-                    }
-                    throw err;
-                }
-                stack.unshift(new internal_search_state_1.SearchState(searchPath, 1));
-            }
-            // Search
-            const traversalChain = []; // used to detect cycles
-            while (stack.length) {
-                // Pop
-                const item = stack.pop();
-                // Match?
-                const match = patternHelper.match(patterns, item.path);
-                const partialMatch = !!match || patternHelper.partialMatch(patterns, item.path);
-                if (!match && !partialMatch) {
-                    continue;
-                }
-                // Stat
-                const stats = yield __await(DefaultGlobber.stat(item, options, traversalChain)
-                // Broken symlink, or symlink cycle detected, or no longer exists
-                );
-                // Broken symlink, or symlink cycle detected, or no longer exists
-                if (!stats) {
-                    continue;
-                }
-                // Hidden file or directory?
-                if (options.excludeHiddenFiles && path.basename(item.path).match(/^\./)) {
-                    continue;
-                }
-                // Directory
-                if (stats.isDirectory()) {
-                    // Matched
-                    if (match & internal_match_kind_1.MatchKind.Directory && options.matchDirectories) {
-                        yield yield __await(item.path);
-                    }
-                    // Descend?
-                    else if (!partialMatch) {
-                        continue;
-                    }
-                    // Push the child items in reverse
-                    const childLevel = item.level + 1;
-                    const childItems = (yield __await(fs.promises.readdir(item.path))).map(x => new internal_search_state_1.SearchState(path.join(item.path, x), childLevel));
-                    stack.push(...childItems.reverse());
-                }
-                // File
-                else if (match & internal_match_kind_1.MatchKind.File) {
-                    yield yield __await(item.path);
-                }
-            }
-        });
-    }
-    /**
-     * Constructs a DefaultGlobber
-     */
-    static create(patterns, options) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const result = new DefaultGlobber(options);
-            if (IS_WINDOWS) {
-                patterns = patterns.replace(/\r\n/g, '\n');
-                patterns = patterns.replace(/\r/g, '\n');
-            }
-            const lines = patterns.split('\n').map(x => x.trim());
-            for (const line of lines) {
-                // Empty or comment
-                if (!line || line.startsWith('#')) {
-                    continue;
-                }
-                // Pattern
-                else {
-                    result.patterns.push(new internal_pattern_1.Pattern(line));
-                }
-            }
-            result.searchPaths.push(...patternHelper.getSearchPaths(result.patterns));
-            return result;
-        });
-    }
-    static stat(item, options, traversalChain) {
-        return __awaiter(this, void 0, void 0, function* () {
-            // Note:
-            // `stat` returns info about the target of a symlink (or symlink chain)
-            // `lstat` returns info about a symlink itself
-            let stats;
-            if (options.followSymbolicLinks) {
-                try {
-                    // Use `stat` (following symlinks)
-                    stats = yield fs.promises.stat(item.path);
-                }
-                catch (err) {
-                    if (err.code === 'ENOENT') {
-                        if (options.omitBrokenSymbolicLinks) {
-                            core.debug(`Broken symlink '${item.path}'`);
-                            return undefined;
-                        }
-                        throw new Error(`No information found for the path '${item.path}'. This may indicate a broken symbolic link.`);
-                    }
-                    throw err;
-                }
-            }
-            else {
-                // Use `lstat` (not following symlinks)
-                stats = yield fs.promises.lstat(item.path);
-            }
-            // Note, isDirectory() returns false for the lstat of a symlink
-            if (stats.isDirectory() && options.followSymbolicLinks) {
-                // Get the realpath
-                const realPath = yield fs.promises.realpath(item.path);
-                // Fixup the traversal chain to match the item level
-                while (traversalChain.length >= item.level) {
-                    traversalChain.pop();
-                }
-                // Test for a cycle
-                if (traversalChain.some((x) => x === realPath)) {
-                    core.debug(`Symlink cycle detected for path '${item.path}' and realpath '${realPath}'`);
-                    return undefined;
-                }
-                // Update the traversal chain
-                traversalChain.push(realPath);
-            }
-            return stats;
-        });
-    }
-}
-exports.DefaultGlobber = DefaultGlobber;
-//# sourceMappingURL=internal-globber.js.map
-
-/***/ }),
-
-/***/ 3608:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __asyncValues = (this && this.__asyncValues) || function (o) {
-    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-    var m = o[Symbol.asyncIterator], i;
-    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
-    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
-    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.hashFiles = void 0;
-const crypto = __importStar(__nccwpck_require__(6982));
-const core = __importStar(__nccwpck_require__(7484));
-const fs = __importStar(__nccwpck_require__(9896));
-const stream = __importStar(__nccwpck_require__(2203));
-const util = __importStar(__nccwpck_require__(9023));
-const path = __importStar(__nccwpck_require__(6928));
-function hashFiles(globber, currentWorkspace, verbose = false) {
-    var _a, e_1, _b, _c;
-    var _d;
-    return __awaiter(this, void 0, void 0, function* () {
-        const writeDelegate = verbose ? core.info : core.debug;
-        let hasMatch = false;
-        const githubWorkspace = currentWorkspace
-            ? currentWorkspace
-            : (_d = process.env['GITHUB_WORKSPACE']) !== null && _d !== void 0 ? _d : process.cwd();
-        const result = crypto.createHash('sha256');
-        let count = 0;
-        try {
-            for (var _e = true, _f = __asyncValues(globber.globGenerator()), _g; _g = yield _f.next(), _a = _g.done, !_a; _e = true) {
-                _c = _g.value;
-                _e = false;
-                const file = _c;
-                writeDelegate(file);
-                if (!file.startsWith(`${githubWorkspace}${path.sep}`)) {
-                    writeDelegate(`Ignore '${file}' since it is not under GITHUB_WORKSPACE.`);
-                    continue;
-                }
-                if (fs.statSync(file).isDirectory()) {
-                    writeDelegate(`Skip directory '${file}'.`);
-                    continue;
-                }
-                const hash = crypto.createHash('sha256');
-                const pipeline = util.promisify(stream.pipeline);
-                yield pipeline(fs.createReadStream(file), hash);
-                result.write(hash.digest());
-                count++;
-                if (!hasMatch) {
-                    hasMatch = true;
-                }
-            }
-        }
-        catch (e_1_1) { e_1 = { error: e_1_1 }; }
-        finally {
-            try {
-                if (!_e && !_a && (_b = _f.return)) yield _b.call(_f);
-            }
-            finally { if (e_1) throw e_1.error; }
-        }
-        result.end();
-        if (hasMatch) {
-            writeDelegate(`Found ${count} files to hash.`);
-            return result.digest('hex');
-        }
-        else {
-            writeDelegate(`No matches found for glob`);
-            return '';
-        }
-    });
-}
-exports.hashFiles = hashFiles;
-//# sourceMappingURL=internal-hash-files.js.map
-
-/***/ }),
-
-/***/ 2644:
-/***/ ((__unused_webpack_module, exports) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.MatchKind = void 0;
-/**
- * Indicates whether a pattern matches a path
- */
-var MatchKind;
-(function (MatchKind) {
-    /** Not matched */
-    MatchKind[MatchKind["None"] = 0] = "None";
-    /** Matched if the path is a directory */
-    MatchKind[MatchKind["Directory"] = 1] = "Directory";
-    /** Matched if the path is a regular file */
-    MatchKind[MatchKind["File"] = 2] = "File";
-    /** Matched */
-    MatchKind[MatchKind["All"] = 3] = "All";
-})(MatchKind || (exports.MatchKind = MatchKind = {}));
-//# sourceMappingURL=internal-match-kind.js.map
-
-/***/ }),
-
-/***/ 4138:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.safeTrimTrailingSeparator = exports.normalizeSeparators = exports.hasRoot = exports.hasAbsoluteRoot = exports.ensureAbsoluteRoot = exports.dirname = void 0;
-const path = __importStar(__nccwpck_require__(6928));
-const assert_1 = __importDefault(__nccwpck_require__(2613));
-const IS_WINDOWS = process.platform === 'win32';
-/**
- * Similar to path.dirname except normalizes the path separators and slightly better handling for Windows UNC paths.
- *
- * For example, on Linux/macOS:
- * - `/               => /`
- * - `/hello          => /`
- *
- * For example, on Windows:
- * - `C:\             => C:\`
- * - `C:\hello        => C:\`
- * - `C:              => C:`
- * - `C:hello         => C:`
- * - `\               => \`
- * - `\hello          => \`
- * - `\\hello         => \\hello`
- * - `\\hello\world   => \\hello\world`
- */
-function dirname(p) {
-    // Normalize slashes and trim unnecessary trailing slash
-    p = safeTrimTrailingSeparator(p);
-    // Windows UNC root, e.g. \\hello or \\hello\world
-    if (IS_WINDOWS && /^\\\\[^\\]+(\\[^\\]+)?$/.test(p)) {
-        return p;
-    }
-    // Get dirname
-    let result = path.dirname(p);
-    // Trim trailing slash for Windows UNC root, e.g. \\hello\world\
-    if (IS_WINDOWS && /^\\\\[^\\]+\\[^\\]+\\$/.test(result)) {
-        result = safeTrimTrailingSeparator(result);
-    }
-    return result;
-}
-exports.dirname = dirname;
-/**
- * Roots the path if not already rooted. On Windows, relative roots like `\`
- * or `C:` are expanded based on the current working directory.
- */
-function ensureAbsoluteRoot(root, itemPath) {
-    (0, assert_1.default)(root, `ensureAbsoluteRoot parameter 'root' must not be empty`);
-    (0, assert_1.default)(itemPath, `ensureAbsoluteRoot parameter 'itemPath' must not be empty`);
-    // Already rooted
-    if (hasAbsoluteRoot(itemPath)) {
-        return itemPath;
-    }
-    // Windows
-    if (IS_WINDOWS) {
-        // Check for itemPath like C: or C:foo
-        if (itemPath.match(/^[A-Z]:[^\\/]|^[A-Z]:$/i)) {
-            let cwd = process.cwd();
-            (0, assert_1.default)(cwd.match(/^[A-Z]:\\/i), `Expected current directory to start with an absolute drive root. Actual '${cwd}'`);
-            // Drive letter matches cwd? Expand to cwd
-            if (itemPath[0].toUpperCase() === cwd[0].toUpperCase()) {
-                // Drive only, e.g. C:
-                if (itemPath.length === 2) {
-                    // Preserve specified drive letter case (upper or lower)
-                    return `${itemPath[0]}:\\${cwd.substr(3)}`;
-                }
-                // Drive + path, e.g. C:foo
-                else {
-                    if (!cwd.endsWith('\\')) {
-                        cwd += '\\';
-                    }
-                    // Preserve specified drive letter case (upper or lower)
-                    return `${itemPath[0]}:\\${cwd.substr(3)}${itemPath.substr(2)}`;
-                }
-            }
-            // Different drive
-            else {
-                return `${itemPath[0]}:\\${itemPath.substr(2)}`;
-            }
-        }
-        // Check for itemPath like \ or \foo
-        else if (normalizeSeparators(itemPath).match(/^\\$|^\\[^\\]/)) {
-            const cwd = process.cwd();
-            (0, assert_1.default)(cwd.match(/^[A-Z]:\\/i), `Expected current directory to start with an absolute drive root. Actual '${cwd}'`);
-            return `${cwd[0]}:\\${itemPath.substr(1)}`;
-        }
-    }
-    (0, assert_1.default)(hasAbsoluteRoot(root), `ensureAbsoluteRoot parameter 'root' must have an absolute root`);
-    // Otherwise ensure root ends with a separator
-    if (root.endsWith('/') || (IS_WINDOWS && root.endsWith('\\'))) {
-        // Intentionally empty
-    }
-    else {
-        // Append separator
-        root += path.sep;
-    }
-    return root + itemPath;
-}
-exports.ensureAbsoluteRoot = ensureAbsoluteRoot;
-/**
- * On Linux/macOS, true if path starts with `/`. On Windows, true for paths like:
- * `\\hello\share` and `C:\hello` (and using alternate separator).
- */
-function hasAbsoluteRoot(itemPath) {
-    (0, assert_1.default)(itemPath, `hasAbsoluteRoot parameter 'itemPath' must not be empty`);
-    // Normalize separators
-    itemPath = normalizeSeparators(itemPath);
-    // Windows
-    if (IS_WINDOWS) {
-        // E.g. \\hello\share or C:\hello
-        return itemPath.startsWith('\\\\') || /^[A-Z]:\\/i.test(itemPath);
-    }
-    // E.g. /hello
-    return itemPath.startsWith('/');
-}
-exports.hasAbsoluteRoot = hasAbsoluteRoot;
-/**
- * On Linux/macOS, true if path starts with `/`. On Windows, true for paths like:
- * `\`, `\hello`, `\\hello\share`, `C:`, and `C:\hello` (and using alternate separator).
- */
-function hasRoot(itemPath) {
-    (0, assert_1.default)(itemPath, `isRooted parameter 'itemPath' must not be empty`);
-    // Normalize separators
-    itemPath = normalizeSeparators(itemPath);
-    // Windows
-    if (IS_WINDOWS) {
-        // E.g. \ or \hello or \\hello
-        // E.g. C: or C:\hello
-        return itemPath.startsWith('\\') || /^[A-Z]:/i.test(itemPath);
-    }
-    // E.g. /hello
-    return itemPath.startsWith('/');
-}
-exports.hasRoot = hasRoot;
-/**
- * Removes redundant slashes and converts `/` to `\` on Windows
- */
-function normalizeSeparators(p) {
-    p = p || '';
-    // Windows
-    if (IS_WINDOWS) {
-        // Convert slashes on Windows
-        p = p.replace(/\//g, '\\');
-        // Remove redundant slashes
-        const isUnc = /^\\\\+[^\\]/.test(p); // e.g. \\hello
-        return (isUnc ? '\\' : '') + p.replace(/\\\\+/g, '\\'); // preserve leading \\ for UNC
-    }
-    // Remove redundant slashes
-    return p.replace(/\/\/+/g, '/');
-}
-exports.normalizeSeparators = normalizeSeparators;
-/**
- * Normalizes the path separators and trims the trailing separator (when safe).
- * For example, `/foo/ => /foo` but `/ => /`
- */
-function safeTrimTrailingSeparator(p) {
-    // Short-circuit if empty
-    if (!p) {
-        return '';
-    }
-    // Normalize separators
-    p = normalizeSeparators(p);
-    // No trailing slash
-    if (!p.endsWith(path.sep)) {
-        return p;
-    }
-    // Check '/' on Linux/macOS and '\' on Windows
-    if (p === path.sep) {
-        return p;
-    }
-    // On Windows check if drive root. E.g. C:\
-    if (IS_WINDOWS && /^[A-Z]:\\$/i.test(p)) {
-        return p;
-    }
-    // Otherwise trim trailing slash
-    return p.substr(0, p.length - 1);
-}
-exports.safeTrimTrailingSeparator = safeTrimTrailingSeparator;
-//# sourceMappingURL=internal-path-helper.js.map
-
-/***/ }),
-
-/***/ 6617:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Path = void 0;
-const path = __importStar(__nccwpck_require__(6928));
-const pathHelper = __importStar(__nccwpck_require__(4138));
-const assert_1 = __importDefault(__nccwpck_require__(2613));
-const IS_WINDOWS = process.platform === 'win32';
-/**
- * Helper class for parsing paths into segments
- */
-class Path {
-    /**
-     * Constructs a Path
-     * @param itemPath Path or array of segments
-     */
-    constructor(itemPath) {
-        this.segments = [];
-        // String
-        if (typeof itemPath === 'string') {
-            (0, assert_1.default)(itemPath, `Parameter 'itemPath' must not be empty`);
-            // Normalize slashes and trim unnecessary trailing slash
-            itemPath = pathHelper.safeTrimTrailingSeparator(itemPath);
-            // Not rooted
-            if (!pathHelper.hasRoot(itemPath)) {
-                this.segments = itemPath.split(path.sep);
-            }
-            // Rooted
-            else {
-                // Add all segments, while not at the root
-                let remaining = itemPath;
-                let dir = pathHelper.dirname(remaining);
-                while (dir !== remaining) {
-                    // Add the segment
-                    const basename = path.basename(remaining);
-                    this.segments.unshift(basename);
-                    // Truncate the last segment
-                    remaining = dir;
-                    dir = pathHelper.dirname(remaining);
-                }
-                // Remainder is the root
-                this.segments.unshift(remaining);
-            }
-        }
-        // Array
-        else {
-            // Must not be empty
-            (0, assert_1.default)(itemPath.length > 0, `Parameter 'itemPath' must not be an empty array`);
-            // Each segment
-            for (let i = 0; i < itemPath.length; i++) {
-                let segment = itemPath[i];
-                // Must not be empty
-                (0, assert_1.default)(segment, `Parameter 'itemPath' must not contain any empty segments`);
-                // Normalize slashes
-                segment = pathHelper.normalizeSeparators(itemPath[i]);
-                // Root segment
-                if (i === 0 && pathHelper.hasRoot(segment)) {
-                    segment = pathHelper.safeTrimTrailingSeparator(segment);
-                    (0, assert_1.default)(segment === pathHelper.dirname(segment), `Parameter 'itemPath' root segment contains information for multiple segments`);
-                    this.segments.push(segment);
-                }
-                // All other segments
-                else {
-                    // Must not contain slash
-                    (0, assert_1.default)(!segment.includes(path.sep), `Parameter 'itemPath' contains unexpected path separators`);
-                    this.segments.push(segment);
-                }
-            }
-        }
-    }
-    /**
-     * Converts the path to it's string representation
-     */
-    toString() {
-        // First segment
-        let result = this.segments[0];
-        // All others
-        let skipSlash = result.endsWith(path.sep) || (IS_WINDOWS && /^[A-Z]:$/i.test(result));
-        for (let i = 1; i < this.segments.length; i++) {
-            if (skipSlash) {
-                skipSlash = false;
-            }
-            else {
-                result += path.sep;
-            }
-            result += this.segments[i];
-        }
-        return result;
-    }
-}
-exports.Path = Path;
-//# sourceMappingURL=internal-path.js.map
-
-/***/ }),
-
-/***/ 8891:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.partialMatch = exports.match = exports.getSearchPaths = void 0;
-const pathHelper = __importStar(__nccwpck_require__(4138));
-const internal_match_kind_1 = __nccwpck_require__(2644);
-const IS_WINDOWS = process.platform === 'win32';
-/**
- * Given an array of patterns, returns an array of paths to search.
- * Duplicates and paths under other included paths are filtered out.
- */
-function getSearchPaths(patterns) {
-    // Ignore negate patterns
-    patterns = patterns.filter(x => !x.negate);
-    // Create a map of all search paths
-    const searchPathMap = {};
-    for (const pattern of patterns) {
-        const key = IS_WINDOWS
-            ? pattern.searchPath.toUpperCase()
-            : pattern.searchPath;
-        searchPathMap[key] = 'candidate';
-    }
-    const result = [];
-    for (const pattern of patterns) {
-        // Check if already included
-        const key = IS_WINDOWS
-            ? pattern.searchPath.toUpperCase()
-            : pattern.searchPath;
-        if (searchPathMap[key] === 'included') {
-            continue;
-        }
-        // Check for an ancestor search path
-        let foundAncestor = false;
-        let tempKey = key;
-        let parent = pathHelper.dirname(tempKey);
-        while (parent !== tempKey) {
-            if (searchPathMap[parent]) {
-                foundAncestor = true;
-                break;
-            }
-            tempKey = parent;
-            parent = pathHelper.dirname(tempKey);
-        }
-        // Include the search pattern in the result
-        if (!foundAncestor) {
-            result.push(pattern.searchPath);
-            searchPathMap[key] = 'included';
-        }
-    }
-    return result;
-}
-exports.getSearchPaths = getSearchPaths;
-/**
- * Matches the patterns against the path
- */
-function match(patterns, itemPath) {
-    let result = internal_match_kind_1.MatchKind.None;
-    for (const pattern of patterns) {
-        if (pattern.negate) {
-            result &= ~pattern.match(itemPath);
-        }
-        else {
-            result |= pattern.match(itemPath);
-        }
-    }
-    return result;
-}
-exports.match = match;
-/**
- * Checks whether to descend further into the directory
- */
-function partialMatch(patterns, itemPath) {
-    return patterns.some(x => !x.negate && x.partialMatch(itemPath));
-}
-exports.partialMatch = partialMatch;
-//# sourceMappingURL=internal-pattern-helper.js.map
-
-/***/ }),
-
-/***/ 5370:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Pattern = void 0;
-const os = __importStar(__nccwpck_require__(857));
-const path = __importStar(__nccwpck_require__(6928));
-const pathHelper = __importStar(__nccwpck_require__(4138));
-const assert_1 = __importDefault(__nccwpck_require__(2613));
-const minimatch_1 = __nccwpck_require__(3772);
-const internal_match_kind_1 = __nccwpck_require__(2644);
-const internal_path_1 = __nccwpck_require__(6617);
-const IS_WINDOWS = process.platform === 'win32';
-class Pattern {
-    constructor(patternOrNegate, isImplicitPattern = false, segments, homedir) {
-        /**
-         * Indicates whether matches should be excluded from the result set
-         */
-        this.negate = false;
-        // Pattern overload
-        let pattern;
-        if (typeof patternOrNegate === 'string') {
-            pattern = patternOrNegate.trim();
-        }
-        // Segments overload
-        else {
-            // Convert to pattern
-            segments = segments || [];
-            (0, assert_1.default)(segments.length, `Parameter 'segments' must not empty`);
-            const root = Pattern.getLiteral(segments[0]);
-            (0, assert_1.default)(root && pathHelper.hasAbsoluteRoot(root), `Parameter 'segments' first element must be a root path`);
-            pattern = new internal_path_1.Path(segments).toString().trim();
-            if (patternOrNegate) {
-                pattern = `!${pattern}`;
-            }
-        }
-        // Negate
-        while (pattern.startsWith('!')) {
-            this.negate = !this.negate;
-            pattern = pattern.substr(1).trim();
-        }
-        // Normalize slashes and ensures absolute root
-        pattern = Pattern.fixupPattern(pattern, homedir);
-        // Segments
-        this.segments = new internal_path_1.Path(pattern).segments;
-        // Trailing slash indicates the pattern should only match directories, not regular files
-        this.trailingSeparator = pathHelper
-            .normalizeSeparators(pattern)
-            .endsWith(path.sep);
-        pattern = pathHelper.safeTrimTrailingSeparator(pattern);
-        // Search path (literal path prior to the first glob segment)
-        let foundGlob = false;
-        const searchSegments = this.segments
-            .map(x => Pattern.getLiteral(x))
-            .filter(x => !foundGlob && !(foundGlob = x === ''));
-        this.searchPath = new internal_path_1.Path(searchSegments).toString();
-        // Root RegExp (required when determining partial match)
-        this.rootRegExp = new RegExp(Pattern.regExpEscape(searchSegments[0]), IS_WINDOWS ? 'i' : '');
-        this.isImplicitPattern = isImplicitPattern;
-        // Create minimatch
-        const minimatchOptions = {
-            dot: true,
-            nobrace: true,
-            nocase: IS_WINDOWS,
-            nocomment: true,
-            noext: true,
-            nonegate: true
-        };
-        pattern = IS_WINDOWS ? pattern.replace(/\\/g, '/') : pattern;
-        this.minimatch = new minimatch_1.Minimatch(pattern, minimatchOptions);
-    }
-    /**
-     * Matches the pattern against the specified path
-     */
-    match(itemPath) {
-        // Last segment is globstar?
-        if (this.segments[this.segments.length - 1] === '**') {
-            // Normalize slashes
-            itemPath = pathHelper.normalizeSeparators(itemPath);
-            // Append a trailing slash. Otherwise Minimatch will not match the directory immediately
-            // preceding the globstar. For example, given the pattern `/foo/**`, Minimatch returns
-            // false for `/foo` but returns true for `/foo/`. Append a trailing slash to handle that quirk.
-            if (!itemPath.endsWith(path.sep) && this.isImplicitPattern === false) {
-                // Note, this is safe because the constructor ensures the pattern has an absolute root.
-                // For example, formats like C: and C:foo on Windows are resolved to an absolute root.
-                itemPath = `${itemPath}${path.sep}`;
-            }
-        }
-        else {
-            // Normalize slashes and trim unnecessary trailing slash
-            itemPath = pathHelper.safeTrimTrailingSeparator(itemPath);
-        }
-        // Match
-        if (this.minimatch.match(itemPath)) {
-            return this.trailingSeparator ? internal_match_kind_1.MatchKind.Directory : internal_match_kind_1.MatchKind.All;
-        }
-        return internal_match_kind_1.MatchKind.None;
-    }
-    /**
-     * Indicates whether the pattern may match descendants of the specified path
-     */
-    partialMatch(itemPath) {
-        // Normalize slashes and trim unnecessary trailing slash
-        itemPath = pathHelper.safeTrimTrailingSeparator(itemPath);
-        // matchOne does not handle root path correctly
-        if (pathHelper.dirname(itemPath) === itemPath) {
-            return this.rootRegExp.test(itemPath);
-        }
-        return this.minimatch.matchOne(itemPath.split(IS_WINDOWS ? /\\+/ : /\/+/), this.minimatch.set[0], true);
-    }
-    /**
-     * Escapes glob patterns within a path
-     */
-    static globEscape(s) {
-        return (IS_WINDOWS ? s : s.replace(/\\/g, '\\\\')) // escape '\' on Linux/macOS
-            .replace(/(\[)(?=[^/]+\])/g, '[[]') // escape '[' when ']' follows within the path segment
-            .replace(/\?/g, '[?]') // escape '?'
-            .replace(/\*/g, '[*]'); // escape '*'
-    }
-    /**
-     * Normalizes slashes and ensures absolute root
-     */
-    static fixupPattern(pattern, homedir) {
-        // Empty
-        (0, assert_1.default)(pattern, 'pattern cannot be empty');
-        // Must not contain `.` segment, unless first segment
-        // Must not contain `..` segment
-        const literalSegments = new internal_path_1.Path(pattern).segments.map(x => Pattern.getLiteral(x));
-        (0, assert_1.default)(literalSegments.every((x, i) => (x !== '.' || i === 0) && x !== '..'), `Invalid pattern '${pattern}'. Relative pathing '.' and '..' is not allowed.`);
-        // Must not contain globs in root, e.g. Windows UNC path \\foo\b*r
-        (0, assert_1.default)(!pathHelper.hasRoot(pattern) || literalSegments[0], `Invalid pattern '${pattern}'. Root segment must not contain globs.`);
-        // Normalize slashes
-        pattern = pathHelper.normalizeSeparators(pattern);
-        // Replace leading `.` segment
-        if (pattern === '.' || pattern.startsWith(`.${path.sep}`)) {
-            pattern = Pattern.globEscape(process.cwd()) + pattern.substr(1);
-        }
-        // Replace leading `~` segment
-        else if (pattern === '~' || pattern.startsWith(`~${path.sep}`)) {
-            homedir = homedir || os.homedir();
-            (0, assert_1.default)(homedir, 'Unable to determine HOME directory');
-            (0, assert_1.default)(pathHelper.hasAbsoluteRoot(homedir), `Expected HOME directory to be a rooted path. Actual '${homedir}'`);
-            pattern = Pattern.globEscape(homedir) + pattern.substr(1);
-        }
-        // Replace relative drive root, e.g. pattern is C: or C:foo
-        else if (IS_WINDOWS &&
-            (pattern.match(/^[A-Z]:$/i) || pattern.match(/^[A-Z]:[^\\]/i))) {
-            let root = pathHelper.ensureAbsoluteRoot('C:\\dummy-root', pattern.substr(0, 2));
-            if (pattern.length > 2 && !root.endsWith('\\')) {
-                root += '\\';
-            }
-            pattern = Pattern.globEscape(root) + pattern.substr(2);
-        }
-        // Replace relative root, e.g. pattern is \ or \foo
-        else if (IS_WINDOWS && (pattern === '\\' || pattern.match(/^\\[^\\]/))) {
-            let root = pathHelper.ensureAbsoluteRoot('C:\\dummy-root', '\\');
-            if (!root.endsWith('\\')) {
-                root += '\\';
-            }
-            pattern = Pattern.globEscape(root) + pattern.substr(1);
-        }
-        // Otherwise ensure absolute root
-        else {
-            pattern = pathHelper.ensureAbsoluteRoot(Pattern.globEscape(process.cwd()), pattern);
-        }
-        return pathHelper.normalizeSeparators(pattern);
-    }
-    /**
-     * Attempts to unescape a pattern segment to create a literal path segment.
-     * Otherwise returns empty string.
-     */
-    static getLiteral(segment) {
-        let literal = '';
-        for (let i = 0; i < segment.length; i++) {
-            const c = segment[i];
-            // Escape
-            if (c === '\\' && !IS_WINDOWS && i + 1 < segment.length) {
-                literal += segment[++i];
-                continue;
-            }
-            // Wildcard
-            else if (c === '*' || c === '?') {
-                return '';
-            }
-            // Character set
-            else if (c === '[' && i + 1 < segment.length) {
-                let set = '';
-                let closed = -1;
-                for (let i2 = i + 1; i2 < segment.length; i2++) {
-                    const c2 = segment[i2];
-                    // Escape
-                    if (c2 === '\\' && !IS_WINDOWS && i2 + 1 < segment.length) {
-                        set += segment[++i2];
-                        continue;
-                    }
-                    // Closed
-                    else if (c2 === ']') {
-                        closed = i2;
-                        break;
-                    }
-                    // Otherwise
-                    else {
-                        set += c2;
-                    }
-                }
-                // Closed?
-                if (closed >= 0) {
-                    // Cannot convert
-                    if (set.length > 1) {
-                        return '';
-                    }
-                    // Convert to literal
-                    if (set) {
-                        literal += set;
-                        i = closed;
-                        continue;
-                    }
-                }
-                // Otherwise fall thru
-            }
-            // Append
-            literal += c;
-        }
-        return literal;
-    }
-    /**
-     * Escapes regexp special characters
-     * https://javascript.info/regexp-escaping
-     */
-    static regExpEscape(s) {
-        return s.replace(/[[\\^$.|?*+()]/g, '\\$&');
-    }
-}
-exports.Pattern = Pattern;
-//# sourceMappingURL=internal-pattern.js.map
-
-/***/ }),
-
-/***/ 9890:
-/***/ ((__unused_webpack_module, exports) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.SearchState = void 0;
-class SearchState {
-    constructor(path, level) {
-        this.path = path;
-        this.level = level;
-    }
-}
-exports.SearchState = SearchState;
-//# sourceMappingURL=internal-search-state.js.map
-
-/***/ }),
-
 /***/ 4552:
 /***/ (function(__unused_webpack_module, exports) {
 
@@ -8592,7 +7369,6 @@ function removeHook(state, name, method) {
 /***/ 4691:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-var concatMap = __nccwpck_require__(7087);
 var balanced = __nccwpck_require__(9380);
 
 module.exports = expandTop;
@@ -8673,10 +7449,6 @@ function expandTop(str) {
   return expand(escapeBraces(str), true).map(unescapeBraces);
 }
 
-function identity(e) {
-  return e;
-}
-
 function embrace(str) {
   return '{' + str + '}';
 }
@@ -8695,42 +7467,7 @@ function expand(str, isTop) {
   var expansions = [];
 
   var m = balanced('{', '}', str);
-  if (!m || /\$$/.test(m.pre)) return [str];
-
-  var isNumericSequence = /^-?\d+\.\.-?\d+(?:\.\.-?\d+)?$/.test(m.body);
-  var isAlphaSequence = /^[a-zA-Z]\.\.[a-zA-Z](?:\.\.-?\d+)?$/.test(m.body);
-  var isSequence = isNumericSequence || isAlphaSequence;
-  var isOptions = m.body.indexOf(',') >= 0;
-  if (!isSequence && !isOptions) {
-    // {a},b}
-    if (m.post.match(/,.*\}/)) {
-      str = m.pre + '{' + m.body + escClose + m.post;
-      return expand(str);
-    }
-    return [str];
-  }
-
-  var n;
-  if (isSequence) {
-    n = m.body.split(/\.\./);
-  } else {
-    n = parseCommaParts(m.body);
-    if (n.length === 1) {
-      // x{{a,b}}y ==> x{a}y x{b}y
-      n = expand(n[0], false).map(embrace);
-      if (n.length === 1) {
-        var post = m.post.length
-          ? expand(m.post, false)
-          : [''];
-        return post.map(function(p) {
-          return m.pre + n[0] + p;
-        });
-      }
-    }
-  }
-
-  // at this point, n is the parts, and we know it's not a comma set
-  // with a single entry.
+  if (!m) return [str];
 
   // no need to expand pre, since it is guaranteed to be free of brace-sets
   var pre = m.pre;
@@ -8738,81 +7475,103 @@ function expand(str, isTop) {
     ? expand(m.post, false)
     : [''];
 
-  var N;
-
-  if (isSequence) {
-    var x = numeric(n[0]);
-    var y = numeric(n[1]);
-    var width = Math.max(n[0].length, n[1].length)
-    var incr = n.length == 3
-      ? Math.abs(numeric(n[2]))
-      : 1;
-    var test = lte;
-    var reverse = y < x;
-    if (reverse) {
-      incr *= -1;
-      test = gte;
-    }
-    var pad = n.some(isPadded);
-
-    N = [];
-
-    for (var i = x; test(i, y); i += incr) {
-      var c;
-      if (isAlphaSequence) {
-        c = String.fromCharCode(i);
-        if (c === '\\')
-          c = '';
-      } else {
-        c = String(i);
-        if (pad) {
-          var need = width - c.length;
-          if (need > 0) {
-            var z = new Array(need + 1).join('0');
-            if (i < 0)
-              c = '-' + z + c.slice(1);
-            else
-              c = z + c;
-          }
-        }
-      }
-      N.push(c);
+  if (/\$$/.test(m.pre)) {    
+    for (var k = 0; k < post.length; k++) {
+      var expansion = pre+ '{' + m.body + '}' + post[k];
+      expansions.push(expansion);
     }
   } else {
-    N = concatMap(n, function(el) { return expand(el, false) });
-  }
+    var isNumericSequence = /^-?\d+\.\.-?\d+(?:\.\.-?\d+)?$/.test(m.body);
+    var isAlphaSequence = /^[a-zA-Z]\.\.[a-zA-Z](?:\.\.-?\d+)?$/.test(m.body);
+    var isSequence = isNumericSequence || isAlphaSequence;
+    var isOptions = m.body.indexOf(',') >= 0;
+    if (!isSequence && !isOptions) {
+      // {a},b}
+      if (m.post.match(/,.*\}/)) {
+        str = m.pre + '{' + m.body + escClose + m.post;
+        return expand(str);
+      }
+      return [str];
+    }
 
-  for (var j = 0; j < N.length; j++) {
-    for (var k = 0; k < post.length; k++) {
-      var expansion = pre + N[j] + post[k];
-      if (!isTop || isSequence || expansion)
-        expansions.push(expansion);
+    var n;
+    if (isSequence) {
+      n = m.body.split(/\.\./);
+    } else {
+      n = parseCommaParts(m.body);
+      if (n.length === 1) {
+        // x{{a,b}}y ==> x{a}y x{b}y
+        n = expand(n[0], false).map(embrace);
+        if (n.length === 1) {
+          return post.map(function(p) {
+            return m.pre + n[0] + p;
+          });
+        }
+      }
+    }
+
+    // at this point, n is the parts, and we know it's not a comma set
+    // with a single entry.
+    var N;
+
+    if (isSequence) {
+      var x = numeric(n[0]);
+      var y = numeric(n[1]);
+      var width = Math.max(n[0].length, n[1].length)
+      var incr = n.length == 3
+        ? Math.abs(numeric(n[2]))
+        : 1;
+      var test = lte;
+      var reverse = y < x;
+      if (reverse) {
+        incr *= -1;
+        test = gte;
+      }
+      var pad = n.some(isPadded);
+
+      N = [];
+
+      for (var i = x; test(i, y); i += incr) {
+        var c;
+        if (isAlphaSequence) {
+          c = String.fromCharCode(i);
+          if (c === '\\')
+            c = '';
+        } else {
+          c = String(i);
+          if (pad) {
+            var need = width - c.length;
+            if (need > 0) {
+              var z = new Array(need + 1).join('0');
+              if (i < 0)
+                c = '-' + z + c.slice(1);
+              else
+                c = z + c;
+            }
+          }
+        }
+        N.push(c);
+      }
+    } else {
+      N = [];
+
+      for (var j = 0; j < n.length; j++) {
+        N.push.apply(N, expand(n[j], false));
+      }
+    }
+
+    for (var j = 0; j < N.length; j++) {
+      for (var k = 0; k < post.length; k++) {
+        var expansion = pre + N[j] + post[k];
+        if (!isTop || isSequence || expansion)
+          expansions.push(expansion);
+      }
     }
   }
 
   return expansions;
 }
 
-
-
-/***/ }),
-
-/***/ 7087:
-/***/ ((module) => {
-
-module.exports = function (xs, fn) {
-    var res = [];
-    for (var i = 0; i < xs.length; i++) {
-        var x = fn(xs[i], i);
-        if (isArray(x)) res.push.apply(res, x);
-        else res.push(x);
-    }
-    return res;
-};
-
-var isArray = Array.isArray || function (xs) {
-    return Object.prototype.toString.call(xs) === '[object Array]';
-};
 
 
 /***/ }),
@@ -8840,960 +7599,6 @@ class Deprecation extends Error {
 }
 
 exports.Deprecation = Deprecation;
-
-
-/***/ }),
-
-/***/ 3772:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-module.exports = minimatch
-minimatch.Minimatch = Minimatch
-
-var path = (function () { try { return __nccwpck_require__(6928) } catch (e) {}}()) || {
-  sep: '/'
-}
-minimatch.sep = path.sep
-
-var GLOBSTAR = minimatch.GLOBSTAR = Minimatch.GLOBSTAR = {}
-var expand = __nccwpck_require__(4691)
-
-var plTypes = {
-  '!': { open: '(?:(?!(?:', close: '))[^/]*?)'},
-  '?': { open: '(?:', close: ')?' },
-  '+': { open: '(?:', close: ')+' },
-  '*': { open: '(?:', close: ')*' },
-  '@': { open: '(?:', close: ')' }
-}
-
-// any single thing other than /
-// don't need to escape / when using new RegExp()
-var qmark = '[^/]'
-
-// * => any number of characters
-var star = qmark + '*?'
-
-// ** when dots are allowed.  Anything goes, except .. and .
-// not (^ or / followed by one or two dots followed by $ or /),
-// followed by anything, any number of times.
-var twoStarDot = '(?:(?!(?:\\\/|^)(?:\\.{1,2})($|\\\/)).)*?'
-
-// not a ^ or / followed by a dot,
-// followed by anything, any number of times.
-var twoStarNoDot = '(?:(?!(?:\\\/|^)\\.).)*?'
-
-// characters that need to be escaped in RegExp.
-var reSpecials = charSet('().*{}+?[]^$\\!')
-
-// "abc" -> { a:true, b:true, c:true }
-function charSet (s) {
-  return s.split('').reduce(function (set, c) {
-    set[c] = true
-    return set
-  }, {})
-}
-
-// normalizes slashes.
-var slashSplit = /\/+/
-
-minimatch.filter = filter
-function filter (pattern, options) {
-  options = options || {}
-  return function (p, i, list) {
-    return minimatch(p, pattern, options)
-  }
-}
-
-function ext (a, b) {
-  b = b || {}
-  var t = {}
-  Object.keys(a).forEach(function (k) {
-    t[k] = a[k]
-  })
-  Object.keys(b).forEach(function (k) {
-    t[k] = b[k]
-  })
-  return t
-}
-
-minimatch.defaults = function (def) {
-  if (!def || typeof def !== 'object' || !Object.keys(def).length) {
-    return minimatch
-  }
-
-  var orig = minimatch
-
-  var m = function minimatch (p, pattern, options) {
-    return orig(p, pattern, ext(def, options))
-  }
-
-  m.Minimatch = function Minimatch (pattern, options) {
-    return new orig.Minimatch(pattern, ext(def, options))
-  }
-  m.Minimatch.defaults = function defaults (options) {
-    return orig.defaults(ext(def, options)).Minimatch
-  }
-
-  m.filter = function filter (pattern, options) {
-    return orig.filter(pattern, ext(def, options))
-  }
-
-  m.defaults = function defaults (options) {
-    return orig.defaults(ext(def, options))
-  }
-
-  m.makeRe = function makeRe (pattern, options) {
-    return orig.makeRe(pattern, ext(def, options))
-  }
-
-  m.braceExpand = function braceExpand (pattern, options) {
-    return orig.braceExpand(pattern, ext(def, options))
-  }
-
-  m.match = function (list, pattern, options) {
-    return orig.match(list, pattern, ext(def, options))
-  }
-
-  return m
-}
-
-Minimatch.defaults = function (def) {
-  return minimatch.defaults(def).Minimatch
-}
-
-function minimatch (p, pattern, options) {
-  assertValidPattern(pattern)
-
-  if (!options) options = {}
-
-  // shortcut: comments match nothing.
-  if (!options.nocomment && pattern.charAt(0) === '#') {
-    return false
-  }
-
-  return new Minimatch(pattern, options).match(p)
-}
-
-function Minimatch (pattern, options) {
-  if (!(this instanceof Minimatch)) {
-    return new Minimatch(pattern, options)
-  }
-
-  assertValidPattern(pattern)
-
-  if (!options) options = {}
-
-  pattern = pattern.trim()
-
-  // windows support: need to use /, not \
-  if (!options.allowWindowsEscape && path.sep !== '/') {
-    pattern = pattern.split(path.sep).join('/')
-  }
-
-  this.options = options
-  this.set = []
-  this.pattern = pattern
-  this.regexp = null
-  this.negate = false
-  this.comment = false
-  this.empty = false
-  this.partial = !!options.partial
-
-  // make the set of regexps etc.
-  this.make()
-}
-
-Minimatch.prototype.debug = function () {}
-
-Minimatch.prototype.make = make
-function make () {
-  var pattern = this.pattern
-  var options = this.options
-
-  // empty patterns and comments match nothing.
-  if (!options.nocomment && pattern.charAt(0) === '#') {
-    this.comment = true
-    return
-  }
-  if (!pattern) {
-    this.empty = true
-    return
-  }
-
-  // step 1: figure out negation, etc.
-  this.parseNegate()
-
-  // step 2: expand braces
-  var set = this.globSet = this.braceExpand()
-
-  if (options.debug) this.debug = function debug() { console.error.apply(console, arguments) }
-
-  this.debug(this.pattern, set)
-
-  // step 3: now we have a set, so turn each one into a series of path-portion
-  // matching patterns.
-  // These will be regexps, except in the case of "**", which is
-  // set to the GLOBSTAR object for globstar behavior,
-  // and will not contain any / characters
-  set = this.globParts = set.map(function (s) {
-    return s.split(slashSplit)
-  })
-
-  this.debug(this.pattern, set)
-
-  // glob --> regexps
-  set = set.map(function (s, si, set) {
-    return s.map(this.parse, this)
-  }, this)
-
-  this.debug(this.pattern, set)
-
-  // filter out everything that didn't compile properly.
-  set = set.filter(function (s) {
-    return s.indexOf(false) === -1
-  })
-
-  this.debug(this.pattern, set)
-
-  this.set = set
-}
-
-Minimatch.prototype.parseNegate = parseNegate
-function parseNegate () {
-  var pattern = this.pattern
-  var negate = false
-  var options = this.options
-  var negateOffset = 0
-
-  if (options.nonegate) return
-
-  for (var i = 0, l = pattern.length
-    ; i < l && pattern.charAt(i) === '!'
-    ; i++) {
-    negate = !negate
-    negateOffset++
-  }
-
-  if (negateOffset) this.pattern = pattern.substr(negateOffset)
-  this.negate = negate
-}
-
-// Brace expansion:
-// a{b,c}d -> abd acd
-// a{b,}c -> abc ac
-// a{0..3}d -> a0d a1d a2d a3d
-// a{b,c{d,e}f}g -> abg acdfg acefg
-// a{b,c}d{e,f}g -> abdeg acdeg abdeg abdfg
-//
-// Invalid sets are not expanded.
-// a{2..}b -> a{2..}b
-// a{b}c -> a{b}c
-minimatch.braceExpand = function (pattern, options) {
-  return braceExpand(pattern, options)
-}
-
-Minimatch.prototype.braceExpand = braceExpand
-
-function braceExpand (pattern, options) {
-  if (!options) {
-    if (this instanceof Minimatch) {
-      options = this.options
-    } else {
-      options = {}
-    }
-  }
-
-  pattern = typeof pattern === 'undefined'
-    ? this.pattern : pattern
-
-  assertValidPattern(pattern)
-
-  // Thanks to Yeting Li <https://github.com/yetingli> for
-  // improving this regexp to avoid a ReDOS vulnerability.
-  if (options.nobrace || !/\{(?:(?!\{).)*\}/.test(pattern)) {
-    // shortcut. no need to expand.
-    return [pattern]
-  }
-
-  return expand(pattern)
-}
-
-var MAX_PATTERN_LENGTH = 1024 * 64
-var assertValidPattern = function (pattern) {
-  if (typeof pattern !== 'string') {
-    throw new TypeError('invalid pattern')
-  }
-
-  if (pattern.length > MAX_PATTERN_LENGTH) {
-    throw new TypeError('pattern is too long')
-  }
-}
-
-// parse a component of the expanded set.
-// At this point, no pattern may contain "/" in it
-// so we're going to return a 2d array, where each entry is the full
-// pattern, split on '/', and then turned into a regular expression.
-// A regexp is made at the end which joins each array with an
-// escaped /, and another full one which joins each regexp with |.
-//
-// Following the lead of Bash 4.1, note that "**" only has special meaning
-// when it is the *only* thing in a path portion.  Otherwise, any series
-// of * is equivalent to a single *.  Globstar behavior is enabled by
-// default, and can be disabled by setting options.noglobstar.
-Minimatch.prototype.parse = parse
-var SUBPARSE = {}
-function parse (pattern, isSub) {
-  assertValidPattern(pattern)
-
-  var options = this.options
-
-  // shortcuts
-  if (pattern === '**') {
-    if (!options.noglobstar)
-      return GLOBSTAR
-    else
-      pattern = '*'
-  }
-  if (pattern === '') return ''
-
-  var re = ''
-  var hasMagic = !!options.nocase
-  var escaping = false
-  // ? => one single character
-  var patternListStack = []
-  var negativeLists = []
-  var stateChar
-  var inClass = false
-  var reClassStart = -1
-  var classStart = -1
-  // . and .. never match anything that doesn't start with .,
-  // even when options.dot is set.
-  var patternStart = pattern.charAt(0) === '.' ? '' // anything
-  // not (start or / followed by . or .. followed by / or end)
-  : options.dot ? '(?!(?:^|\\\/)\\.{1,2}(?:$|\\\/))'
-  : '(?!\\.)'
-  var self = this
-
-  function clearStateChar () {
-    if (stateChar) {
-      // we had some state-tracking character
-      // that wasn't consumed by this pass.
-      switch (stateChar) {
-        case '*':
-          re += star
-          hasMagic = true
-        break
-        case '?':
-          re += qmark
-          hasMagic = true
-        break
-        default:
-          re += '\\' + stateChar
-        break
-      }
-      self.debug('clearStateChar %j %j', stateChar, re)
-      stateChar = false
-    }
-  }
-
-  for (var i = 0, len = pattern.length, c
-    ; (i < len) && (c = pattern.charAt(i))
-    ; i++) {
-    this.debug('%s\t%s %s %j', pattern, i, re, c)
-
-    // skip over any that are escaped.
-    if (escaping && reSpecials[c]) {
-      re += '\\' + c
-      escaping = false
-      continue
-    }
-
-    switch (c) {
-      /* istanbul ignore next */
-      case '/': {
-        // completely not allowed, even escaped.
-        // Should already be path-split by now.
-        return false
-      }
-
-      case '\\':
-        clearStateChar()
-        escaping = true
-      continue
-
-      // the various stateChar values
-      // for the "extglob" stuff.
-      case '?':
-      case '*':
-      case '+':
-      case '@':
-      case '!':
-        this.debug('%s\t%s %s %j <-- stateChar', pattern, i, re, c)
-
-        // all of those are literals inside a class, except that
-        // the glob [!a] means [^a] in regexp
-        if (inClass) {
-          this.debug('  in class')
-          if (c === '!' && i === classStart + 1) c = '^'
-          re += c
-          continue
-        }
-
-        // if we already have a stateChar, then it means
-        // that there was something like ** or +? in there.
-        // Handle the stateChar, then proceed with this one.
-        self.debug('call clearStateChar %j', stateChar)
-        clearStateChar()
-        stateChar = c
-        // if extglob is disabled, then +(asdf|foo) isn't a thing.
-        // just clear the statechar *now*, rather than even diving into
-        // the patternList stuff.
-        if (options.noext) clearStateChar()
-      continue
-
-      case '(':
-        if (inClass) {
-          re += '('
-          continue
-        }
-
-        if (!stateChar) {
-          re += '\\('
-          continue
-        }
-
-        patternListStack.push({
-          type: stateChar,
-          start: i - 1,
-          reStart: re.length,
-          open: plTypes[stateChar].open,
-          close: plTypes[stateChar].close
-        })
-        // negation is (?:(?!js)[^/]*)
-        re += stateChar === '!' ? '(?:(?!(?:' : '(?:'
-        this.debug('plType %j %j', stateChar, re)
-        stateChar = false
-      continue
-
-      case ')':
-        if (inClass || !patternListStack.length) {
-          re += '\\)'
-          continue
-        }
-
-        clearStateChar()
-        hasMagic = true
-        var pl = patternListStack.pop()
-        // negation is (?:(?!js)[^/]*)
-        // The others are (?:<pattern>)<type>
-        re += pl.close
-        if (pl.type === '!') {
-          negativeLists.push(pl)
-        }
-        pl.reEnd = re.length
-      continue
-
-      case '|':
-        if (inClass || !patternListStack.length || escaping) {
-          re += '\\|'
-          escaping = false
-          continue
-        }
-
-        clearStateChar()
-        re += '|'
-      continue
-
-      // these are mostly the same in regexp and glob
-      case '[':
-        // swallow any state-tracking char before the [
-        clearStateChar()
-
-        if (inClass) {
-          re += '\\' + c
-          continue
-        }
-
-        inClass = true
-        classStart = i
-        reClassStart = re.length
-        re += c
-      continue
-
-      case ']':
-        //  a right bracket shall lose its special
-        //  meaning and represent itself in
-        //  a bracket expression if it occurs
-        //  first in the list.  -- POSIX.2 2.8.3.2
-        if (i === classStart + 1 || !inClass) {
-          re += '\\' + c
-          escaping = false
-          continue
-        }
-
-        // handle the case where we left a class open.
-        // "[z-a]" is valid, equivalent to "\[z-a\]"
-        // split where the last [ was, make sure we don't have
-        // an invalid re. if so, re-walk the contents of the
-        // would-be class to re-translate any characters that
-        // were passed through as-is
-        // TODO: It would probably be faster to determine this
-        // without a try/catch and a new RegExp, but it's tricky
-        // to do safely.  For now, this is safe and works.
-        var cs = pattern.substring(classStart + 1, i)
-        try {
-          RegExp('[' + cs + ']')
-        } catch (er) {
-          // not a valid class!
-          var sp = this.parse(cs, SUBPARSE)
-          re = re.substr(0, reClassStart) + '\\[' + sp[0] + '\\]'
-          hasMagic = hasMagic || sp[1]
-          inClass = false
-          continue
-        }
-
-        // finish up the class.
-        hasMagic = true
-        inClass = false
-        re += c
-      continue
-
-      default:
-        // swallow any state char that wasn't consumed
-        clearStateChar()
-
-        if (escaping) {
-          // no need
-          escaping = false
-        } else if (reSpecials[c]
-          && !(c === '^' && inClass)) {
-          re += '\\'
-        }
-
-        re += c
-
-    } // switch
-  } // for
-
-  // handle the case where we left a class open.
-  // "[abc" is valid, equivalent to "\[abc"
-  if (inClass) {
-    // split where the last [ was, and escape it
-    // this is a huge pita.  We now have to re-walk
-    // the contents of the would-be class to re-translate
-    // any characters that were passed through as-is
-    cs = pattern.substr(classStart + 1)
-    sp = this.parse(cs, SUBPARSE)
-    re = re.substr(0, reClassStart) + '\\[' + sp[0]
-    hasMagic = hasMagic || sp[1]
-  }
-
-  // handle the case where we had a +( thing at the *end*
-  // of the pattern.
-  // each pattern list stack adds 3 chars, and we need to go through
-  // and escape any | chars that were passed through as-is for the regexp.
-  // Go through and escape them, taking care not to double-escape any
-  // | chars that were already escaped.
-  for (pl = patternListStack.pop(); pl; pl = patternListStack.pop()) {
-    var tail = re.slice(pl.reStart + pl.open.length)
-    this.debug('setting tail', re, pl)
-    // maybe some even number of \, then maybe 1 \, followed by a |
-    tail = tail.replace(/((?:\\{2}){0,64})(\\?)\|/g, function (_, $1, $2) {
-      if (!$2) {
-        // the | isn't already escaped, so escape it.
-        $2 = '\\'
-      }
-
-      // need to escape all those slashes *again*, without escaping the
-      // one that we need for escaping the | character.  As it works out,
-      // escaping an even number of slashes can be done by simply repeating
-      // it exactly after itself.  That's why this trick works.
-      //
-      // I am sorry that you have to see this.
-      return $1 + $1 + $2 + '|'
-    })
-
-    this.debug('tail=%j\n   %s', tail, tail, pl, re)
-    var t = pl.type === '*' ? star
-      : pl.type === '?' ? qmark
-      : '\\' + pl.type
-
-    hasMagic = true
-    re = re.slice(0, pl.reStart) + t + '\\(' + tail
-  }
-
-  // handle trailing things that only matter at the very end.
-  clearStateChar()
-  if (escaping) {
-    // trailing \\
-    re += '\\\\'
-  }
-
-  // only need to apply the nodot start if the re starts with
-  // something that could conceivably capture a dot
-  var addPatternStart = false
-  switch (re.charAt(0)) {
-    case '[': case '.': case '(': addPatternStart = true
-  }
-
-  // Hack to work around lack of negative lookbehind in JS
-  // A pattern like: *.!(x).!(y|z) needs to ensure that a name
-  // like 'a.xyz.yz' doesn't match.  So, the first negative
-  // lookahead, has to look ALL the way ahead, to the end of
-  // the pattern.
-  for (var n = negativeLists.length - 1; n > -1; n--) {
-    var nl = negativeLists[n]
-
-    var nlBefore = re.slice(0, nl.reStart)
-    var nlFirst = re.slice(nl.reStart, nl.reEnd - 8)
-    var nlLast = re.slice(nl.reEnd - 8, nl.reEnd)
-    var nlAfter = re.slice(nl.reEnd)
-
-    nlLast += nlAfter
-
-    // Handle nested stuff like *(*.js|!(*.json)), where open parens
-    // mean that we should *not* include the ) in the bit that is considered
-    // "after" the negated section.
-    var openParensBefore = nlBefore.split('(').length - 1
-    var cleanAfter = nlAfter
-    for (i = 0; i < openParensBefore; i++) {
-      cleanAfter = cleanAfter.replace(/\)[+*?]?/, '')
-    }
-    nlAfter = cleanAfter
-
-    var dollar = ''
-    if (nlAfter === '' && isSub !== SUBPARSE) {
-      dollar = '$'
-    }
-    var newRe = nlBefore + nlFirst + nlAfter + dollar + nlLast
-    re = newRe
-  }
-
-  // if the re is not "" at this point, then we need to make sure
-  // it doesn't match against an empty path part.
-  // Otherwise a/* will match a/, which it should not.
-  if (re !== '' && hasMagic) {
-    re = '(?=.)' + re
-  }
-
-  if (addPatternStart) {
-    re = patternStart + re
-  }
-
-  // parsing just a piece of a larger pattern.
-  if (isSub === SUBPARSE) {
-    return [re, hasMagic]
-  }
-
-  // skip the regexp for non-magical patterns
-  // unescape anything in it, though, so that it'll be
-  // an exact match against a file etc.
-  if (!hasMagic) {
-    return globUnescape(pattern)
-  }
-
-  var flags = options.nocase ? 'i' : ''
-  try {
-    var regExp = new RegExp('^' + re + '$', flags)
-  } catch (er) /* istanbul ignore next - should be impossible */ {
-    // If it was an invalid regular expression, then it can't match
-    // anything.  This trick looks for a character after the end of
-    // the string, which is of course impossible, except in multi-line
-    // mode, but it's not a /m regex.
-    return new RegExp('$.')
-  }
-
-  regExp._glob = pattern
-  regExp._src = re
-
-  return regExp
-}
-
-minimatch.makeRe = function (pattern, options) {
-  return new Minimatch(pattern, options || {}).makeRe()
-}
-
-Minimatch.prototype.makeRe = makeRe
-function makeRe () {
-  if (this.regexp || this.regexp === false) return this.regexp
-
-  // at this point, this.set is a 2d array of partial
-  // pattern strings, or "**".
-  //
-  // It's better to use .match().  This function shouldn't
-  // be used, really, but it's pretty convenient sometimes,
-  // when you just want to work with a regex.
-  var set = this.set
-
-  if (!set.length) {
-    this.regexp = false
-    return this.regexp
-  }
-  var options = this.options
-
-  var twoStar = options.noglobstar ? star
-    : options.dot ? twoStarDot
-    : twoStarNoDot
-  var flags = options.nocase ? 'i' : ''
-
-  var re = set.map(function (pattern) {
-    return pattern.map(function (p) {
-      return (p === GLOBSTAR) ? twoStar
-      : (typeof p === 'string') ? regExpEscape(p)
-      : p._src
-    }).join('\\\/')
-  }).join('|')
-
-  // must match entire pattern
-  // ending in a * or ** will make it less strict.
-  re = '^(?:' + re + ')$'
-
-  // can match anything, as long as it's not this.
-  if (this.negate) re = '^(?!' + re + ').*$'
-
-  try {
-    this.regexp = new RegExp(re, flags)
-  } catch (ex) /* istanbul ignore next - should be impossible */ {
-    this.regexp = false
-  }
-  return this.regexp
-}
-
-minimatch.match = function (list, pattern, options) {
-  options = options || {}
-  var mm = new Minimatch(pattern, options)
-  list = list.filter(function (f) {
-    return mm.match(f)
-  })
-  if (mm.options.nonull && !list.length) {
-    list.push(pattern)
-  }
-  return list
-}
-
-Minimatch.prototype.match = function match (f, partial) {
-  if (typeof partial === 'undefined') partial = this.partial
-  this.debug('match', f, this.pattern)
-  // short-circuit in the case of busted things.
-  // comments, etc.
-  if (this.comment) return false
-  if (this.empty) return f === ''
-
-  if (f === '/' && partial) return true
-
-  var options = this.options
-
-  // windows: need to use /, not \
-  if (path.sep !== '/') {
-    f = f.split(path.sep).join('/')
-  }
-
-  // treat the test path as a set of pathparts.
-  f = f.split(slashSplit)
-  this.debug(this.pattern, 'split', f)
-
-  // just ONE of the pattern sets in this.set needs to match
-  // in order for it to be valid.  If negating, then just one
-  // match means that we have failed.
-  // Either way, return on the first hit.
-
-  var set = this.set
-  this.debug(this.pattern, 'set', set)
-
-  // Find the basename of the path by looking for the last non-empty segment
-  var filename
-  var i
-  for (i = f.length - 1; i >= 0; i--) {
-    filename = f[i]
-    if (filename) break
-  }
-
-  for (i = 0; i < set.length; i++) {
-    var pattern = set[i]
-    var file = f
-    if (options.matchBase && pattern.length === 1) {
-      file = [filename]
-    }
-    var hit = this.matchOne(file, pattern, partial)
-    if (hit) {
-      if (options.flipNegate) return true
-      return !this.negate
-    }
-  }
-
-  // didn't get any hits.  this is success if it's a negative
-  // pattern, failure otherwise.
-  if (options.flipNegate) return false
-  return this.negate
-}
-
-// set partial to true to test if, for example,
-// "/a/b" matches the start of "/*/b/*/d"
-// Partial means, if you run out of file before you run
-// out of pattern, then that's fine, as long as all
-// the parts match.
-Minimatch.prototype.matchOne = function (file, pattern, partial) {
-  var options = this.options
-
-  this.debug('matchOne',
-    { 'this': this, file: file, pattern: pattern })
-
-  this.debug('matchOne', file.length, pattern.length)
-
-  for (var fi = 0,
-      pi = 0,
-      fl = file.length,
-      pl = pattern.length
-      ; (fi < fl) && (pi < pl)
-      ; fi++, pi++) {
-    this.debug('matchOne loop')
-    var p = pattern[pi]
-    var f = file[fi]
-
-    this.debug(pattern, p, f)
-
-    // should be impossible.
-    // some invalid regexp stuff in the set.
-    /* istanbul ignore if */
-    if (p === false) return false
-
-    if (p === GLOBSTAR) {
-      this.debug('GLOBSTAR', [pattern, p, f])
-
-      // "**"
-      // a/**/b/**/c would match the following:
-      // a/b/x/y/z/c
-      // a/x/y/z/b/c
-      // a/b/x/b/x/c
-      // a/b/c
-      // To do this, take the rest of the pattern after
-      // the **, and see if it would match the file remainder.
-      // If so, return success.
-      // If not, the ** "swallows" a segment, and try again.
-      // This is recursively awful.
-      //
-      // a/**/b/**/c matching a/b/x/y/z/c
-      // - a matches a
-      // - doublestar
-      //   - matchOne(b/x/y/z/c, b/**/c)
-      //     - b matches b
-      //     - doublestar
-      //       - matchOne(x/y/z/c, c) -> no
-      //       - matchOne(y/z/c, c) -> no
-      //       - matchOne(z/c, c) -> no
-      //       - matchOne(c, c) yes, hit
-      var fr = fi
-      var pr = pi + 1
-      if (pr === pl) {
-        this.debug('** at the end')
-        // a ** at the end will just swallow the rest.
-        // We have found a match.
-        // however, it will not swallow /.x, unless
-        // options.dot is set.
-        // . and .. are *never* matched by **, for explosively
-        // exponential reasons.
-        for (; fi < fl; fi++) {
-          if (file[fi] === '.' || file[fi] === '..' ||
-            (!options.dot && file[fi].charAt(0) === '.')) return false
-        }
-        return true
-      }
-
-      // ok, let's see if we can swallow whatever we can.
-      while (fr < fl) {
-        var swallowee = file[fr]
-
-        this.debug('\nglobstar while', file, fr, pattern, pr, swallowee)
-
-        // XXX remove this slice.  Just pass the start index.
-        if (this.matchOne(file.slice(fr), pattern.slice(pr), partial)) {
-          this.debug('globstar found match!', fr, fl, swallowee)
-          // found a match.
-          return true
-        } else {
-          // can't swallow "." or ".." ever.
-          // can only swallow ".foo" when explicitly asked.
-          if (swallowee === '.' || swallowee === '..' ||
-            (!options.dot && swallowee.charAt(0) === '.')) {
-            this.debug('dot detected!', file, fr, pattern, pr)
-            break
-          }
-
-          // ** swallows a segment, and continue.
-          this.debug('globstar swallow a segment, and continue')
-          fr++
-        }
-      }
-
-      // no match was found.
-      // However, in partial mode, we can't say this is necessarily over.
-      // If there's more *pattern* left, then
-      /* istanbul ignore if */
-      if (partial) {
-        // ran out of file
-        this.debug('\n>>> no match, partial?', file, fr, pattern, pr)
-        if (fr === fl) return true
-      }
-      return false
-    }
-
-    // something other than **
-    // non-magic patterns just have to match exactly
-    // patterns with magic have been turned into regexps.
-    var hit
-    if (typeof p === 'string') {
-      hit = f === p
-      this.debug('string match', p, f, hit)
-    } else {
-      hit = f.match(p)
-      this.debug('pattern match', p, f, hit)
-    }
-
-    if (!hit) return false
-  }
-
-  // Note: ending in / means that we'll get a final ""
-  // at the end of the pattern.  This can only match a
-  // corresponding "" at the end of the file.
-  // If the file ends in /, then it can only match a
-  // a pattern that ends in /, unless the pattern just
-  // doesn't have any more for it. But, a/b/ should *not*
-  // match "a/b/*", even though "" matches against the
-  // [^/]*? pattern, except in partial mode, where it might
-  // simply not be reached yet.
-  // However, a/b/ should still satisfy a/*
-
-  // now either we fell off the end of the pattern, or we're done.
-  if (fi === fl && pi === pl) {
-    // ran out of pattern and filename at the same time.
-    // an exact hit!
-    return true
-  } else if (fi === fl) {
-    // ran out of file, but still had pattern left.
-    // this is ok if we're doing the match as part of
-    // a glob fs traversal.
-    return partial
-  } else /* istanbul ignore else */ if (pi === pl) {
-    // ran out of pattern, still have file left.
-    // this is only acceptable if we're on the very last
-    // empty segment of a file with a trailing slash.
-    // a/* should match a/b/
-    return (fi === fl - 1) && (file[fi] === '')
-  }
-
-  // should be unreachable.
-  /* istanbul ignore next */
-  throw new Error('wtf?')
-}
-
-// replace stuff like \* with *
-function globUnescape (s) {
-  return s.replace(/\\(.)/g, '$1')
-}
-
-function regExpEscape (s) {
-  return s.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')
-}
 
 
 /***/ }),
@@ -32335,7 +30140,7 @@ exports.createTree = createTree;
 exports.createCommit = createCommit;
 exports.updateRef = updateRef;
 const fs = __importStar(__nccwpck_require__(9896));
-const utils = __importStar(__nccwpck_require__(1798));
+const path = __importStar(__nccwpck_require__(6928));
 function buildCommitMessage(message, file) {
     // Allow message to be either static or from contents in a file
     const output = file ? fs.readFileSync(file, 'utf-8') : message;
@@ -32392,8 +30197,10 @@ function getFileMode(file, symlink) {
 }
 async function createBlob(file, workspace, symlink, context, octokit) {
     // Generate relative and absolute paths to file base on workspace
-    const relPath = utils.normalizePath(utils.relativePath(file, workspace));
-    const absPath = utils.absolutePath(file, workspace);
+    const relPath = file.startsWith(workspace)
+        ? file.replace(workspace, '').substring(1)
+        : file;
+    const absPath = file.startsWith(workspace) ? file : path.join(workspace, file);
     // Get file data
     const mode = getFileMode(absPath, symlink);
     const content = Buffer.from(fs.readFileSync(absPath)).toString('base64');
@@ -32483,8 +30290,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = run;
 const core = __importStar(__nccwpck_require__(7484));
 const github = __importStar(__nccwpck_require__(3228));
-const glob = __importStar(__nccwpck_require__(7206));
-const utils = __importStar(__nccwpck_require__(1798));
+const exec = __importStar(__nccwpck_require__(5236));
+const minimatch_1 = __nccwpck_require__(6507);
 const git = __importStar(__nccwpck_require__(1243));
 async function run() {
     try {
@@ -32496,43 +30303,45 @@ async function run() {
         const headRef = git.normalizeRef(core.getInput('ref'));
         const headCommit = await git.getRef(headRef, github.context, octokit);
         const headTree = await git.getTree(headCommit, github.context, octokit);
-        // Create a blob object for each file
-        const seen = new Set();
-        const blobs = [];
-        const files = core.getInput('files');
+        // Get list of changed files
         const workspace = core.getInput('workspace');
+        const execOpts = { cwd: workspace };
+        let execOutput = '';
+        core.startGroup('🪁 Getting changed files...');
+        await exec.exec('git', ['add', '-A'], execOpts);
+        await exec.exec('git', ['diff', '--cached', '--name-only'], {
+            ...execOpts,
+            listeners: {
+                stdout: (data) => {
+                    execOutput += data.toString();
+                }
+            }
+        });
+        core.endGroup();
+        const changedFiles = execOutput.trim().split(/\r?\n/);
+        // Create a blob object for each file
+        const blobs = [];
+        const patterns = core.getInput('files').split(/\r?\n/);
         const followSymbolicLinks = core.getBooleanInput('follow-symlinks');
         core.startGroup(`🗂️ Creating Git Blobs...`);
-        for (const pattern of files.split('\n')) {
-            // Skip patterns we've already seen
-            if (seen.has(pattern))
-                continue;
-            seen.add(pattern);
-            // Check if pattern exactly matches an existing file
-            if (utils.fileExists(pattern)) {
-                if (utils.isDirectory(pattern))
-                    continue; // Skip directories
-                // Ensure globbing patterns don't include static files
-                seen.add(`${workspace}/${pattern}`);
-                const blob = await git.createBlob(pattern, workspace, followSymbolicLinks, github.context, octokit);
-                core.info(`${blob.sha}\t${blob.path}`);
-                blobs.push(blob);
-            }
-            else {
-                // Treat the pattern as a glob and attempt to locate files
-                const globber = await glob.create(pattern, {
-                    followSymbolicLinks
-                });
-                for await (const file of globber.globGenerator()) {
-                    if (utils.isDirectory(file))
-                        continue; // Skip directories
-                    // Skip files we've already seen
-                    if (seen.has(file))
-                        continue;
-                    seen.add(file);
+        for (const file of changedFiles) {
+            for (const pattern of patterns) {
+                // Skip blank and comment patterns
+                if (pattern.startsWith('#') || pattern.length === 0) {
+                    continue;
+                }
+                // Skip the file entirely if a pattern specifically negates it
+                if (pattern.startsWith('!')) {
+                    if ((0, minimatch_1.minimatch)(file, pattern.substring(1)))
+                        break;
+                    continue;
+                }
+                // Only include files that match a pattern
+                if ((0, minimatch_1.minimatch)(file, pattern)) {
                     const blob = await git.createBlob(file, workspace, followSymbolicLinks, github.context, octokit);
                     core.info(`${blob.sha}\t${blob.path}`);
                     blobs.push(blob);
+                    break;
                 }
             }
         }
@@ -32554,6 +30363,9 @@ async function run() {
         const refSha = await git.updateRef(headRef, commit, core.getBooleanInput('force-push'), github.context, octokit);
         core.info(`⏩ Updated refs/${headRef} to point to ${refSha}`);
         core.setOutput('ref', refSha);
+        core.startGroup('📍 Updating local branch...');
+        await exec.exec('git', ['pull', 'origin', `refs/${headRef}`], execOpts);
+        core.endGroup();
     }
     catch (error) {
         if (error instanceof Error)
@@ -32561,80 +30373,6 @@ async function run() {
         else
             core.setFailed(error);
     }
-}
-
-
-/***/ }),
-
-/***/ 1798:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.fileExists = fileExists;
-exports.isDirectory = isDirectory;
-exports.relativePath = relativePath;
-exports.absolutePath = absolutePath;
-exports.normalizePath = normalizePath;
-const fs = __importStar(__nccwpck_require__(9896));
-const path = __importStar(__nccwpck_require__(6928));
-function fileExists(file) {
-    try {
-        fs.accessSync(file);
-        return true;
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    }
-    catch (_) {
-        return false;
-    }
-}
-function isDirectory(file) {
-    return fs.statSync(file).isDirectory();
-}
-function relativePath(file, workspace) {
-    if (file.startsWith(workspace)) {
-        return file.replace(workspace, '').substring(1);
-    }
-    return file;
-}
-function absolutePath(file, workspace) {
-    return file.startsWith(workspace) ? file : path.join(workspace, file);
-}
-function normalizePath(file) {
-    return file.replaceAll('\\', '/').replace(/(\/)\/+/g, '$1');
 }
 
 
@@ -34467,6 +32205,1863 @@ function parseParams (str) {
 
 module.exports = parseParams
 
+
+/***/ }),
+
+/***/ 7305:
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.assertValidPattern = void 0;
+const MAX_PATTERN_LENGTH = 1024 * 64;
+const assertValidPattern = (pattern) => {
+    if (typeof pattern !== 'string') {
+        throw new TypeError('invalid pattern');
+    }
+    if (pattern.length > MAX_PATTERN_LENGTH) {
+        throw new TypeError('pattern is too long');
+    }
+};
+exports.assertValidPattern = assertValidPattern;
+//# sourceMappingURL=assert-valid-pattern.js.map
+
+/***/ }),
+
+/***/ 1803:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+
+// parse a single path portion
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AST = void 0;
+const brace_expressions_js_1 = __nccwpck_require__(1090);
+const unescape_js_1 = __nccwpck_require__(851);
+const types = new Set(['!', '?', '+', '*', '@']);
+const isExtglobType = (c) => types.has(c);
+// Patterns that get prepended to bind to the start of either the
+// entire string, or just a single path portion, to prevent dots
+// and/or traversal patterns, when needed.
+// Exts don't need the ^ or / bit, because the root binds that already.
+const startNoTraversal = '(?!(?:^|/)\\.\\.?(?:$|/))';
+const startNoDot = '(?!\\.)';
+// characters that indicate a start of pattern needs the "no dots" bit,
+// because a dot *might* be matched. ( is not in the list, because in
+// the case of a child extglob, it will handle the prevention itself.
+const addPatternStart = new Set(['[', '.']);
+// cases where traversal is A-OK, no dot prevention needed
+const justDots = new Set(['..', '.']);
+const reSpecials = new Set('().*{}+?[]^$\\!');
+const regExpEscape = (s) => s.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+// any single thing other than /
+const qmark = '[^/]';
+// * => any number of characters
+const star = qmark + '*?';
+// use + when we need to ensure that *something* matches, because the * is
+// the only thing in the path portion.
+const starNoEmpty = qmark + '+?';
+// remove the \ chars that we added if we end up doing a nonmagic compare
+// const deslash = (s: string) => s.replace(/\\(.)/g, '$1')
+class AST {
+    type;
+    #root;
+    #hasMagic;
+    #uflag = false;
+    #parts = [];
+    #parent;
+    #parentIndex;
+    #negs;
+    #filledNegs = false;
+    #options;
+    #toString;
+    // set to true if it's an extglob with no children
+    // (which really means one child of '')
+    #emptyExt = false;
+    constructor(type, parent, options = {}) {
+        this.type = type;
+        // extglobs are inherently magical
+        if (type)
+            this.#hasMagic = true;
+        this.#parent = parent;
+        this.#root = this.#parent ? this.#parent.#root : this;
+        this.#options = this.#root === this ? options : this.#root.#options;
+        this.#negs = this.#root === this ? [] : this.#root.#negs;
+        if (type === '!' && !this.#root.#filledNegs)
+            this.#negs.push(this);
+        this.#parentIndex = this.#parent ? this.#parent.#parts.length : 0;
+    }
+    get hasMagic() {
+        /* c8 ignore start */
+        if (this.#hasMagic !== undefined)
+            return this.#hasMagic;
+        /* c8 ignore stop */
+        for (const p of this.#parts) {
+            if (typeof p === 'string')
+                continue;
+            if (p.type || p.hasMagic)
+                return (this.#hasMagic = true);
+        }
+        // note: will be undefined until we generate the regexp src and find out
+        return this.#hasMagic;
+    }
+    // reconstructs the pattern
+    toString() {
+        if (this.#toString !== undefined)
+            return this.#toString;
+        if (!this.type) {
+            return (this.#toString = this.#parts.map(p => String(p)).join(''));
+        }
+        else {
+            return (this.#toString =
+                this.type + '(' + this.#parts.map(p => String(p)).join('|') + ')');
+        }
+    }
+    #fillNegs() {
+        /* c8 ignore start */
+        if (this !== this.#root)
+            throw new Error('should only call on root');
+        if (this.#filledNegs)
+            return this;
+        /* c8 ignore stop */
+        // call toString() once to fill this out
+        this.toString();
+        this.#filledNegs = true;
+        let n;
+        while ((n = this.#negs.pop())) {
+            if (n.type !== '!')
+                continue;
+            // walk up the tree, appending everthing that comes AFTER parentIndex
+            let p = n;
+            let pp = p.#parent;
+            while (pp) {
+                for (let i = p.#parentIndex + 1; !pp.type && i < pp.#parts.length; i++) {
+                    for (const part of n.#parts) {
+                        /* c8 ignore start */
+                        if (typeof part === 'string') {
+                            throw new Error('string part in extglob AST??');
+                        }
+                        /* c8 ignore stop */
+                        part.copyIn(pp.#parts[i]);
+                    }
+                }
+                p = pp;
+                pp = p.#parent;
+            }
+        }
+        return this;
+    }
+    push(...parts) {
+        for (const p of parts) {
+            if (p === '')
+                continue;
+            /* c8 ignore start */
+            if (typeof p !== 'string' && !(p instanceof AST && p.#parent === this)) {
+                throw new Error('invalid part: ' + p);
+            }
+            /* c8 ignore stop */
+            this.#parts.push(p);
+        }
+    }
+    toJSON() {
+        const ret = this.type === null
+            ? this.#parts.slice().map(p => (typeof p === 'string' ? p : p.toJSON()))
+            : [this.type, ...this.#parts.map(p => p.toJSON())];
+        if (this.isStart() && !this.type)
+            ret.unshift([]);
+        if (this.isEnd() &&
+            (this === this.#root ||
+                (this.#root.#filledNegs && this.#parent?.type === '!'))) {
+            ret.push({});
+        }
+        return ret;
+    }
+    isStart() {
+        if (this.#root === this)
+            return true;
+        // if (this.type) return !!this.#parent?.isStart()
+        if (!this.#parent?.isStart())
+            return false;
+        if (this.#parentIndex === 0)
+            return true;
+        // if everything AHEAD of this is a negation, then it's still the "start"
+        const p = this.#parent;
+        for (let i = 0; i < this.#parentIndex; i++) {
+            const pp = p.#parts[i];
+            if (!(pp instanceof AST && pp.type === '!')) {
+                return false;
+            }
+        }
+        return true;
+    }
+    isEnd() {
+        if (this.#root === this)
+            return true;
+        if (this.#parent?.type === '!')
+            return true;
+        if (!this.#parent?.isEnd())
+            return false;
+        if (!this.type)
+            return this.#parent?.isEnd();
+        // if not root, it'll always have a parent
+        /* c8 ignore start */
+        const pl = this.#parent ? this.#parent.#parts.length : 0;
+        /* c8 ignore stop */
+        return this.#parentIndex === pl - 1;
+    }
+    copyIn(part) {
+        if (typeof part === 'string')
+            this.push(part);
+        else
+            this.push(part.clone(this));
+    }
+    clone(parent) {
+        const c = new AST(this.type, parent);
+        for (const p of this.#parts) {
+            c.copyIn(p);
+        }
+        return c;
+    }
+    static #parseAST(str, ast, pos, opt) {
+        let escaping = false;
+        let inBrace = false;
+        let braceStart = -1;
+        let braceNeg = false;
+        if (ast.type === null) {
+            // outside of a extglob, append until we find a start
+            let i = pos;
+            let acc = '';
+            while (i < str.length) {
+                const c = str.charAt(i++);
+                // still accumulate escapes at this point, but we do ignore
+                // starts that are escaped
+                if (escaping || c === '\\') {
+                    escaping = !escaping;
+                    acc += c;
+                    continue;
+                }
+                if (inBrace) {
+                    if (i === braceStart + 1) {
+                        if (c === '^' || c === '!') {
+                            braceNeg = true;
+                        }
+                    }
+                    else if (c === ']' && !(i === braceStart + 2 && braceNeg)) {
+                        inBrace = false;
+                    }
+                    acc += c;
+                    continue;
+                }
+                else if (c === '[') {
+                    inBrace = true;
+                    braceStart = i;
+                    braceNeg = false;
+                    acc += c;
+                    continue;
+                }
+                if (!opt.noext && isExtglobType(c) && str.charAt(i) === '(') {
+                    ast.push(acc);
+                    acc = '';
+                    const ext = new AST(c, ast);
+                    i = AST.#parseAST(str, ext, i, opt);
+                    ast.push(ext);
+                    continue;
+                }
+                acc += c;
+            }
+            ast.push(acc);
+            return i;
+        }
+        // some kind of extglob, pos is at the (
+        // find the next | or )
+        let i = pos + 1;
+        let part = new AST(null, ast);
+        const parts = [];
+        let acc = '';
+        while (i < str.length) {
+            const c = str.charAt(i++);
+            // still accumulate escapes at this point, but we do ignore
+            // starts that are escaped
+            if (escaping || c === '\\') {
+                escaping = !escaping;
+                acc += c;
+                continue;
+            }
+            if (inBrace) {
+                if (i === braceStart + 1) {
+                    if (c === '^' || c === '!') {
+                        braceNeg = true;
+                    }
+                }
+                else if (c === ']' && !(i === braceStart + 2 && braceNeg)) {
+                    inBrace = false;
+                }
+                acc += c;
+                continue;
+            }
+            else if (c === '[') {
+                inBrace = true;
+                braceStart = i;
+                braceNeg = false;
+                acc += c;
+                continue;
+            }
+            if (isExtglobType(c) && str.charAt(i) === '(') {
+                part.push(acc);
+                acc = '';
+                const ext = new AST(c, part);
+                part.push(ext);
+                i = AST.#parseAST(str, ext, i, opt);
+                continue;
+            }
+            if (c === '|') {
+                part.push(acc);
+                acc = '';
+                parts.push(part);
+                part = new AST(null, ast);
+                continue;
+            }
+            if (c === ')') {
+                if (acc === '' && ast.#parts.length === 0) {
+                    ast.#emptyExt = true;
+                }
+                part.push(acc);
+                acc = '';
+                ast.push(...parts, part);
+                return i;
+            }
+            acc += c;
+        }
+        // unfinished extglob
+        // if we got here, it was a malformed extglob! not an extglob, but
+        // maybe something else in there.
+        ast.type = null;
+        ast.#hasMagic = undefined;
+        ast.#parts = [str.substring(pos - 1)];
+        return i;
+    }
+    static fromGlob(pattern, options = {}) {
+        const ast = new AST(null, undefined, options);
+        AST.#parseAST(pattern, ast, 0, options);
+        return ast;
+    }
+    // returns the regular expression if there's magic, or the unescaped
+    // string if not.
+    toMMPattern() {
+        // should only be called on root
+        /* c8 ignore start */
+        if (this !== this.#root)
+            return this.#root.toMMPattern();
+        /* c8 ignore stop */
+        const glob = this.toString();
+        const [re, body, hasMagic, uflag] = this.toRegExpSource();
+        // if we're in nocase mode, and not nocaseMagicOnly, then we do
+        // still need a regular expression if we have to case-insensitively
+        // match capital/lowercase characters.
+        const anyMagic = hasMagic ||
+            this.#hasMagic ||
+            (this.#options.nocase &&
+                !this.#options.nocaseMagicOnly &&
+                glob.toUpperCase() !== glob.toLowerCase());
+        if (!anyMagic) {
+            return body;
+        }
+        const flags = (this.#options.nocase ? 'i' : '') + (uflag ? 'u' : '');
+        return Object.assign(new RegExp(`^${re}$`, flags), {
+            _src: re,
+            _glob: glob,
+        });
+    }
+    get options() {
+        return this.#options;
+    }
+    // returns the string match, the regexp source, whether there's magic
+    // in the regexp (so a regular expression is required) and whether or
+    // not the uflag is needed for the regular expression (for posix classes)
+    // TODO: instead of injecting the start/end at this point, just return
+    // the BODY of the regexp, along with the start/end portions suitable
+    // for binding the start/end in either a joined full-path makeRe context
+    // (where we bind to (^|/), or a standalone matchPart context (where
+    // we bind to ^, and not /).  Otherwise slashes get duped!
+    //
+    // In part-matching mode, the start is:
+    // - if not isStart: nothing
+    // - if traversal possible, but not allowed: ^(?!\.\.?$)
+    // - if dots allowed or not possible: ^
+    // - if dots possible and not allowed: ^(?!\.)
+    // end is:
+    // - if not isEnd(): nothing
+    // - else: $
+    //
+    // In full-path matching mode, we put the slash at the START of the
+    // pattern, so start is:
+    // - if first pattern: same as part-matching mode
+    // - if not isStart(): nothing
+    // - if traversal possible, but not allowed: /(?!\.\.?(?:$|/))
+    // - if dots allowed or not possible: /
+    // - if dots possible and not allowed: /(?!\.)
+    // end is:
+    // - if last pattern, same as part-matching mode
+    // - else nothing
+    //
+    // Always put the (?:$|/) on negated tails, though, because that has to be
+    // there to bind the end of the negated pattern portion, and it's easier to
+    // just stick it in now rather than try to inject it later in the middle of
+    // the pattern.
+    //
+    // We can just always return the same end, and leave it up to the caller
+    // to know whether it's going to be used joined or in parts.
+    // And, if the start is adjusted slightly, can do the same there:
+    // - if not isStart: nothing
+    // - if traversal possible, but not allowed: (?:/|^)(?!\.\.?$)
+    // - if dots allowed or not possible: (?:/|^)
+    // - if dots possible and not allowed: (?:/|^)(?!\.)
+    //
+    // But it's better to have a simpler binding without a conditional, for
+    // performance, so probably better to return both start options.
+    //
+    // Then the caller just ignores the end if it's not the first pattern,
+    // and the start always gets applied.
+    //
+    // But that's always going to be $ if it's the ending pattern, or nothing,
+    // so the caller can just attach $ at the end of the pattern when building.
+    //
+    // So the todo is:
+    // - better detect what kind of start is needed
+    // - return both flavors of starting pattern
+    // - attach $ at the end of the pattern when creating the actual RegExp
+    //
+    // Ah, but wait, no, that all only applies to the root when the first pattern
+    // is not an extglob. If the first pattern IS an extglob, then we need all
+    // that dot prevention biz to live in the extglob portions, because eg
+    // +(*|.x*) can match .xy but not .yx.
+    //
+    // So, return the two flavors if it's #root and the first child is not an
+    // AST, otherwise leave it to the child AST to handle it, and there,
+    // use the (?:^|/) style of start binding.
+    //
+    // Even simplified further:
+    // - Since the start for a join is eg /(?!\.) and the start for a part
+    // is ^(?!\.), we can just prepend (?!\.) to the pattern (either root
+    // or start or whatever) and prepend ^ or / at the Regexp construction.
+    toRegExpSource(allowDot) {
+        const dot = allowDot ?? !!this.#options.dot;
+        if (this.#root === this)
+            this.#fillNegs();
+        if (!this.type) {
+            const noEmpty = this.isStart() && this.isEnd();
+            const src = this.#parts
+                .map(p => {
+                const [re, _, hasMagic, uflag] = typeof p === 'string'
+                    ? AST.#parseGlob(p, this.#hasMagic, noEmpty)
+                    : p.toRegExpSource(allowDot);
+                this.#hasMagic = this.#hasMagic || hasMagic;
+                this.#uflag = this.#uflag || uflag;
+                return re;
+            })
+                .join('');
+            let start = '';
+            if (this.isStart()) {
+                if (typeof this.#parts[0] === 'string') {
+                    // this is the string that will match the start of the pattern,
+                    // so we need to protect against dots and such.
+                    // '.' and '..' cannot match unless the pattern is that exactly,
+                    // even if it starts with . or dot:true is set.
+                    const dotTravAllowed = this.#parts.length === 1 && justDots.has(this.#parts[0]);
+                    if (!dotTravAllowed) {
+                        const aps = addPatternStart;
+                        // check if we have a possibility of matching . or ..,
+                        // and prevent that.
+                        const needNoTrav = 
+                        // dots are allowed, and the pattern starts with [ or .
+                        (dot && aps.has(src.charAt(0))) ||
+                            // the pattern starts with \., and then [ or .
+                            (src.startsWith('\\.') && aps.has(src.charAt(2))) ||
+                            // the pattern starts with \.\., and then [ or .
+                            (src.startsWith('\\.\\.') && aps.has(src.charAt(4)));
+                        // no need to prevent dots if it can't match a dot, or if a
+                        // sub-pattern will be preventing it anyway.
+                        const needNoDot = !dot && !allowDot && aps.has(src.charAt(0));
+                        start = needNoTrav ? startNoTraversal : needNoDot ? startNoDot : '';
+                    }
+                }
+            }
+            // append the "end of path portion" pattern to negation tails
+            let end = '';
+            if (this.isEnd() &&
+                this.#root.#filledNegs &&
+                this.#parent?.type === '!') {
+                end = '(?:$|\\/)';
+            }
+            const final = start + src + end;
+            return [
+                final,
+                (0, unescape_js_1.unescape)(src),
+                (this.#hasMagic = !!this.#hasMagic),
+                this.#uflag,
+            ];
+        }
+        // We need to calculate the body *twice* if it's a repeat pattern
+        // at the start, once in nodot mode, then again in dot mode, so a
+        // pattern like *(?) can match 'x.y'
+        const repeated = this.type === '*' || this.type === '+';
+        // some kind of extglob
+        const start = this.type === '!' ? '(?:(?!(?:' : '(?:';
+        let body = this.#partsToRegExp(dot);
+        if (this.isStart() && this.isEnd() && !body && this.type !== '!') {
+            // invalid extglob, has to at least be *something* present, if it's
+            // the entire path portion.
+            const s = this.toString();
+            this.#parts = [s];
+            this.type = null;
+            this.#hasMagic = undefined;
+            return [s, (0, unescape_js_1.unescape)(this.toString()), false, false];
+        }
+        // XXX abstract out this map method
+        let bodyDotAllowed = !repeated || allowDot || dot || !startNoDot
+            ? ''
+            : this.#partsToRegExp(true);
+        if (bodyDotAllowed === body) {
+            bodyDotAllowed = '';
+        }
+        if (bodyDotAllowed) {
+            body = `(?:${body})(?:${bodyDotAllowed})*?`;
+        }
+        // an empty !() is exactly equivalent to a starNoEmpty
+        let final = '';
+        if (this.type === '!' && this.#emptyExt) {
+            final = (this.isStart() && !dot ? startNoDot : '') + starNoEmpty;
+        }
+        else {
+            const close = this.type === '!'
+                ? // !() must match something,but !(x) can match ''
+                    '))' +
+                        (this.isStart() && !dot && !allowDot ? startNoDot : '') +
+                        star +
+                        ')'
+                : this.type === '@'
+                    ? ')'
+                    : this.type === '?'
+                        ? ')?'
+                        : this.type === '+' && bodyDotAllowed
+                            ? ')'
+                            : this.type === '*' && bodyDotAllowed
+                                ? `)?`
+                                : `)${this.type}`;
+            final = start + body + close;
+        }
+        return [
+            final,
+            (0, unescape_js_1.unescape)(body),
+            (this.#hasMagic = !!this.#hasMagic),
+            this.#uflag,
+        ];
+    }
+    #partsToRegExp(dot) {
+        return this.#parts
+            .map(p => {
+            // extglob ASTs should only contain parent ASTs
+            /* c8 ignore start */
+            if (typeof p === 'string') {
+                throw new Error('string type in extglob ast??');
+            }
+            /* c8 ignore stop */
+            // can ignore hasMagic, because extglobs are already always magic
+            const [re, _, _hasMagic, uflag] = p.toRegExpSource(dot);
+            this.#uflag = this.#uflag || uflag;
+            return re;
+        })
+            .filter(p => !(this.isStart() && this.isEnd()) || !!p)
+            .join('|');
+    }
+    static #parseGlob(glob, hasMagic, noEmpty = false) {
+        let escaping = false;
+        let re = '';
+        let uflag = false;
+        for (let i = 0; i < glob.length; i++) {
+            const c = glob.charAt(i);
+            if (escaping) {
+                escaping = false;
+                re += (reSpecials.has(c) ? '\\' : '') + c;
+                continue;
+            }
+            if (c === '\\') {
+                if (i === glob.length - 1) {
+                    re += '\\\\';
+                }
+                else {
+                    escaping = true;
+                }
+                continue;
+            }
+            if (c === '[') {
+                const [src, needUflag, consumed, magic] = (0, brace_expressions_js_1.parseClass)(glob, i);
+                if (consumed) {
+                    re += src;
+                    uflag = uflag || needUflag;
+                    i += consumed - 1;
+                    hasMagic = hasMagic || magic;
+                    continue;
+                }
+            }
+            if (c === '*') {
+                if (noEmpty && glob === '*')
+                    re += starNoEmpty;
+                else
+                    re += star;
+                hasMagic = true;
+                continue;
+            }
+            if (c === '?') {
+                re += qmark;
+                hasMagic = true;
+                continue;
+            }
+            re += regExpEscape(c);
+        }
+        return [re, (0, unescape_js_1.unescape)(glob), !!hasMagic, uflag];
+    }
+}
+exports.AST = AST;
+//# sourceMappingURL=ast.js.map
+
+/***/ }),
+
+/***/ 1090:
+/***/ ((__unused_webpack_module, exports) => {
+
+
+// translate the various posix character classes into unicode properties
+// this works across all unicode locales
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.parseClass = void 0;
+// { <posix class>: [<translation>, /u flag required, negated]
+const posixClasses = {
+    '[:alnum:]': ['\\p{L}\\p{Nl}\\p{Nd}', true],
+    '[:alpha:]': ['\\p{L}\\p{Nl}', true],
+    '[:ascii:]': ['\\x' + '00-\\x' + '7f', false],
+    '[:blank:]': ['\\p{Zs}\\t', true],
+    '[:cntrl:]': ['\\p{Cc}', true],
+    '[:digit:]': ['\\p{Nd}', true],
+    '[:graph:]': ['\\p{Z}\\p{C}', true, true],
+    '[:lower:]': ['\\p{Ll}', true],
+    '[:print:]': ['\\p{C}', true],
+    '[:punct:]': ['\\p{P}', true],
+    '[:space:]': ['\\p{Z}\\t\\r\\n\\v\\f', true],
+    '[:upper:]': ['\\p{Lu}', true],
+    '[:word:]': ['\\p{L}\\p{Nl}\\p{Nd}\\p{Pc}', true],
+    '[:xdigit:]': ['A-Fa-f0-9', false],
+};
+// only need to escape a few things inside of brace expressions
+// escapes: [ \ ] -
+const braceEscape = (s) => s.replace(/[[\]\\-]/g, '\\$&');
+// escape all regexp magic characters
+const regexpEscape = (s) => s.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+// everything has already been escaped, we just have to join
+const rangesToString = (ranges) => ranges.join('');
+// takes a glob string at a posix brace expression, and returns
+// an equivalent regular expression source, and boolean indicating
+// whether the /u flag needs to be applied, and the number of chars
+// consumed to parse the character class.
+// This also removes out of order ranges, and returns ($.) if the
+// entire class just no good.
+const parseClass = (glob, position) => {
+    const pos = position;
+    /* c8 ignore start */
+    if (glob.charAt(pos) !== '[') {
+        throw new Error('not in a brace expression');
+    }
+    /* c8 ignore stop */
+    const ranges = [];
+    const negs = [];
+    let i = pos + 1;
+    let sawStart = false;
+    let uflag = false;
+    let escaping = false;
+    let negate = false;
+    let endPos = pos;
+    let rangeStart = '';
+    WHILE: while (i < glob.length) {
+        const c = glob.charAt(i);
+        if ((c === '!' || c === '^') && i === pos + 1) {
+            negate = true;
+            i++;
+            continue;
+        }
+        if (c === ']' && sawStart && !escaping) {
+            endPos = i + 1;
+            break;
+        }
+        sawStart = true;
+        if (c === '\\') {
+            if (!escaping) {
+                escaping = true;
+                i++;
+                continue;
+            }
+            // escaped \ char, fall through and treat like normal char
+        }
+        if (c === '[' && !escaping) {
+            // either a posix class, a collation equivalent, or just a [
+            for (const [cls, [unip, u, neg]] of Object.entries(posixClasses)) {
+                if (glob.startsWith(cls, i)) {
+                    // invalid, [a-[] is fine, but not [a-[:alpha]]
+                    if (rangeStart) {
+                        return ['$.', false, glob.length - pos, true];
+                    }
+                    i += cls.length;
+                    if (neg)
+                        negs.push(unip);
+                    else
+                        ranges.push(unip);
+                    uflag = uflag || u;
+                    continue WHILE;
+                }
+            }
+        }
+        // now it's just a normal character, effectively
+        escaping = false;
+        if (rangeStart) {
+            // throw this range away if it's not valid, but others
+            // can still match.
+            if (c > rangeStart) {
+                ranges.push(braceEscape(rangeStart) + '-' + braceEscape(c));
+            }
+            else if (c === rangeStart) {
+                ranges.push(braceEscape(c));
+            }
+            rangeStart = '';
+            i++;
+            continue;
+        }
+        // now might be the start of a range.
+        // can be either c-d or c-] or c<more...>] or c] at this point
+        if (glob.startsWith('-]', i + 1)) {
+            ranges.push(braceEscape(c + '-'));
+            i += 2;
+            continue;
+        }
+        if (glob.startsWith('-', i + 1)) {
+            rangeStart = c;
+            i += 2;
+            continue;
+        }
+        // not the start of a range, just a single character
+        ranges.push(braceEscape(c));
+        i++;
+    }
+    if (endPos < i) {
+        // didn't see the end of the class, not a valid class,
+        // but might still be valid as a literal match.
+        return ['', false, 0, false];
+    }
+    // if we got no ranges and no negates, then we have a range that
+    // cannot possibly match anything, and that poisons the whole glob
+    if (!ranges.length && !negs.length) {
+        return ['$.', false, glob.length - pos, true];
+    }
+    // if we got one positive range, and it's a single character, then that's
+    // not actually a magic pattern, it's just that one literal character.
+    // we should not treat that as "magic", we should just return the literal
+    // character. [_] is a perfectly valid way to escape glob magic chars.
+    if (negs.length === 0 &&
+        ranges.length === 1 &&
+        /^\\?.$/.test(ranges[0]) &&
+        !negate) {
+        const r = ranges[0].length === 2 ? ranges[0].slice(-1) : ranges[0];
+        return [regexpEscape(r), false, endPos - pos, false];
+    }
+    const sranges = '[' + (negate ? '^' : '') + rangesToString(ranges) + ']';
+    const snegs = '[' + (negate ? '' : '^') + rangesToString(negs) + ']';
+    const comb = ranges.length && negs.length
+        ? '(' + sranges + '|' + snegs + ')'
+        : ranges.length
+            ? sranges
+            : snegs;
+    return [comb, uflag, endPos - pos, true];
+};
+exports.parseClass = parseClass;
+//# sourceMappingURL=brace-expressions.js.map
+
+/***/ }),
+
+/***/ 800:
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.escape = void 0;
+/**
+ * Escape all magic characters in a glob pattern.
+ *
+ * If the {@link windowsPathsNoEscape | GlobOptions.windowsPathsNoEscape}
+ * option is used, then characters are escaped by wrapping in `[]`, because
+ * a magic character wrapped in a character class can only be satisfied by
+ * that exact character.  In this mode, `\` is _not_ escaped, because it is
+ * not interpreted as a magic character, but instead as a path separator.
+ */
+const escape = (s, { windowsPathsNoEscape = false, } = {}) => {
+    // don't need to escape +@! because we escape the parens
+    // that make those magic, and escaping ! as [!] isn't valid,
+    // because [!]] is a valid glob class meaning not ']'.
+    return windowsPathsNoEscape
+        ? s.replace(/[?*()[\]]/g, '[$&]')
+        : s.replace(/[?*()[\]\\]/g, '\\$&');
+};
+exports.escape = escape;
+//# sourceMappingURL=escape.js.map
+
+/***/ }),
+
+/***/ 6507:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.unescape = exports.escape = exports.AST = exports.Minimatch = exports.match = exports.makeRe = exports.braceExpand = exports.defaults = exports.filter = exports.GLOBSTAR = exports.sep = exports.minimatch = void 0;
+const brace_expansion_1 = __importDefault(__nccwpck_require__(4691));
+const assert_valid_pattern_js_1 = __nccwpck_require__(7305);
+const ast_js_1 = __nccwpck_require__(1803);
+const escape_js_1 = __nccwpck_require__(800);
+const unescape_js_1 = __nccwpck_require__(851);
+const minimatch = (p, pattern, options = {}) => {
+    (0, assert_valid_pattern_js_1.assertValidPattern)(pattern);
+    // shortcut: comments match nothing.
+    if (!options.nocomment && pattern.charAt(0) === '#') {
+        return false;
+    }
+    return new Minimatch(pattern, options).match(p);
+};
+exports.minimatch = minimatch;
+// Optimized checking for the most common glob patterns.
+const starDotExtRE = /^\*+([^+@!?\*\[\(]*)$/;
+const starDotExtTest = (ext) => (f) => !f.startsWith('.') && f.endsWith(ext);
+const starDotExtTestDot = (ext) => (f) => f.endsWith(ext);
+const starDotExtTestNocase = (ext) => {
+    ext = ext.toLowerCase();
+    return (f) => !f.startsWith('.') && f.toLowerCase().endsWith(ext);
+};
+const starDotExtTestNocaseDot = (ext) => {
+    ext = ext.toLowerCase();
+    return (f) => f.toLowerCase().endsWith(ext);
+};
+const starDotStarRE = /^\*+\.\*+$/;
+const starDotStarTest = (f) => !f.startsWith('.') && f.includes('.');
+const starDotStarTestDot = (f) => f !== '.' && f !== '..' && f.includes('.');
+const dotStarRE = /^\.\*+$/;
+const dotStarTest = (f) => f !== '.' && f !== '..' && f.startsWith('.');
+const starRE = /^\*+$/;
+const starTest = (f) => f.length !== 0 && !f.startsWith('.');
+const starTestDot = (f) => f.length !== 0 && f !== '.' && f !== '..';
+const qmarksRE = /^\?+([^+@!?\*\[\(]*)?$/;
+const qmarksTestNocase = ([$0, ext = '']) => {
+    const noext = qmarksTestNoExt([$0]);
+    if (!ext)
+        return noext;
+    ext = ext.toLowerCase();
+    return (f) => noext(f) && f.toLowerCase().endsWith(ext);
+};
+const qmarksTestNocaseDot = ([$0, ext = '']) => {
+    const noext = qmarksTestNoExtDot([$0]);
+    if (!ext)
+        return noext;
+    ext = ext.toLowerCase();
+    return (f) => noext(f) && f.toLowerCase().endsWith(ext);
+};
+const qmarksTestDot = ([$0, ext = '']) => {
+    const noext = qmarksTestNoExtDot([$0]);
+    return !ext ? noext : (f) => noext(f) && f.endsWith(ext);
+};
+const qmarksTest = ([$0, ext = '']) => {
+    const noext = qmarksTestNoExt([$0]);
+    return !ext ? noext : (f) => noext(f) && f.endsWith(ext);
+};
+const qmarksTestNoExt = ([$0]) => {
+    const len = $0.length;
+    return (f) => f.length === len && !f.startsWith('.');
+};
+const qmarksTestNoExtDot = ([$0]) => {
+    const len = $0.length;
+    return (f) => f.length === len && f !== '.' && f !== '..';
+};
+/* c8 ignore start */
+const defaultPlatform = (typeof process === 'object' && process
+    ? (typeof process.env === 'object' &&
+        process.env &&
+        process.env.__MINIMATCH_TESTING_PLATFORM__) ||
+        process.platform
+    : 'posix');
+const path = {
+    win32: { sep: '\\' },
+    posix: { sep: '/' },
+};
+/* c8 ignore stop */
+exports.sep = defaultPlatform === 'win32' ? path.win32.sep : path.posix.sep;
+exports.minimatch.sep = exports.sep;
+exports.GLOBSTAR = Symbol('globstar **');
+exports.minimatch.GLOBSTAR = exports.GLOBSTAR;
+// any single thing other than /
+// don't need to escape / when using new RegExp()
+const qmark = '[^/]';
+// * => any number of characters
+const star = qmark + '*?';
+// ** when dots are allowed.  Anything goes, except .. and .
+// not (^ or / followed by one or two dots followed by $ or /),
+// followed by anything, any number of times.
+const twoStarDot = '(?:(?!(?:\\/|^)(?:\\.{1,2})($|\\/)).)*?';
+// not a ^ or / followed by a dot,
+// followed by anything, any number of times.
+const twoStarNoDot = '(?:(?!(?:\\/|^)\\.).)*?';
+const filter = (pattern, options = {}) => (p) => (0, exports.minimatch)(p, pattern, options);
+exports.filter = filter;
+exports.minimatch.filter = exports.filter;
+const ext = (a, b = {}) => Object.assign({}, a, b);
+const defaults = (def) => {
+    if (!def || typeof def !== 'object' || !Object.keys(def).length) {
+        return exports.minimatch;
+    }
+    const orig = exports.minimatch;
+    const m = (p, pattern, options = {}) => orig(p, pattern, ext(def, options));
+    return Object.assign(m, {
+        Minimatch: class Minimatch extends orig.Minimatch {
+            constructor(pattern, options = {}) {
+                super(pattern, ext(def, options));
+            }
+            static defaults(options) {
+                return orig.defaults(ext(def, options)).Minimatch;
+            }
+        },
+        AST: class AST extends orig.AST {
+            /* c8 ignore start */
+            constructor(type, parent, options = {}) {
+                super(type, parent, ext(def, options));
+            }
+            /* c8 ignore stop */
+            static fromGlob(pattern, options = {}) {
+                return orig.AST.fromGlob(pattern, ext(def, options));
+            }
+        },
+        unescape: (s, options = {}) => orig.unescape(s, ext(def, options)),
+        escape: (s, options = {}) => orig.escape(s, ext(def, options)),
+        filter: (pattern, options = {}) => orig.filter(pattern, ext(def, options)),
+        defaults: (options) => orig.defaults(ext(def, options)),
+        makeRe: (pattern, options = {}) => orig.makeRe(pattern, ext(def, options)),
+        braceExpand: (pattern, options = {}) => orig.braceExpand(pattern, ext(def, options)),
+        match: (list, pattern, options = {}) => orig.match(list, pattern, ext(def, options)),
+        sep: orig.sep,
+        GLOBSTAR: exports.GLOBSTAR,
+    });
+};
+exports.defaults = defaults;
+exports.minimatch.defaults = exports.defaults;
+// Brace expansion:
+// a{b,c}d -> abd acd
+// a{b,}c -> abc ac
+// a{0..3}d -> a0d a1d a2d a3d
+// a{b,c{d,e}f}g -> abg acdfg acefg
+// a{b,c}d{e,f}g -> abdeg acdeg abdeg abdfg
+//
+// Invalid sets are not expanded.
+// a{2..}b -> a{2..}b
+// a{b}c -> a{b}c
+const braceExpand = (pattern, options = {}) => {
+    (0, assert_valid_pattern_js_1.assertValidPattern)(pattern);
+    // Thanks to Yeting Li <https://github.com/yetingli> for
+    // improving this regexp to avoid a ReDOS vulnerability.
+    if (options.nobrace || !/\{(?:(?!\{).)*\}/.test(pattern)) {
+        // shortcut. no need to expand.
+        return [pattern];
+    }
+    return (0, brace_expansion_1.default)(pattern);
+};
+exports.braceExpand = braceExpand;
+exports.minimatch.braceExpand = exports.braceExpand;
+// parse a component of the expanded set.
+// At this point, no pattern may contain "/" in it
+// so we're going to return a 2d array, where each entry is the full
+// pattern, split on '/', and then turned into a regular expression.
+// A regexp is made at the end which joins each array with an
+// escaped /, and another full one which joins each regexp with |.
+//
+// Following the lead of Bash 4.1, note that "**" only has special meaning
+// when it is the *only* thing in a path portion.  Otherwise, any series
+// of * is equivalent to a single *.  Globstar behavior is enabled by
+// default, and can be disabled by setting options.noglobstar.
+const makeRe = (pattern, options = {}) => new Minimatch(pattern, options).makeRe();
+exports.makeRe = makeRe;
+exports.minimatch.makeRe = exports.makeRe;
+const match = (list, pattern, options = {}) => {
+    const mm = new Minimatch(pattern, options);
+    list = list.filter(f => mm.match(f));
+    if (mm.options.nonull && !list.length) {
+        list.push(pattern);
+    }
+    return list;
+};
+exports.match = match;
+exports.minimatch.match = exports.match;
+// replace stuff like \* with *
+const globMagic = /[?*]|[+@!]\(.*?\)|\[|\]/;
+const regExpEscape = (s) => s.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+class Minimatch {
+    options;
+    set;
+    pattern;
+    windowsPathsNoEscape;
+    nonegate;
+    negate;
+    comment;
+    empty;
+    preserveMultipleSlashes;
+    partial;
+    globSet;
+    globParts;
+    nocase;
+    isWindows;
+    platform;
+    windowsNoMagicRoot;
+    regexp;
+    constructor(pattern, options = {}) {
+        (0, assert_valid_pattern_js_1.assertValidPattern)(pattern);
+        options = options || {};
+        this.options = options;
+        this.pattern = pattern;
+        this.platform = options.platform || defaultPlatform;
+        this.isWindows = this.platform === 'win32';
+        this.windowsPathsNoEscape =
+            !!options.windowsPathsNoEscape || options.allowWindowsEscape === false;
+        if (this.windowsPathsNoEscape) {
+            this.pattern = this.pattern.replace(/\\/g, '/');
+        }
+        this.preserveMultipleSlashes = !!options.preserveMultipleSlashes;
+        this.regexp = null;
+        this.negate = false;
+        this.nonegate = !!options.nonegate;
+        this.comment = false;
+        this.empty = false;
+        this.partial = !!options.partial;
+        this.nocase = !!this.options.nocase;
+        this.windowsNoMagicRoot =
+            options.windowsNoMagicRoot !== undefined
+                ? options.windowsNoMagicRoot
+                : !!(this.isWindows && this.nocase);
+        this.globSet = [];
+        this.globParts = [];
+        this.set = [];
+        // make the set of regexps etc.
+        this.make();
+    }
+    hasMagic() {
+        if (this.options.magicalBraces && this.set.length > 1) {
+            return true;
+        }
+        for (const pattern of this.set) {
+            for (const part of pattern) {
+                if (typeof part !== 'string')
+                    return true;
+            }
+        }
+        return false;
+    }
+    debug(..._) { }
+    make() {
+        const pattern = this.pattern;
+        const options = this.options;
+        // empty patterns and comments match nothing.
+        if (!options.nocomment && pattern.charAt(0) === '#') {
+            this.comment = true;
+            return;
+        }
+        if (!pattern) {
+            this.empty = true;
+            return;
+        }
+        // step 1: figure out negation, etc.
+        this.parseNegate();
+        // step 2: expand braces
+        this.globSet = [...new Set(this.braceExpand())];
+        if (options.debug) {
+            this.debug = (...args) => console.error(...args);
+        }
+        this.debug(this.pattern, this.globSet);
+        // step 3: now we have a set, so turn each one into a series of
+        // path-portion matching patterns.
+        // These will be regexps, except in the case of "**", which is
+        // set to the GLOBSTAR object for globstar behavior,
+        // and will not contain any / characters
+        //
+        // First, we preprocess to make the glob pattern sets a bit simpler
+        // and deduped.  There are some perf-killing patterns that can cause
+        // problems with a glob walk, but we can simplify them down a bit.
+        const rawGlobParts = this.globSet.map(s => this.slashSplit(s));
+        this.globParts = this.preprocess(rawGlobParts);
+        this.debug(this.pattern, this.globParts);
+        // glob --> regexps
+        let set = this.globParts.map((s, _, __) => {
+            if (this.isWindows && this.windowsNoMagicRoot) {
+                // check if it's a drive or unc path.
+                const isUNC = s[0] === '' &&
+                    s[1] === '' &&
+                    (s[2] === '?' || !globMagic.test(s[2])) &&
+                    !globMagic.test(s[3]);
+                const isDrive = /^[a-z]:/i.test(s[0]);
+                if (isUNC) {
+                    return [...s.slice(0, 4), ...s.slice(4).map(ss => this.parse(ss))];
+                }
+                else if (isDrive) {
+                    return [s[0], ...s.slice(1).map(ss => this.parse(ss))];
+                }
+            }
+            return s.map(ss => this.parse(ss));
+        });
+        this.debug(this.pattern, set);
+        // filter out everything that didn't compile properly.
+        this.set = set.filter(s => s.indexOf(false) === -1);
+        // do not treat the ? in UNC paths as magic
+        if (this.isWindows) {
+            for (let i = 0; i < this.set.length; i++) {
+                const p = this.set[i];
+                if (p[0] === '' &&
+                    p[1] === '' &&
+                    this.globParts[i][2] === '?' &&
+                    typeof p[3] === 'string' &&
+                    /^[a-z]:$/i.test(p[3])) {
+                    p[2] = '?';
+                }
+            }
+        }
+        this.debug(this.pattern, this.set);
+    }
+    // various transforms to equivalent pattern sets that are
+    // faster to process in a filesystem walk.  The goal is to
+    // eliminate what we can, and push all ** patterns as far
+    // to the right as possible, even if it increases the number
+    // of patterns that we have to process.
+    preprocess(globParts) {
+        // if we're not in globstar mode, then turn all ** into *
+        if (this.options.noglobstar) {
+            for (let i = 0; i < globParts.length; i++) {
+                for (let j = 0; j < globParts[i].length; j++) {
+                    if (globParts[i][j] === '**') {
+                        globParts[i][j] = '*';
+                    }
+                }
+            }
+        }
+        const { optimizationLevel = 1 } = this.options;
+        if (optimizationLevel >= 2) {
+            // aggressive optimization for the purpose of fs walking
+            globParts = this.firstPhasePreProcess(globParts);
+            globParts = this.secondPhasePreProcess(globParts);
+        }
+        else if (optimizationLevel >= 1) {
+            // just basic optimizations to remove some .. parts
+            globParts = this.levelOneOptimize(globParts);
+        }
+        else {
+            // just collapse multiple ** portions into one
+            globParts = this.adjascentGlobstarOptimize(globParts);
+        }
+        return globParts;
+    }
+    // just get rid of adjascent ** portions
+    adjascentGlobstarOptimize(globParts) {
+        return globParts.map(parts => {
+            let gs = -1;
+            while (-1 !== (gs = parts.indexOf('**', gs + 1))) {
+                let i = gs;
+                while (parts[i + 1] === '**') {
+                    i++;
+                }
+                if (i !== gs) {
+                    parts.splice(gs, i - gs);
+                }
+            }
+            return parts;
+        });
+    }
+    // get rid of adjascent ** and resolve .. portions
+    levelOneOptimize(globParts) {
+        return globParts.map(parts => {
+            parts = parts.reduce((set, part) => {
+                const prev = set[set.length - 1];
+                if (part === '**' && prev === '**') {
+                    return set;
+                }
+                if (part === '..') {
+                    if (prev && prev !== '..' && prev !== '.' && prev !== '**') {
+                        set.pop();
+                        return set;
+                    }
+                }
+                set.push(part);
+                return set;
+            }, []);
+            return parts.length === 0 ? [''] : parts;
+        });
+    }
+    levelTwoFileOptimize(parts) {
+        if (!Array.isArray(parts)) {
+            parts = this.slashSplit(parts);
+        }
+        let didSomething = false;
+        do {
+            didSomething = false;
+            // <pre>/<e>/<rest> -> <pre>/<rest>
+            if (!this.preserveMultipleSlashes) {
+                for (let i = 1; i < parts.length - 1; i++) {
+                    const p = parts[i];
+                    // don't squeeze out UNC patterns
+                    if (i === 1 && p === '' && parts[0] === '')
+                        continue;
+                    if (p === '.' || p === '') {
+                        didSomething = true;
+                        parts.splice(i, 1);
+                        i--;
+                    }
+                }
+                if (parts[0] === '.' &&
+                    parts.length === 2 &&
+                    (parts[1] === '.' || parts[1] === '')) {
+                    didSomething = true;
+                    parts.pop();
+                }
+            }
+            // <pre>/<p>/../<rest> -> <pre>/<rest>
+            let dd = 0;
+            while (-1 !== (dd = parts.indexOf('..', dd + 1))) {
+                const p = parts[dd - 1];
+                if (p && p !== '.' && p !== '..' && p !== '**') {
+                    didSomething = true;
+                    parts.splice(dd - 1, 2);
+                    dd -= 2;
+                }
+            }
+        } while (didSomething);
+        return parts.length === 0 ? [''] : parts;
+    }
+    // First phase: single-pattern processing
+    // <pre> is 1 or more portions
+    // <rest> is 1 or more portions
+    // <p> is any portion other than ., .., '', or **
+    // <e> is . or ''
+    //
+    // **/.. is *brutal* for filesystem walking performance, because
+    // it effectively resets the recursive walk each time it occurs,
+    // and ** cannot be reduced out by a .. pattern part like a regexp
+    // or most strings (other than .., ., and '') can be.
+    //
+    // <pre>/**/../<p>/<p>/<rest> -> {<pre>/../<p>/<p>/<rest>,<pre>/**/<p>/<p>/<rest>}
+    // <pre>/<e>/<rest> -> <pre>/<rest>
+    // <pre>/<p>/../<rest> -> <pre>/<rest>
+    // **/**/<rest> -> **/<rest>
+    //
+    // **/*/<rest> -> */**/<rest> <== not valid because ** doesn't follow
+    // this WOULD be allowed if ** did follow symlinks, or * didn't
+    firstPhasePreProcess(globParts) {
+        let didSomething = false;
+        do {
+            didSomething = false;
+            // <pre>/**/../<p>/<p>/<rest> -> {<pre>/../<p>/<p>/<rest>,<pre>/**/<p>/<p>/<rest>}
+            for (let parts of globParts) {
+                let gs = -1;
+                while (-1 !== (gs = parts.indexOf('**', gs + 1))) {
+                    let gss = gs;
+                    while (parts[gss + 1] === '**') {
+                        // <pre>/**/**/<rest> -> <pre>/**/<rest>
+                        gss++;
+                    }
+                    // eg, if gs is 2 and gss is 4, that means we have 3 **
+                    // parts, and can remove 2 of them.
+                    if (gss > gs) {
+                        parts.splice(gs + 1, gss - gs);
+                    }
+                    let next = parts[gs + 1];
+                    const p = parts[gs + 2];
+                    const p2 = parts[gs + 3];
+                    if (next !== '..')
+                        continue;
+                    if (!p ||
+                        p === '.' ||
+                        p === '..' ||
+                        !p2 ||
+                        p2 === '.' ||
+                        p2 === '..') {
+                        continue;
+                    }
+                    didSomething = true;
+                    // edit parts in place, and push the new one
+                    parts.splice(gs, 1);
+                    const other = parts.slice(0);
+                    other[gs] = '**';
+                    globParts.push(other);
+                    gs--;
+                }
+                // <pre>/<e>/<rest> -> <pre>/<rest>
+                if (!this.preserveMultipleSlashes) {
+                    for (let i = 1; i < parts.length - 1; i++) {
+                        const p = parts[i];
+                        // don't squeeze out UNC patterns
+                        if (i === 1 && p === '' && parts[0] === '')
+                            continue;
+                        if (p === '.' || p === '') {
+                            didSomething = true;
+                            parts.splice(i, 1);
+                            i--;
+                        }
+                    }
+                    if (parts[0] === '.' &&
+                        parts.length === 2 &&
+                        (parts[1] === '.' || parts[1] === '')) {
+                        didSomething = true;
+                        parts.pop();
+                    }
+                }
+                // <pre>/<p>/../<rest> -> <pre>/<rest>
+                let dd = 0;
+                while (-1 !== (dd = parts.indexOf('..', dd + 1))) {
+                    const p = parts[dd - 1];
+                    if (p && p !== '.' && p !== '..' && p !== '**') {
+                        didSomething = true;
+                        const needDot = dd === 1 && parts[dd + 1] === '**';
+                        const splin = needDot ? ['.'] : [];
+                        parts.splice(dd - 1, 2, ...splin);
+                        if (parts.length === 0)
+                            parts.push('');
+                        dd -= 2;
+                    }
+                }
+            }
+        } while (didSomething);
+        return globParts;
+    }
+    // second phase: multi-pattern dedupes
+    // {<pre>/*/<rest>,<pre>/<p>/<rest>} -> <pre>/*/<rest>
+    // {<pre>/<rest>,<pre>/<rest>} -> <pre>/<rest>
+    // {<pre>/**/<rest>,<pre>/<rest>} -> <pre>/**/<rest>
+    //
+    // {<pre>/**/<rest>,<pre>/**/<p>/<rest>} -> <pre>/**/<rest>
+    // ^-- not valid because ** doens't follow symlinks
+    secondPhasePreProcess(globParts) {
+        for (let i = 0; i < globParts.length - 1; i++) {
+            for (let j = i + 1; j < globParts.length; j++) {
+                const matched = this.partsMatch(globParts[i], globParts[j], !this.preserveMultipleSlashes);
+                if (matched) {
+                    globParts[i] = [];
+                    globParts[j] = matched;
+                    break;
+                }
+            }
+        }
+        return globParts.filter(gs => gs.length);
+    }
+    partsMatch(a, b, emptyGSMatch = false) {
+        let ai = 0;
+        let bi = 0;
+        let result = [];
+        let which = '';
+        while (ai < a.length && bi < b.length) {
+            if (a[ai] === b[bi]) {
+                result.push(which === 'b' ? b[bi] : a[ai]);
+                ai++;
+                bi++;
+            }
+            else if (emptyGSMatch && a[ai] === '**' && b[bi] === a[ai + 1]) {
+                result.push(a[ai]);
+                ai++;
+            }
+            else if (emptyGSMatch && b[bi] === '**' && a[ai] === b[bi + 1]) {
+                result.push(b[bi]);
+                bi++;
+            }
+            else if (a[ai] === '*' &&
+                b[bi] &&
+                (this.options.dot || !b[bi].startsWith('.')) &&
+                b[bi] !== '**') {
+                if (which === 'b')
+                    return false;
+                which = 'a';
+                result.push(a[ai]);
+                ai++;
+                bi++;
+            }
+            else if (b[bi] === '*' &&
+                a[ai] &&
+                (this.options.dot || !a[ai].startsWith('.')) &&
+                a[ai] !== '**') {
+                if (which === 'a')
+                    return false;
+                which = 'b';
+                result.push(b[bi]);
+                ai++;
+                bi++;
+            }
+            else {
+                return false;
+            }
+        }
+        // if we fall out of the loop, it means they two are identical
+        // as long as their lengths match
+        return a.length === b.length && result;
+    }
+    parseNegate() {
+        if (this.nonegate)
+            return;
+        const pattern = this.pattern;
+        let negate = false;
+        let negateOffset = 0;
+        for (let i = 0; i < pattern.length && pattern.charAt(i) === '!'; i++) {
+            negate = !negate;
+            negateOffset++;
+        }
+        if (negateOffset)
+            this.pattern = pattern.slice(negateOffset);
+        this.negate = negate;
+    }
+    // set partial to true to test if, for example,
+    // "/a/b" matches the start of "/*/b/*/d"
+    // Partial means, if you run out of file before you run
+    // out of pattern, then that's fine, as long as all
+    // the parts match.
+    matchOne(file, pattern, partial = false) {
+        const options = this.options;
+        // UNC paths like //?/X:/... can match X:/... and vice versa
+        // Drive letters in absolute drive or unc paths are always compared
+        // case-insensitively.
+        if (this.isWindows) {
+            const fileDrive = typeof file[0] === 'string' && /^[a-z]:$/i.test(file[0]);
+            const fileUNC = !fileDrive &&
+                file[0] === '' &&
+                file[1] === '' &&
+                file[2] === '?' &&
+                /^[a-z]:$/i.test(file[3]);
+            const patternDrive = typeof pattern[0] === 'string' && /^[a-z]:$/i.test(pattern[0]);
+            const patternUNC = !patternDrive &&
+                pattern[0] === '' &&
+                pattern[1] === '' &&
+                pattern[2] === '?' &&
+                typeof pattern[3] === 'string' &&
+                /^[a-z]:$/i.test(pattern[3]);
+            const fdi = fileUNC ? 3 : fileDrive ? 0 : undefined;
+            const pdi = patternUNC ? 3 : patternDrive ? 0 : undefined;
+            if (typeof fdi === 'number' && typeof pdi === 'number') {
+                const [fd, pd] = [file[fdi], pattern[pdi]];
+                if (fd.toLowerCase() === pd.toLowerCase()) {
+                    pattern[pdi] = fd;
+                    if (pdi > fdi) {
+                        pattern = pattern.slice(pdi);
+                    }
+                    else if (fdi > pdi) {
+                        file = file.slice(fdi);
+                    }
+                }
+            }
+        }
+        // resolve and reduce . and .. portions in the file as well.
+        // dont' need to do the second phase, because it's only one string[]
+        const { optimizationLevel = 1 } = this.options;
+        if (optimizationLevel >= 2) {
+            file = this.levelTwoFileOptimize(file);
+        }
+        this.debug('matchOne', this, { file, pattern });
+        this.debug('matchOne', file.length, pattern.length);
+        for (var fi = 0, pi = 0, fl = file.length, pl = pattern.length; fi < fl && pi < pl; fi++, pi++) {
+            this.debug('matchOne loop');
+            var p = pattern[pi];
+            var f = file[fi];
+            this.debug(pattern, p, f);
+            // should be impossible.
+            // some invalid regexp stuff in the set.
+            /* c8 ignore start */
+            if (p === false) {
+                return false;
+            }
+            /* c8 ignore stop */
+            if (p === exports.GLOBSTAR) {
+                this.debug('GLOBSTAR', [pattern, p, f]);
+                // "**"
+                // a/**/b/**/c would match the following:
+                // a/b/x/y/z/c
+                // a/x/y/z/b/c
+                // a/b/x/b/x/c
+                // a/b/c
+                // To do this, take the rest of the pattern after
+                // the **, and see if it would match the file remainder.
+                // If so, return success.
+                // If not, the ** "swallows" a segment, and try again.
+                // This is recursively awful.
+                //
+                // a/**/b/**/c matching a/b/x/y/z/c
+                // - a matches a
+                // - doublestar
+                //   - matchOne(b/x/y/z/c, b/**/c)
+                //     - b matches b
+                //     - doublestar
+                //       - matchOne(x/y/z/c, c) -> no
+                //       - matchOne(y/z/c, c) -> no
+                //       - matchOne(z/c, c) -> no
+                //       - matchOne(c, c) yes, hit
+                var fr = fi;
+                var pr = pi + 1;
+                if (pr === pl) {
+                    this.debug('** at the end');
+                    // a ** at the end will just swallow the rest.
+                    // We have found a match.
+                    // however, it will not swallow /.x, unless
+                    // options.dot is set.
+                    // . and .. are *never* matched by **, for explosively
+                    // exponential reasons.
+                    for (; fi < fl; fi++) {
+                        if (file[fi] === '.' ||
+                            file[fi] === '..' ||
+                            (!options.dot && file[fi].charAt(0) === '.'))
+                            return false;
+                    }
+                    return true;
+                }
+                // ok, let's see if we can swallow whatever we can.
+                while (fr < fl) {
+                    var swallowee = file[fr];
+                    this.debug('\nglobstar while', file, fr, pattern, pr, swallowee);
+                    // XXX remove this slice.  Just pass the start index.
+                    if (this.matchOne(file.slice(fr), pattern.slice(pr), partial)) {
+                        this.debug('globstar found match!', fr, fl, swallowee);
+                        // found a match.
+                        return true;
+                    }
+                    else {
+                        // can't swallow "." or ".." ever.
+                        // can only swallow ".foo" when explicitly asked.
+                        if (swallowee === '.' ||
+                            swallowee === '..' ||
+                            (!options.dot && swallowee.charAt(0) === '.')) {
+                            this.debug('dot detected!', file, fr, pattern, pr);
+                            break;
+                        }
+                        // ** swallows a segment, and continue.
+                        this.debug('globstar swallow a segment, and continue');
+                        fr++;
+                    }
+                }
+                // no match was found.
+                // However, in partial mode, we can't say this is necessarily over.
+                /* c8 ignore start */
+                if (partial) {
+                    // ran out of file
+                    this.debug('\n>>> no match, partial?', file, fr, pattern, pr);
+                    if (fr === fl) {
+                        return true;
+                    }
+                }
+                /* c8 ignore stop */
+                return false;
+            }
+            // something other than **
+            // non-magic patterns just have to match exactly
+            // patterns with magic have been turned into regexps.
+            let hit;
+            if (typeof p === 'string') {
+                hit = f === p;
+                this.debug('string match', p, f, hit);
+            }
+            else {
+                hit = p.test(f);
+                this.debug('pattern match', p, f, hit);
+            }
+            if (!hit)
+                return false;
+        }
+        // Note: ending in / means that we'll get a final ""
+        // at the end of the pattern.  This can only match a
+        // corresponding "" at the end of the file.
+        // If the file ends in /, then it can only match a
+        // a pattern that ends in /, unless the pattern just
+        // doesn't have any more for it. But, a/b/ should *not*
+        // match "a/b/*", even though "" matches against the
+        // [^/]*? pattern, except in partial mode, where it might
+        // simply not be reached yet.
+        // However, a/b/ should still satisfy a/*
+        // now either we fell off the end of the pattern, or we're done.
+        if (fi === fl && pi === pl) {
+            // ran out of pattern and filename at the same time.
+            // an exact hit!
+            return true;
+        }
+        else if (fi === fl) {
+            // ran out of file, but still had pattern left.
+            // this is ok if we're doing the match as part of
+            // a glob fs traversal.
+            return partial;
+        }
+        else if (pi === pl) {
+            // ran out of pattern, still have file left.
+            // this is only acceptable if we're on the very last
+            // empty segment of a file with a trailing slash.
+            // a/* should match a/b/
+            return fi === fl - 1 && file[fi] === '';
+            /* c8 ignore start */
+        }
+        else {
+            // should be unreachable.
+            throw new Error('wtf?');
+        }
+        /* c8 ignore stop */
+    }
+    braceExpand() {
+        return (0, exports.braceExpand)(this.pattern, this.options);
+    }
+    parse(pattern) {
+        (0, assert_valid_pattern_js_1.assertValidPattern)(pattern);
+        const options = this.options;
+        // shortcuts
+        if (pattern === '**')
+            return exports.GLOBSTAR;
+        if (pattern === '')
+            return '';
+        // far and away, the most common glob pattern parts are
+        // *, *.*, and *.<ext>  Add a fast check method for those.
+        let m;
+        let fastTest = null;
+        if ((m = pattern.match(starRE))) {
+            fastTest = options.dot ? starTestDot : starTest;
+        }
+        else if ((m = pattern.match(starDotExtRE))) {
+            fastTest = (options.nocase
+                ? options.dot
+                    ? starDotExtTestNocaseDot
+                    : starDotExtTestNocase
+                : options.dot
+                    ? starDotExtTestDot
+                    : starDotExtTest)(m[1]);
+        }
+        else if ((m = pattern.match(qmarksRE))) {
+            fastTest = (options.nocase
+                ? options.dot
+                    ? qmarksTestNocaseDot
+                    : qmarksTestNocase
+                : options.dot
+                    ? qmarksTestDot
+                    : qmarksTest)(m);
+        }
+        else if ((m = pattern.match(starDotStarRE))) {
+            fastTest = options.dot ? starDotStarTestDot : starDotStarTest;
+        }
+        else if ((m = pattern.match(dotStarRE))) {
+            fastTest = dotStarTest;
+        }
+        const re = ast_js_1.AST.fromGlob(pattern, this.options).toMMPattern();
+        if (fastTest && typeof re === 'object') {
+            // Avoids overriding in frozen environments
+            Reflect.defineProperty(re, 'test', { value: fastTest });
+        }
+        return re;
+    }
+    makeRe() {
+        if (this.regexp || this.regexp === false)
+            return this.regexp;
+        // at this point, this.set is a 2d array of partial
+        // pattern strings, or "**".
+        //
+        // It's better to use .match().  This function shouldn't
+        // be used, really, but it's pretty convenient sometimes,
+        // when you just want to work with a regex.
+        const set = this.set;
+        if (!set.length) {
+            this.regexp = false;
+            return this.regexp;
+        }
+        const options = this.options;
+        const twoStar = options.noglobstar
+            ? star
+            : options.dot
+                ? twoStarDot
+                : twoStarNoDot;
+        const flags = new Set(options.nocase ? ['i'] : []);
+        // regexpify non-globstar patterns
+        // if ** is only item, then we just do one twoStar
+        // if ** is first, and there are more, prepend (\/|twoStar\/)? to next
+        // if ** is last, append (\/twoStar|) to previous
+        // if ** is in the middle, append (\/|\/twoStar\/) to previous
+        // then filter out GLOBSTAR symbols
+        let re = set
+            .map(pattern => {
+            const pp = pattern.map(p => {
+                if (p instanceof RegExp) {
+                    for (const f of p.flags.split(''))
+                        flags.add(f);
+                }
+                return typeof p === 'string'
+                    ? regExpEscape(p)
+                    : p === exports.GLOBSTAR
+                        ? exports.GLOBSTAR
+                        : p._src;
+            });
+            pp.forEach((p, i) => {
+                const next = pp[i + 1];
+                const prev = pp[i - 1];
+                if (p !== exports.GLOBSTAR || prev === exports.GLOBSTAR) {
+                    return;
+                }
+                if (prev === undefined) {
+                    if (next !== undefined && next !== exports.GLOBSTAR) {
+                        pp[i + 1] = '(?:\\/|' + twoStar + '\\/)?' + next;
+                    }
+                    else {
+                        pp[i] = twoStar;
+                    }
+                }
+                else if (next === undefined) {
+                    pp[i - 1] = prev + '(?:\\/|' + twoStar + ')?';
+                }
+                else if (next !== exports.GLOBSTAR) {
+                    pp[i - 1] = prev + '(?:\\/|\\/' + twoStar + '\\/)' + next;
+                    pp[i + 1] = exports.GLOBSTAR;
+                }
+            });
+            return pp.filter(p => p !== exports.GLOBSTAR).join('/');
+        })
+            .join('|');
+        // need to wrap in parens if we had more than one thing with |,
+        // otherwise only the first will be anchored to ^ and the last to $
+        const [open, close] = set.length > 1 ? ['(?:', ')'] : ['', ''];
+        // must match entire pattern
+        // ending in a * or ** will make it less strict.
+        re = '^' + open + re + close + '$';
+        // can match anything, as long as it's not this.
+        if (this.negate)
+            re = '^(?!' + re + ').+$';
+        try {
+            this.regexp = new RegExp(re, [...flags].join(''));
+            /* c8 ignore start */
+        }
+        catch (ex) {
+            // should be impossible
+            this.regexp = false;
+        }
+        /* c8 ignore stop */
+        return this.regexp;
+    }
+    slashSplit(p) {
+        // if p starts with // on windows, we preserve that
+        // so that UNC paths aren't broken.  Otherwise, any number of
+        // / characters are coalesced into one, unless
+        // preserveMultipleSlashes is set to true.
+        if (this.preserveMultipleSlashes) {
+            return p.split('/');
+        }
+        else if (this.isWindows && /^\/\/[^\/]+/.test(p)) {
+            // add an extra '' for the one we lose
+            return ['', ...p.split(/\/+/)];
+        }
+        else {
+            return p.split(/\/+/);
+        }
+    }
+    match(f, partial = this.partial) {
+        this.debug('match', f, this.pattern);
+        // short-circuit in the case of busted things.
+        // comments, etc.
+        if (this.comment) {
+            return false;
+        }
+        if (this.empty) {
+            return f === '';
+        }
+        if (f === '/' && partial) {
+            return true;
+        }
+        const options = this.options;
+        // windows: need to use /, not \
+        if (this.isWindows) {
+            f = f.split('\\').join('/');
+        }
+        // treat the test path as a set of pathparts.
+        const ff = this.slashSplit(f);
+        this.debug(this.pattern, 'split', ff);
+        // just ONE of the pattern sets in this.set needs to match
+        // in order for it to be valid.  If negating, then just one
+        // match means that we have failed.
+        // Either way, return on the first hit.
+        const set = this.set;
+        this.debug(this.pattern, 'set', set);
+        // Find the basename of the path by looking for the last non-empty segment
+        let filename = ff[ff.length - 1];
+        if (!filename) {
+            for (let i = ff.length - 2; !filename && i >= 0; i--) {
+                filename = ff[i];
+            }
+        }
+        for (let i = 0; i < set.length; i++) {
+            const pattern = set[i];
+            let file = ff;
+            if (options.matchBase && pattern.length === 1) {
+                file = [filename];
+            }
+            const hit = this.matchOne(file, pattern, partial);
+            if (hit) {
+                if (options.flipNegate) {
+                    return true;
+                }
+                return !this.negate;
+            }
+        }
+        // didn't get any hits.  this is success if it's a negative
+        // pattern, failure otherwise.
+        if (options.flipNegate) {
+            return false;
+        }
+        return this.negate;
+    }
+    static defaults(def) {
+        return exports.minimatch.defaults(def).Minimatch;
+    }
+}
+exports.Minimatch = Minimatch;
+/* c8 ignore start */
+var ast_js_2 = __nccwpck_require__(1803);
+Object.defineProperty(exports, "AST", ({ enumerable: true, get: function () { return ast_js_2.AST; } }));
+var escape_js_2 = __nccwpck_require__(800);
+Object.defineProperty(exports, "escape", ({ enumerable: true, get: function () { return escape_js_2.escape; } }));
+var unescape_js_2 = __nccwpck_require__(851);
+Object.defineProperty(exports, "unescape", ({ enumerable: true, get: function () { return unescape_js_2.unescape; } }));
+/* c8 ignore stop */
+exports.minimatch.AST = ast_js_1.AST;
+exports.minimatch.Minimatch = Minimatch;
+exports.minimatch.escape = escape_js_1.escape;
+exports.minimatch.unescape = unescape_js_1.unescape;
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ 851:
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.unescape = void 0;
+/**
+ * Un-escape a string that has been escaped with {@link escape}.
+ *
+ * If the {@link windowsPathsNoEscape} option is used, then square-brace
+ * escapes are removed, but not backslash escapes.  For example, it will turn
+ * the string `'[*]'` into `*`, but it will not turn `'\\*'` into `'*'`,
+ * becuase `\` is a path separator in `windowsPathsNoEscape` mode.
+ *
+ * When `windowsPathsNoEscape` is not set, then both brace escapes and
+ * backslash escapes are removed.
+ *
+ * Slashes (and backslashes in `windowsPathsNoEscape` mode) cannot be escaped
+ * or unescaped.
+ */
+const unescape = (s, { windowsPathsNoEscape = false, } = {}) => {
+    return windowsPathsNoEscape
+        ? s.replace(/\[([^\/\\])\]/g, '$1')
+        : s.replace(/((?!\\).|^)\[([^\/\\])\]/g, '$1$2').replace(/\\([^\/])/g, '$1');
+};
+exports.unescape = unescape;
+//# sourceMappingURL=unescape.js.map
 
 /***/ })
 

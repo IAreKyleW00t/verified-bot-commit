@@ -14,8 +14,10 @@ A GitHub Action to create signed and verified commits as the
 accomplished via the GitHub [REST API] by using the [Blob] and [Tree] endpoints
 to build the commit and update the original Ref to point to it. [^1]
 
-The resulting commit will be signed and verified using
-[GitHub's public PGP key](https://github.com/web-flow.gpg)!
+After using this Action your local branch will be updated to point to the newly
+created commit, which will be signed and verified using
+[GitHub's public PGP key](https://github.com/web-flow.gpg)! Files that were not
+committed by the Action will be left staged.
 
 > [!IMPORTANT]
 >
@@ -37,6 +39,7 @@ The resulting commit will be signed and verified using
       README.md
       *.txt
       src/**/tests/*
+      !test-data/dont-include-this
       test-data/**
 ```
 
@@ -52,19 +55,21 @@ The resulting commit will be signed and verified using
 >   example.txt
 > ```
 
-| Name              | Type   | Description                                      | Default                   |
-| ----------------- | ------ | ------------------------------------------------ | ------------------------- |
-| `ref`             | String | The ref to push the commit to                    | `${{ github.ref }}`       |
-| `files`           | List   | Files/[Glob] patterns to include with the commit | _required_                |
-| `message`         | String | Message for the commit [1]                       | _optional_                |
-| `message-file`    | String | File to use for the commit message [1]           | _optional_                |
-| `force-push`      | String | Force push the commit                            | `false`                   |
-| `follow-symlinks` | String | Follow symbolic links when globbing files        | `true`                    |
-| `workspace`       | String | Directory containing checked out files           | `${{ github.workspace }}` |
-| `token`           | String | GitHub Token for REST API access [2]             | `${{ github.token }}`     |
+| Name              | Type    | Description                                          | Default                   |
+| ----------------- | ------- | ---------------------------------------------------- | ------------------------- |
+| `ref`             | String  | The ref to push the commit to                        | `${{ github.ref }}`       |
+| `files`           | List    | Files/[Glob] patterns to include with the commit [1] | _required_                |
+| `message`         | String  | Message for the commit [2]                           | _optional_                |
+| `message-file`    | String  | File to use for the commit message [2]               | _optional_                |
+| `force-push`      | Boolean | Force push the commit                                | `false`                   |
+| `follow-symlinks` | Boolean | Follow symbolic links when globbing files            | `true`                    |
+| `workspace`       | String  | Directory containing checked out files               | `${{ github.workspace }}` |
+| `token`           | String  | GitHub Token for REST API access [3]                 | `${{ github.token }}`     |
 
-> 1. You must include either `message` or `message-file` (which takes priority).
-> 2. This Action is intended to work with the default `GITHUB_TOKEN`. See the
+> 1. Files within your `.gitignore` will not be included. You can also negate
+>    any files by prefixing it with `!`
+> 2. You must include either `message` or `message-file` (which takes priority).
+> 3. This Action is intended to work with the default `GITHUB_TOKEN`. See the
 >    [notice](#verified-bot-commit-action) and [limitations](#limitations)
 
 ### Outputs
