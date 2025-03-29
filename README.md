@@ -14,7 +14,7 @@ A GitHub Action to create signed and verified commits as the
 accomplished via the GitHub [REST API] by using the [Blob] and [Tree] endpoints
 to build the commit and update the original Ref to point to it. [^1]
 
-After using this Action your local branch will be updated to point to the newly
+After using this Action, your local branch will be updated to point to the newly
 created commit, which will be signed and verified using
 [GitHub's public PGP key](https://github.com/web-flow.gpg)! Files that were not
 committed by the Action will be left staged.
