@@ -30300,6 +30300,7 @@ async function run() {
         // Get commit message
         const message = git.buildCommitMessage(core.getInput('message'), core.getInput('message-file'));
         // Lookup HEAD commit and tree
+        const autoStage = core.getBooleanInput('auto-stage');
         const headRef = git.normalizeRef(core.getInput('ref'));
         const headCommit = await git.getRef(headRef, github.context, octokit);
         const headTree = await git.getTree(headCommit, github.context, octokit);
@@ -30308,7 +30309,8 @@ async function run() {
         const execOpts = { cwd: workspace };
         let execOutput = '';
         core.startGroup('🪁 Getting changed files...');
-        await exec.exec('git', ['add', '-A'], execOpts);
+        if (autoStage)
+            await exec.exec('git', ['add', '-A'], execOpts);
         await exec.exec('git', ['diff', '--cached', '--name-only'], {
             ...execOpts,
             listeners: {
@@ -30360,7 +30362,8 @@ async function run() {
         core.info(`✅ Created Commit @ ${commit}`);
         core.setOutput('commit', commit);
         // Update the ref to point to the new commit
-        const refSha = await git.updateRef(headRef, commit, core.getBooleanInput('force-push'), github.context, octokit);
+        const forcePush = core.getBooleanInput('force-push');
+        const refSha = await git.updateRef(headRef, commit, forcePush, github.context, octokit);
         core.info(`⏩ Updated refs/${headRef} to point to ${refSha}`);
         core.setOutput('ref', refSha);
         core.startGroup('📍 Updating local branch...');
