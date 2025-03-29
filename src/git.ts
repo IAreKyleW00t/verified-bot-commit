@@ -1,8 +1,8 @@
 import * as fs from 'fs'
 import * as path from 'path'
 
-import { Context } from '@actions/github/lib/context'
-import { GitHub } from '@actions/github/lib/utils'
+import { Context } from '@actions/github/lib/context.js'
+import { GitHub } from '@actions/github/lib/utils.js'
 
 export type GitMode = '100644' | '100755' | '040000' | '160000' | '120000'
 export interface GitBlob {
