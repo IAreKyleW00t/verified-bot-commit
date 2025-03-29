@@ -62,6 +62,7 @@ committed by the Action will be left staged.
 | `message`         | String  | Message for the commit [2]                               | _optional_                |
 | `message-file`    | String  | File to use for the commit message [2]                   | _optional_                |
 | `auto-stage`      | Boolean | Automatically stage all changed files for committing [3] | `true`                    |
+| `update-local`    | Boolean | Pull changes into your local branch after committing [3] | `true`                    |
 | `force-push`      | Boolean | Force push the commit                                    | `false`                   |
 | `follow-symlinks` | Boolean | Follow symbolic links when globbing files                | `true`                    |
 | `workspace`       | String  | Directory containing checked out files                   | `${{ github.workspace }}` |

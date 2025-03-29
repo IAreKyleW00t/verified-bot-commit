@@ -114,9 +114,12 @@ export async function run(): Promise<void> {
     core.info(`⏩ Updated refs/${headRef} to point to ${refSha}`)
     core.setOutput('ref', refSha)
 
-    core.startGroup('📍 Updating local branch...')
-    await exec.exec('git', ['pull', 'origin', `refs/${headRef}`], execOpts)
-    core.endGroup()
+    const updateLocal = core.getBooleanInput('update-local')
+    if (updateLocal) {
+      core.startGroup('📍 Updating local branch...')
+      await exec.exec('git', ['pull', 'origin', `refs/${headRef}`], execOpts)
+      core.endGroup()
+    }
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
     else core.setFailed(error as string)

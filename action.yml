@@ -24,6 +24,10 @@ inputs:
     description: Automatically stage all changed files for committing
     required: false
     default: 'true'
+  update-local:
+    description: Pull changes into your local branch after committing
+    required: false
+    default: 'true'
   force-push:
     description: Force push the commit
     required: false
