@@ -21,27 +21,31 @@ inputs:
     description: File to use for the commit message
     required: false
   auto-stage:
-    description: Automatically stage all changed files for committing
+    description: Stage all changed files for committing
     required: false
     default: 'true'
   update-local:
-    description: Pull changes into your local branch after committing
+    description: Update local branch after committing
     required: false
     default: 'true'
   force-push:
     description: Force push the commit
     required: false
     default: 'false'
+  if-no-commit:
+    description: Set the behavior when no commit is made
+    required: false
+    default: 'warning'
   no-throttle:
-    description: Disables the built in throttling mechanism during API requests
+    description: Disable the throttling mechanism during requests
     required: false
     default: 'false'
   no-retry:
-    description: Disables the built in retry mechanism during API requests
+    description: Disable the retry mechanism during requests
     required: false
     default: 'false'
   max-retries:
-    description: Number of retries to attempt when an API request fails
+    description: Number of retries to attempt if a request fails
     required: false
     default: '1'
   follow-symlinks:

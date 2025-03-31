@@ -55,28 +55,30 @@ committed by the Action will be left staged.
 >   example.txt
 > ```
 
-| Name              | Type    | Description                                                    | Default                   |
-| ----------------- | ------- | -------------------------------------------------------------- | ------------------------- |
-| `ref`             | String  | The ref to push the commit to                                  | `${{ github.ref }}`       |
-| `files`           | List    | Files/[Glob] patterns to include with the commit [1]           | _required_                |
-| `message`         | String  | Message for the commit [2]                                     | _optional_                |
-| `message-file`    | String  | File to use for the commit message [2]                         | _optional_                |
-| `auto-stage`      | Boolean | Automatically stage all changed files for committing [3]       | `true`                    |
-| `update-local`    | Boolean | Pull changes into your local branch after committing [3]       | `true`                    |
-| `force-push`      | Boolean | Force push the commit                                          | `false`                   |
-| `no-throttle`     | Boolean | Disables the built in throttling mechanism during API requests | `false`                   |
-| `no-retry`        | Boolean | Disables the built in retry mechanism during API requests      | `false`                   |
-| `max-retries`     | Number  | Number of retries to attempt when an API request fails         | `1`                       |
-| `follow-symlinks` | Boolean | Follow symbolic links when globbing files                      | `true`                    |
-| `workspace`       | String  | Directory containing checked out files                         | `${{ github.workspace }}` |
-| `token`           | String  | GitHub Token for REST API access [4]                           | `${{ github.token }}`     |
+| Name              | Type    | Description                                          | Default                   |
+| ----------------- | ------- | ---------------------------------------------------- | ------------------------- |
+| `ref`             | String  | The ref to push the commit to                        | `${{ github.ref }}`       |
+| `files`           | List    | Files/[Glob] patterns to include with the commit [1] | _required_                |
+| `message`         | String  | Message for the commit [2]                           | _optional_                |
+| `message-file`    | String  | File to use for the commit message [2]               | _optional_                |
+| `auto-stage`      | Boolean | Stage all changed files for committing [3]           | `true`                    |
+| `update-local`    | Boolean | Update local branch after committing [3]             | `true`                    |
+| `force-push`      | Boolean | Force push the commit                                | `false`                   |
+| `if-no-commit`    | String  | Set the behavior when no commit is made [4]          | `warning`                 |
+| `no-throttle`     | Boolean | Disable the throttling mechanism during requests     | `false`                   |
+| `no-retry`        | Boolean | Disable the retry mechanism during requests          | `false`                   |
+| `max-retries`     | Number  | Number of retries to attempt if a request fails      | `1`                       |
+| `follow-symlinks` | Boolean | Follow symbolic links when globbing files            | `true`                    |
+| `workspace`       | String  | Directory containing checked out files               | `${{ github.workspace }}` |
+| `token`           | String  | GitHub Token for REST API access [5]                 | `${{ github.token }}`     |
 
 > 1. Files within your `.gitignore` will not be included. You can also negate
 >    any files by prefixing it with `!`
 > 2. You must include either `message` or `message-file` (which takes priority).
 > 3. Only files that match a pattern you include will be in the final commit,
 >    but you can optionally stage files yourself for more control.
-> 4. This Action is intended to work with the default `GITHUB_TOKEN`. See the
+> 4. Available options are `info`, `notice`, `warning` and `error`.
+> 5. This Action is intended to work with the default `GITHUB_TOKEN`. See the
 >    [notice](#verified-bot-commit-action) and [limitations](#limitations)
 
 ### Outputs

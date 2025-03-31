@@ -34,6 +34,34 @@ jobs:
           git checkout -b "$TEST_BRANCH"
           git push -u origin "$TEST_BRANCH"
 
+      - name: Commit with error and without changes
+        id: failure
+        uses: ./
+        continue-on-error: true
+        with:
+          ref: ${{ env.TEST_BRANCH }}
+          message: 'test: ${{ github.ref }} @ ${{ github.sha }}'
+          if-no-commit: error
+          files: |
+            README.md
+
+      - name: Verify branch
+        shell: bash
+        env:
+          OUTCOME: ${{ steps.failure.outcome }}
+        run: |
+          git status
+          git remote update
+          if git status -uno "$TEST_BRANCH" | grep -q "branch is behind" ; then
+            echo "::error::Found unexpectted commit on $TEST_BRANCH"
+            exit 1
+          fi
+
+          if [ "$OUTCOME" != "failure" ]; then
+            echo "::error::Expected Action to result in failure"
+            exit 1
+          fi
+
       - name: Generate file changes
         shell: bash
         run: |
@@ -49,7 +77,25 @@ jobs:
             echo "$i-$GITHUB_RUN_ID-$RANDOM" | tee "$TEST_BRANCH/$i-$GITHUB_RUN_ID"
           done
 
-      - name: Commit changes
+      - name: Commit changes that don't match
+        uses: ./
+        with:
+          ref: ${{ env.TEST_BRANCH }}
+          message: 'test: ${{ github.ref }} @ ${{ github.sha }}'
+          files: |
+            something-that-doesnt-exist.txt
+
+      - name: Verify branch
+        shell: bash
+        run: |
+          git status
+          git remote update
+          if git status -uno "$TEST_BRANCH" | grep -q "branch is behind" ; then
+            echo "::error::Found unexpectted commit on $TEST_BRANCH"
+            exit 1
+          fi
+
+      - name: Commit real changes
         id: commit
         uses: ./
         with:
