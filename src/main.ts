@@ -83,13 +83,13 @@ export async function run(): Promise<void> {
     const noCommitAction = core.getInput('if-no-commit')
     if (changedFiles.length === 0) {
       if (noCommitAction === 'error') {
-        throw new Error('No file changes found in local branch')
+        throw new Error('No changes found in local branch')
       } else if (noCommitAction === 'warning') {
-        core.warning('No file changes found in local branch')
+        core.warning('No changes found in local branch')
       } else if (noCommitAction === 'notice') {
-        core.notice('No file changes found in local branch')
+        core.notice('No changes found in local branch')
       } else {
-        core.info('No file changes found in local branch')
+        core.info('No changes found in local branch')
       }
       return
     }
@@ -137,13 +137,13 @@ export async function run(): Promise<void> {
     // Confirm that blobs were made
     if (blobs.length === 0) {
       if (noCommitAction === 'error') {
-        throw new Error('No files added to commit')
+        throw new Error('No files to commit')
       } else if (noCommitAction === 'warning') {
-        core.warning('No files added to commit')
+        core.warning('No files to commit')
       } else if (noCommitAction === 'notice') {
-        core.notice('No files added to commit')
+        core.notice('No files to commit')
       } else {
-        core.info('No files added to commit')
+        core.info('No files to commit')
       }
       return
     }

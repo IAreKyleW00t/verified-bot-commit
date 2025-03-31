@@ -36463,16 +36463,16 @@ async function run() {
         const noCommitAction = coreExports.getInput('if-no-commit');
         if (changedFiles.length === 0) {
             if (noCommitAction === 'error') {
-                throw new Error('No file changes found in local branch');
+                throw new Error('No changes found in local branch');
             }
             else if (noCommitAction === 'warning') {
-                coreExports.warning('No file changes found in local branch');
+                coreExports.warning('No changes found in local branch');
             }
             else if (noCommitAction === 'notice') {
-                coreExports.notice('No file changes found in local branch');
+                coreExports.notice('No changes found in local branch');
             }
             else {
-                coreExports.info('No file changes found in local branch');
+                coreExports.info('No changes found in local branch');
             }
             return;
         }
@@ -36507,16 +36507,16 @@ async function run() {
         // Confirm that blobs were made
         if (blobs.length === 0) {
             if (noCommitAction === 'error') {
-                throw new Error('No files added to commit');
+                throw new Error('No files to commit');
             }
             else if (noCommitAction === 'warning') {
-                coreExports.warning('No files added to commit');
+                coreExports.warning('No files to commit');
             }
             else if (noCommitAction === 'notice') {
-                coreExports.notice('No files added to commit');
+                coreExports.notice('No files to commit');
             }
             else {
-                coreExports.info('No files added to commit');
+                coreExports.info('No files to commit');
             }
             return;
         }
