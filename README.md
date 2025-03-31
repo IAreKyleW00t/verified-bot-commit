@@ -130,7 +130,7 @@ operations as a different user than what the Runner (usually `root`), which
 results in `.git/` files being owned by that user.
 
 You can fix this by updating the permissions of the `.git/` directory to the
-current user and group.
+back to current user/group.
 
 ```yaml
 - name: Fix .git permissions
