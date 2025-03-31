@@ -74,7 +74,25 @@ export async function run(): Promise<void> {
       }
     })
     core.endGroup()
-    const changedFiles = execOutput.trim().split(/\r?\n/)
+    const changedFiles = execOutput
+      .trim()
+      .split(/\r?\n/)
+      .filter((f) => f)
+
+    // If there are no changed files, exit early
+    const noCommitAction = core.getInput('if-no-commit')
+    if (changedFiles.length === 0) {
+      if (noCommitAction === 'error') {
+        throw new Error('No file changes found in local branch')
+      } else if (noCommitAction === 'warning') {
+        core.warning('No file changes found in local branch')
+      } else if (noCommitAction === 'notice') {
+        core.notice('No file changes found in local branch')
+      } else {
+        core.info('No file changes found in local branch')
+      }
+      return
+    }
 
     // Create a blob object for each file
     const blobs: GitBlob[] = []
@@ -118,7 +136,16 @@ export async function run(): Promise<void> {
 
     // Confirm that blobs were made
     if (blobs.length === 0) {
-      throw Error(`There were no blobs created as part of the commit`)
+      if (noCommitAction === 'error') {
+        throw new Error('No files added to commit')
+      } else if (noCommitAction === 'warning') {
+        core.warning('No files added to commit')
+      } else if (noCommitAction === 'notice') {
+        core.notice('No files added to commit')
+      } else {
+        core.info('No files added to commit')
+      }
+      return
     }
 
     // Create tree with all blobs

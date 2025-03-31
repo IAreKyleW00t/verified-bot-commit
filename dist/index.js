@@ -36455,7 +36455,27 @@ async function run() {
             }
         });
         coreExports.endGroup();
-        const changedFiles = execOutput.trim().split(/\r?\n/);
+        const changedFiles = execOutput
+            .trim()
+            .split(/\r?\n/)
+            .filter((f) => f);
+        // If there are no changed files, exit early
+        const noCommitAction = coreExports.getInput('if-no-commit');
+        if (changedFiles.length === 0) {
+            if (noCommitAction === 'error') {
+                throw new Error('No file changes found in local branch');
+            }
+            else if (noCommitAction === 'warning') {
+                coreExports.warning('No file changes found in local branch');
+            }
+            else if (noCommitAction === 'notice') {
+                coreExports.notice('No file changes found in local branch');
+            }
+            else {
+                coreExports.info('No file changes found in local branch');
+            }
+            return;
+        }
         // Create a blob object for each file
         const blobs = [];
         const patterns = coreExports.getMultilineInput('files');
@@ -36486,7 +36506,19 @@ async function run() {
         coreExports.setOutput('blobs', blobs.map((b) => b.sha));
         // Confirm that blobs were made
         if (blobs.length === 0) {
-            throw Error(`There were no blobs created as part of the commit`);
+            if (noCommitAction === 'error') {
+                throw new Error('No files added to commit');
+            }
+            else if (noCommitAction === 'warning') {
+                coreExports.warning('No files added to commit');
+            }
+            else if (noCommitAction === 'notice') {
+                coreExports.notice('No files added to commit');
+            }
+            else {
+                coreExports.info('No files added to commit');
+            }
+            return;
         }
         // Create tree with all blobs
         const tree = await createTree(blobs, headTree, githubExports.context, octokit);
