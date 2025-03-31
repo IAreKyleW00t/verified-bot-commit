@@ -64,7 +64,7 @@ committed by the Action will be left staged.
 | `auto-stage`      | Boolean | Stage all changed files for committing [3]           | `true`                    |
 | `update-local`    | Boolean | Update local branch after committing [3]             | `true`                    |
 | `force-push`      | Boolean | Force push the commit                                | `false`                   |
-| `if-no-commit`    | String  | Set the behavior when no commit is made [4]          | `info`                    |
+| `if-no-commit`    | String  | Set the behavior when no commit is made [4]          | `warning`                 |
 | `no-throttle`     | Boolean | Disable the throttling mechanism during requests     | `false`                   |
 | `no-retry`        | Boolean | Disable the retry mechanism during requests          | `false`                   |
 | `max-retries`     | Number  | Number of retries to attempt if a request fails      | `1`                       |

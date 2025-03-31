@@ -35,7 +35,7 @@ inputs:
   if-no-commit:
     description: Set the behavior when no commit is made
     required: false
-    default: 'info'
+    default: 'warning'
   no-throttle:
     description: Disable the throttling mechanism during requests
     required: false
