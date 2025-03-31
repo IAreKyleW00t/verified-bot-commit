@@ -14,10 +14,11 @@ A GitHub Action to create signed and verified commits as the
 accomplished via the GitHub [REST API] by using the [Blob] and [Tree] endpoints
 to build the commit and update the original Ref to point to it. [^1]
 
-After using this Action, your local branch will be updated to point to the newly
-created commit, which will be signed and verified using
-[GitHub's public PGP key](https://github.com/web-flow.gpg)! Files that were not
-committed by the Action will be left staged.
+This Action will stage all changed files in your local branch and add those that
+match your file patterns to the commit. Afterwards, your local branch will be
+updated to point to the newly created commit, which will be signed and verified
+using [GitHub's public PGP key](https://github.com/web-flow.gpg)! Files that
+were not committed by the Action will be left staged.
 
 > [!IMPORTANT]
 >
@@ -108,6 +109,33 @@ unverified commit. You should _really_ look into [using your own keys] and
 [signing commits] yourself with the help of Actions like
 [webfactory/ssh-agent](https://github.com/webfactory/ssh-agent) and
 [crazy-max/ghaction-import-gpg](https://github.com/crazy-max/ghaction-import-gpg).
+
+## Common Errors
+
+Below are some common errors that can occur depending on your use case. This are
+issues that are considered outside the scope of this Action but are still
+documented here to include common solutions/workarounds for others.
+
+Feel free to create an
+[Issue](https://github.com/IAreKyleW00t/verified-bot-commit/issues) or
+[Pull Request](https://github.com/IAreKyleW00t/verified-bot-commit/pulls) if you
+encounter other errors that should be documented here.
+
+### Git Object Errors
+
+If you see errors that contain
+`insufficient permission for adding an object to repository database .git/objects`
+then this probably means another Action in your Workflow performed a local Git
+operations as a different user than what the Runner (usually `root`), which
+results in `.git/` files being owned by that user.
+
+You can fix this by updating the permissions of the `.git/` directory to the
+current user and group.
+
+```yaml
+- name: Fix .git permissions
+  run: sudo chown -R "$(id -u):$(id -g)" .git
+```
 
 ## Development
 
