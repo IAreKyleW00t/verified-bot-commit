@@ -229,7 +229,89 @@ jobs:
           fi
           exit "$RC"
 
-      - name: Delete test branch
+      - name: Checkout test-repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          path: test-repo
+
+      - name: Setup test-repo branch and files
+        shell: bash
+        run: |
+          cd test-repo
+          git checkout -b "$TEST_BRANCH-test-repo"
+          git push -u origin "$TEST_BRANCH-test-repo"
+          echo -e "Just a test" | tee -a test.txt
+          date -Iseconds | tee test-ignore.txt
+          echo "$GITHUB_RUN_ID" | tee __tests__/ignore/test-abcdef.txt
+          echo "$GITHUB_RUN_ID" | tee src/test.txt
+          echo "$GITHUB_RUN_ID" | tee src/test2.txt
+          echo "uncommitted file" | tee blah.txt
+          mkdir -p "$GITHUB_RUN_ID"
+          for i in {1..10}; do
+            echo "$i-$TEST_BRANCH-$RANDOM" | tee "$GITHUB_RUN_ID/$i-$TEST_BRANCH"
+          done
+
+      - name: Commit test-repo changes
+        id: commit-sub
+        uses: ./
+        with:
+          workspace: test-repo
+          ref: ${{ env.TEST_BRANCH }}-test-repo
+          message: 'test: ${{ github.ref }} @ ${{ github.sha }}'
+          files: |
+            *.txt
+            !src/test.txt
+            src/*.txt
+            __tests__/**
+            !${{ github.run_id }}/1*-*
+            ${{ github.run_id }}/**
+
+      - name: Verify test-repo
+        shell: bash
+        env:
+          COMMIT: ${{ steps.commit-sub.outputs.commit }}
+        run: |
+          cd test-repo
+          git status
+          RC=0
+
+          FILES=$(git diff-tree --no-commit-id --name-only -r "$COMMIT")
+          COUNT=$(echo "$FILES" | wc -l)
+          echo -e "Committed files: $COUNT\n$FILES"
+          if [ -z "$COUNT" ] && [ "$COUNT" -ne 10 ]; then
+            echo "::error::Expected 10 committed files but got $COUNT"
+            RC=1
+          fi
+          echo
+
+          FILES=$(git diff --cached --name-only)
+          COUNT=$(echo "$FILES" | wc -l)
+          echo -e "Staged files: $COUNT\n$FILES"
+          if [ "$COUNT" -ne 3 ]; then
+            echo "::error::Expected 3 staged files but got $COUNT"
+            RC=1
+          fi
+          echo
+
+          FILES=$(git diff --name-only)
+          COUNT=$(echo "$FILES" | wc -l)
+          echo -e "Unstaged files: $COUNT\n$FILES"
+          if [ -n "$COUNT" ] && [ "$COUNT" -ne 1 ]; then
+            echo "::error::Expected 0 unstaged files but got $COUNT"
+            RC=1
+          fi
+          echo
+
+          FILES=$(git ls-files --others --exclude-standard)
+          COUNT=$(echo "$FILES" | wc -l)
+          echo -e "Untracked files: $COUNT\n$FILES"
+          if [ -n "$COUNT" ] && [ "$COUNT" -ne 1 ]; then
+            echo "::error::Expected 0 untracked files but got $COUNT"
+            RC=1
+          fi
+          exit "$RC"
+
+      - name: Delete test branches
         if: (!cancelled())
         shell: bash
         run: |
@@ -238,5 +320,5 @@ jobs:
           else
             git checkout "$GITHUB_REF_NAME"
           fi
-          git branch -D "$TEST_BRANCH"
           git push -u origin --delete "$TEST_BRANCH"
+          git push -u origin --delete "$TEST_BRANCH-test-repo"
