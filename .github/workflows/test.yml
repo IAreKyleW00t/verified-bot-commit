@@ -76,6 +76,10 @@ jobs:
           for i in {1..100}; do
             echo "$i-$GITHUB_RUN_ID-$RANDOM" | tee "$TEST_BRANCH/$i-$GITHUB_RUN_ID"
           done
+          mkdir -p "$GITHUB_RUN_ID"
+          for i in {1..10}; do
+            echo "$i-$TEST_BRANCH-$RANDOM" | tee "$GITHUB_RUN_ID/$i-$TEST_BRANCH"
+          done
 
       - name: Commit changes that don't match
         uses: ./
@@ -94,6 +98,67 @@ jobs:
             echo "::error::Found unexpectted commit on $TEST_BRANCH"
             exit 1
           fi
+
+      - name: Manually stage files
+        shell: bash
+        run: |
+          git restore --staged .
+          git add "$GITHUB_RUN_ID/"
+          git status
+
+      - name: Commit all staged changes
+        id: staged
+        uses: ./
+        with:
+          ref: ${{ env.TEST_BRANCH }}
+          message: 'staged: ${{ github.ref }} @ ${{ github.sha }}'
+          auto-stage: false
+          files: |
+            **
+
+      - name: Verify file changes
+        shell: bash
+        env:
+          COMMIT: ${{ steps.staged.outputs.commit }}
+        run: |
+          git status
+          RC=0
+
+          FILES=$(git diff-tree --no-commit-id --name-only -r "$COMMIT")
+          COUNT=$(echo "$FILES" | wc -l)
+          echo -e "Committed files: $COUNT\n$FILES"
+          if [ "$COUNT" -ne 10 ]; then
+            echo "::error::Expected 10 committed files but got $COUNT"
+            RC=1
+          fi
+          echo
+
+          FILES=$(git diff --cached --name-only)
+          COUNT=$(echo "$FILES" | wc -l)
+          echo -e "Staged files: $COUNT\n$FILES"
+          if [ -n "$COUNT" ] && [ "$COUNT" -ne 1 ]; then
+            echo "::error::Expected 0 staged files but got $COUNT"
+            RC=1
+          fi
+          echo
+
+          FILES=$(git diff --name-only)
+          COUNT=$(echo "$FILES" | wc -l)
+          echo -e "Unstaged files: $COUNT\n$FILES"
+          if [ -z "$COUNT" ] && [ "$COUNT" -ne 1 ]; then
+            echo "::error::Expected 1 unstaged files but got 0"
+            RC=1
+          fi
+          echo
+
+          FILES=$(git ls-files --others --exclude-standard)
+          COUNT=$(echo "$FILES" | wc -l)
+          echo -e "Untracked files: $COUNT\n$FILES"
+          if [ "$COUNT" -ne 104 ]; then
+            echo "::error::Expected 104 untracked files but got $COUNT"
+            RC=1
+          fi
+          exit "$RC"
 
       - name: Commit real changes
         id: commit
@@ -129,19 +194,37 @@ jobs:
           RC=0
 
           FILES=$(git diff-tree --no-commit-id --name-only -r "$COMMIT")
-          COUNT=$(wc -l <<< "$FILES")
-          echo -e "Changed files: $COUNT\n$FILES"
-          if [ "$(wc -l <<< "$FILES")" -ne 91 ]; then
-            echo "::error::Expected 91 changed files but got $COUNT"
+          COUNT=$(echo "$FILES" | wc -l)
+          echo -e "Committed files: $COUNT\n$FILES"
+          if [ "$COUNT" -ne 91 ]; then
+            echo "::error::Expected 91 committed files but got $COUNT"
             RC=1
           fi
           echo
 
           FILES=$(git diff --cached --name-only)
-          COUNT=$(wc -l <<< "$FILES")
-          echo -e "Unchanged files: $COUNT\n$FILES"
-          if [ "$(wc -l <<< "$FILES")" -ne 14 ]; then
-            echo "::error::Expected 14 uncommitted files but got $COUNT"
+          COUNT=$(echo "$FILES" | wc -l)
+          echo -e "Staged files: $COUNT\n$FILES"
+          if [ "$COUNT" -ne 14 ]; then
+            echo "::error::Expected 14 staged files but got $COUNT"
+            RC=1
+          fi
+          echo
+
+          FILES=$(git diff --name-only)
+          COUNT=$(echo "$FILES" | wc -l)
+          echo -e "Unstaged files: $COUNT\n$FILES"
+          if [ -n "$COUNT" ] && [ "$COUNT" -ne 1 ]; then
+            echo "::error::Expected 0 unstaged files but got $COUNT"
+            RC=1
+          fi
+          echo
+
+          FILES=$(git ls-files --others --exclude-standard)
+          COUNT=$(echo "$FILES" | wc -l)
+          echo -e "Untracked files: $COUNT\n$FILES"
+          if [ -n "$COUNT" ] && [ "$COUNT" -ne 1 ]; then
+            echo "::error::Expected 0 untracked files but got $COUNT"
             RC=1
           fi
           exit "$RC"

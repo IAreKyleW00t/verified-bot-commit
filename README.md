@@ -97,6 +97,78 @@ This Actions requires the following permissions granted to the `GITHUB_TOKEN`.
 
 - `contents: write`
 
+## Examples
+
+### Commit all changes
+
+```yaml
+- name: Install regctl
+  uses: iarekylew00t/verified-bot-commit@v1
+  with:
+    message: 'chore: Updates'
+    files: |
+      **
+```
+
+### Commit changes back to a Pull Request
+
+```yaml
+- name: Install regctl
+  uses: iarekylew00t/verified-bot-commit@v1
+  with:
+    ref: ${{ github.event.pull_request.head.ref }}
+    message: 'chore: Update README'
+    files: |
+      README.md
+```
+
+### Ignore warnings when no files changed
+
+```yaml
+- name: Install regctl
+  uses: iarekylew00t/verified-bot-commit@v1
+  with:
+    if-no-commit: info
+    message: 'feat: Some changes'
+    files: |
+      README.md
+```
+
+### Manually stage your own files
+
+```yaml
+- name: Stage files
+  shell: bash
+  run: |
+    git add docs/
+    git restore --staged docs/something/idont/want
+
+- name: Install regctl
+  uses: iarekylew00t/verified-bot-commit@v1
+  with:
+    auto-stage: false
+    message: 'chore: Updating docs'
+    files: |
+      docs/**
+```
+
+### Use a repository in another directory
+
+```yaml
+- name: Checkout repo
+  uses: actions/checkout@v4
+  with:
+    path: my-repo
+
+- name: Install regctl
+  uses: iarekylew00t/verified-bot-commit@v1
+  with:
+    workspace: my-repo
+    message: 'chore: Updating badges'
+    files: |
+      badges/
+```
+
 ## Limitations
 
 ⚠️ As always, the `GITHUB_TOKEN` cannot push to protected Refs.
