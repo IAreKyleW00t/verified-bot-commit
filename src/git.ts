@@ -84,15 +84,10 @@ export async function createBlob(
   context: Context,
   octokit: InstanceType<typeof Octokit>
 ): Promise<GitBlob> {
-  // Generate relative and absolute paths to file base on workspace
-  const relPath = file.startsWith(workspace)
-    ? file.replace(workspace, '').substring(1)
-    : file
-  const absPath = file.startsWith(workspace) ? file : path.join(workspace, file)
-
   // Get file data
-  const mode = getFileMode(absPath, symlink)
-  const content = Buffer.from(fs.readFileSync(absPath)).toString('base64')
+  const location = path.join(workspace, file)
+  const mode = getFileMode(location, symlink)
+  const content = Buffer.from(fs.readFileSync(location)).toString('base64')
 
   // Send the blob to GitHub
   const sha = (
@@ -106,7 +101,7 @@ export async function createBlob(
 
   // Format blob for later use in tree
   return {
-    path: relPath,
+    path: file,
     type: 'blob',
     mode,
     sha
