@@ -320,6 +320,5 @@ jobs:
           else
             git checkout "$GITHUB_REF_NAME"
           fi
-          git pull
           git push -u origin --delete "$TEST_BRANCH"
           git push -u origin --delete "$TEST_BRANCH-test-repo"
