@@ -160,13 +160,17 @@ This Actions requires the following permissions granted to the `GITHUB_TOKEN`.
   with:
     path: my-repo
 
+- name: Update files
+  shell: bash
+  run: echo 'Hello World!' > my-repo/test.txt
+
 - name: Install regctl
   uses: iarekylew00t/verified-bot-commit@v1
   with:
     workspace: my-repo
-    message: 'chore: Updating badges'
+    message: 'chore: Updating tests'
     files: |
-      badges/
+      test.txt
 ```
 
 ## Limitations
