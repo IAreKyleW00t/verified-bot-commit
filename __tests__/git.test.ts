@@ -1,40 +1,30 @@
-import * as fs from 'fs'
-import * as os from 'os'
-import * as path from 'path'
+import mock from 'mock-fs'
 
 import * as git from '../src/git.js'
 
-describe('git', () => {
-  let tmpDir: string
-  beforeAll(() => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'verified-bot-commit_'))
-  })
-  afterAll(() => {
-    // Cleanup
-    fs.rmSync(tmpDir, { recursive: true, force: true })
-  })
+describe('git.ts', () => {
+  // Reset mocked filesystem after each test
+  afterEach(mock.restore)
 
   describe('buildCommitMessage', () => {
     test('accepts a message', () => {
-      // Set message
       const message = 'Some message'
-
-      // Check result
       const result = git.buildCommitMessage('Some message')
       expect(result).toEqual(message)
     })
 
     test('accepts a message from file', () => {
-      // Set message
-      const message = 'Some message'
+      mock({
+        'message.txt': 'Some message'
+      })
 
-      // Write to file
-      const file = path.join(tmpDir, 'test-message.txt')
-      fs.writeFileSync(file, message)
+      const result = git.buildCommitMessage(undefined, 'message.txt')
+      expect(result).toEqual('Some message')
+    })
 
-      // Check result
-      const result = git.buildCommitMessage(undefined, file)
-      expect(result).toEqual(message)
+    test('rejects an empty message', () => {
+      const result = () => git.buildCommitMessage('')
+      expect(result).toThrow('Commit message is empty')
     })
   })
 
@@ -47,7 +37,6 @@ describe('git', () => {
       ['heads/feat/test', 'heads/feat/test'],
       ['refs/heads/refs', 'heads/refs']
     ])('handles %s', (ref, expected) => {
-      // Check each result
       const result = git.normalizeRef(ref)
       expect(result).toEqual(expected)
     })
@@ -55,56 +44,54 @@ describe('git', () => {
 
   describe('getFileMode', () => {
     test('returns correct mode for regular file', () => {
-      // Create file
-      const file = path.join(tmpDir, 'test-regular-file.txt')
-      fs.closeSync(fs.openSync(file, 'w'))
+      mock({
+        'test.txt': mock.file({ mode: 0o644 })
+      })
 
-      // Check result
-      const result = git.getFileMode(file, true)
+      const result = git.getFileMode('test.txt', true)
       expect(result).toEqual('100644')
     })
 
     test('returns correct mode for executable file', () => {
-      // Create file and make it executable
-      const file = path.join(tmpDir, 'test-exec')
-      fs.closeSync(fs.openSync(file, 'w'))
-      fs.chmodSync(file, fs.constants.S_IXUSR)
+      mock({
+        test: mock.file({ mode: 0o755 })
+      })
 
-      // Check result
-      const result = git.getFileMode(file, true)
+      const result = git.getFileMode('test', true)
       expect(result).toEqual('100755')
     })
 
     test('returns correct mode for directory', () => {
-      // Check result
-      const result = git.getFileMode(tmpDir, true)
+      mock({
+        'test-dir': {}
+      })
+
+      const result = git.getFileMode('test-dir', true)
       expect(result).toEqual('040000')
     })
 
     test('returns correct mode for symlinks', () => {
-      // Create symlink
-      const symlink = path.join(tmpDir, 'link')
-      fs.symlinkSync(tmpDir, symlink)
+      mock({
+        file: 'some file',
+        link: mock.symlink({
+          path: 'file'
+        })
+      })
 
-      // Check result
-      const result = git.getFileMode(symlink, true)
+      const result = git.getFileMode('link', true)
       expect(result).toEqual('120000')
     })
 
     test('returns correct mode for symlinks when not following', () => {
-      // Create file
-      const file = path.join(tmpDir, 'test-file.txt')
-      fs.closeSync(fs.openSync(file, 'w'))
+      mock({
+        file: 'some file',
+        link: mock.symlink({
+          path: 'file'
+        })
+      })
 
-      // Create symlink
-      const symlink = path.join(tmpDir, 'test-link')
-      fs.symlinkSync(tmpDir, symlink)
-
-      // Check result
-      const dirResult = git.getFileMode(symlink, false)
-      const fileResult = git.getFileMode(file, false)
-      expect(dirResult).toEqual('040000')
-      expect(fileResult).toEqual('100644')
+      const result = git.getFileMode('link', false)
+      expect(result).toEqual('100644')
     })
   })
 })
