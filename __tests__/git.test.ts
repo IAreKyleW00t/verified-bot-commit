@@ -1,5 +1,4 @@
 import mock from 'mock-fs'
-
 import * as git from '../src/git.js'
 
 describe('git.ts', () => {
