@@ -250,14 +250,13 @@ back to current user/group.
 For maintainers, the following release process should be used when cutting new
 versions.
 
-1. ⏬ Ensure all changes are in the `main` branch and all necessary
+1. ⏬ Pull down the latest changes and ensure all
    [Workflows](https://github.com/IAreKyleW00t/verified-bot-commit/actions) are
    passing.
 
    ```sh
    git checkout main
    git pull
-   npm run all
    ```
 
 2. ✅ Bump the package version.
