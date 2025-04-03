@@ -6,10 +6,9 @@ import MockFs from 'mock-fs'
 import { handlers } from '../__fixtures__/handlers.js'
 import { github } from '../__fixtures__/github.js'
 
-// Import mocked modules
+// Import mocked modules before module to be tested
 jest.unstable_mockModule('@actions/github', () => github)
 
-// Import module to be tested
 import * as git from '../src/git.js'
 import { GitBlob } from '../src/git.js'
 
@@ -18,7 +17,7 @@ let octokit: Octokit
 
 describe('git.ts', () => {
   beforeAll(() => {
-    // Setup Octokit and mock HTTP responses
+    // Setup Octokit and mock HTTP responses (async)
     octokit = new Octokit()
     server = setupServer(...handlers)
     server.listen()
