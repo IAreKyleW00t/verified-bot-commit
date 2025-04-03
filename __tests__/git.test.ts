@@ -1,9 +1,36 @@
-import mock from 'mock-fs'
+import { jest } from '@jest/globals'
+import { Octokit } from '@octokit/core'
+import { setupServer, SetupServerApi } from 'msw/node'
+import MockFs from 'mock-fs'
+
+import { handlers } from '../__fixtures__/handlers.js'
+import { github } from '../__fixtures__/github.js'
+
+// Import mocked modules before module to be tested
+jest.unstable_mockModule('@actions/github', () => github)
+
 import * as git from '../src/git.js'
+import { GitBlob } from '../src/git.js'
+
+let server: SetupServerApi
+let octokit: Octokit
 
 describe('git.ts', () => {
-  // Reset mocked filesystem after each test
-  afterEach(mock.restore)
+  beforeAll(() => {
+    // Setup Octokit and mock HTTP responses (async)
+    octokit = new Octokit()
+    server = setupServer(...handlers)
+    server.listen()
+  })
+
+  afterAll(() => {
+    server.close()
+  })
+
+  afterEach(() => {
+    // Reset mocked filesystem after each test
+    MockFs.restore()
+  })
 
   describe('buildCommitMessage', () => {
     test('accepts a message', () => {
@@ -13,7 +40,7 @@ describe('git.ts', () => {
     })
 
     test('accepts a message from file', () => {
-      mock({
+      MockFs({
         'message.txt': 'Some message'
       })
 
@@ -43,8 +70,8 @@ describe('git.ts', () => {
 
   describe('getFileMode', () => {
     test('returns correct mode for regular file', () => {
-      mock({
-        'test.txt': mock.file({ mode: 0o644 })
+      MockFs({
+        'test.txt': MockFs.file({ mode: 0o644 })
       })
 
       const result = git.getFileMode('test.txt', true)
@@ -52,8 +79,8 @@ describe('git.ts', () => {
     })
 
     test('returns correct mode for executable file', () => {
-      mock({
-        test: mock.file({ mode: 0o755 })
+      MockFs({
+        test: MockFs.file({ mode: 0o755 })
       })
 
       const result = git.getFileMode('test', true)
@@ -61,7 +88,7 @@ describe('git.ts', () => {
     })
 
     test('returns correct mode for directory', () => {
-      mock({
+      MockFs({
         'test-dir': {}
       })
 
@@ -70,9 +97,9 @@ describe('git.ts', () => {
     })
 
     test('returns correct mode for symlinks', () => {
-      mock({
+      MockFs({
         file: 'some file',
-        link: mock.symlink({
+        link: MockFs.symlink({
           path: 'file'
         })
       })
@@ -82,9 +109,9 @@ describe('git.ts', () => {
     })
 
     test('returns correct mode for symlinks when not following', () => {
-      mock({
+      MockFs({
         file: 'some file',
-        link: mock.symlink({
+        link: MockFs.symlink({
           path: 'file'
         })
       })
@@ -92,5 +119,86 @@ describe('git.ts', () => {
       const result = git.getFileMode('link', false)
       expect(result).toEqual('100644')
     })
+  })
+
+  describe('getRef', () => {
+    test('returns a Ref via REST API', async () => {
+      const result = await git.getRef('heads/featureA', github.context, octokit)
+      expect(result).toBe('aa218f56b14c9653891f9e74264a383fa43fefbd')
+    })
+  })
+
+  describe('createBlob', () => {
+    test('creates a Blob via REST API', async () => {
+      MockFs({
+        '/workspace/some/file': 'some contents'
+      })
+
+      const result = await git.createBlob(
+        'some/file',
+        '/workspace',
+        true,
+        github.context,
+        octokit
+      )
+
+      expect(result.mode).toBe('100644')
+      expect(result.path).toBe('some/file')
+      expect(result.sha).toBe('3a0f86fb8db8eea7ccbb9a95f325ddbedfb25e15')
+      expect(result.type).toBe('blob')
+    })
+  })
+
+  describe('createTree', () => {
+    test('creates a Tree via REST API', async () => {
+      const blobs: GitBlob[] = [
+        {
+          mode: '100644',
+          path: 'some/file',
+          sha: '3a0f86fb8db8eea7ccbb9a95f325ddbedfb25e15',
+          type: 'blob'
+        }
+      ]
+
+      const result = await git.createTree(
+        blobs,
+        '9fb037999f264ba9a7fc6274d15fa3ae2ab98312',
+        github.context,
+        octokit
+      )
+
+      expect(result).toBe('cd8274d15fa3ae2ab983129fb037999f264ba9a7')
+    })
+  })
+
+  describe('createCommit', () => {
+    test('creates a Commit via REST API', async () => {
+      const result = await git.createCommit(
+        'cd8274d15fa3ae2ab983129fb037999f264ba9a7',
+        '9fb037999f264ba9a7fc6274d15fa3ae2ab98312',
+        'my commit message',
+        github.context,
+        octokit
+      )
+
+      expect(result).toBe('7638417db6d59f3c431d3e1f261cc637155684cd')
+    })
+  })
+
+  describe('updateRef', () => {
+    test.each([true, false])(
+      'updates a Ref via REST API (force: %s)',
+      async (force) => {
+        const result = await git.updateRef(
+          'heads/featureA',
+          '7638417db6d59f3c431d3e1f261cc637155684cd',
+          force,
+          github.context,
+          octokit
+        )
+
+        expect(result).toBe('aa218f56b14c9653891f9e74264a383fa43fefbd')
+      }
+    )
   })
 })
