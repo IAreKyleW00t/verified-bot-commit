@@ -1,3 +1,4 @@
+// Mocked @actions/github context
 export const github = {
   context: {
     payload: {},

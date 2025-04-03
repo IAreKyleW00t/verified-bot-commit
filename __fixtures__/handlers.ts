@@ -1,5 +1,7 @@
 import { http, HttpResponse } from 'msw'
 
+// Mocked responses are from GitHub's REST API example responses
+// https://docs.github.com/en/rest/quickstart
 export const handlers = [
   http.get(
     'https://api.github.com/repos/octocat/Hello-World/git/ref/heads%2FfeatureA',
