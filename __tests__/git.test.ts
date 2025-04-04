@@ -1,13 +1,9 @@
-import { jest } from '@jest/globals'
 import { Octokit } from '@octokit/core'
 import { setupServer, SetupServerApi } from 'msw/node'
 import MockFs from 'mock-fs'
 
 import { handlers } from '../__fixtures__/handlers.js'
 import { github } from '../__fixtures__/github.js'
-
-// Import mocked modules before module to be tested
-jest.unstable_mockModule('@actions/github', () => github)
 
 import * as git from '../src/git.js'
 import { GitBlob } from '../src/git.js'

@@ -1,3 +1,5 @@
+import { Context } from '@actions/github/lib/context.js'
+
 // Mocked @actions/github context
 export const github = {
   context: {
@@ -23,5 +25,5 @@ export const github = {
       owner: 'octocat',
       repo: 'Hello-World'
     }
-  }
+  } as Context
 }
