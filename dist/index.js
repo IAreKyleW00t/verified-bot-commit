@@ -36425,19 +36425,23 @@ async function run() {
             retry: { enabled: !noRetry },
             throttle: {
                 enabled: !noThrottle,
-                onRateLimit: (retryAfter, options, octokit, retryCount) => {
-                    octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
+                onRateLimit: (retryAfter, options, _, retryCount) => {
+                    const message = `Request quota exhausted for request ${options.method} ${options.url}`;
                     if (!noRetry && retryCount < maxRetries) {
-                        octokit.log.info(`Retrying after ${retryAfter} seconds...`);
+                        coreExports.warning(`${message} - Retrying after ${retryAfter} seconds...`);
                         return true;
                     }
+                    else
+                        coreExports.warning(message);
                 },
-                onSecondaryRateLimit: (retryAfter, options, octokit, retryCount) => {
-                    octokit.log.warn(`SecondaryRateLimit detected for request ${options.method} ${options.url}`);
+                onSecondaryRateLimit: (retryAfter, options, _, retryCount) => {
+                    const message = `SecondaryRateLimit detected for request ${options.method} ${options.url}`;
                     if (!noRetry && retryCount < maxRetries) {
-                        octokit.log.info(`Retrying after ${retryAfter} seconds...`);
+                        coreExports.warning(`${message} - Retrying after ${retryAfter} seconds...`);
                         return true;
                     }
+                    else
+                        coreExports.warning(message);
                 }
             }
         });
