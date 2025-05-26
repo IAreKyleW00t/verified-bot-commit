@@ -34349,7 +34349,7 @@ var createTokenAuth = function createTokenAuth2(token) {
   });
 };
 
-const VERSION$2 = "6.1.5";
+const VERSION$2 = "7.0.2";
 
 const noop$1 = () => {
 };
