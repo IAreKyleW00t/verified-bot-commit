@@ -40,7 +40,7 @@
     "@actions/core": "^1.11.1",
     "@actions/exec": "^1.1.1",
     "@actions/github": "^6.0.1",
-    "@octokit/core": "^6.1.5",
+    "@octokit/core": "^7.0.2",
     "@octokit/plugin-retry": "^7.2.1",
     "@octokit/plugin-throttling": "^10.0.0",
     "minimatch": "^10.0.1"
