@@ -32177,7 +32177,7 @@ class AST {
             return [s, unescape(this.toString()), false, false];
         }
         // XXX abstract out this map method
-        let bodyDotAllowed = !repeated || allowDot || dot || false
+        let bodyDotAllowed = !repeated || allowDot || dot || !startNoDot
             ? ''
             : this.#partsToRegExp(true);
         if (bodyDotAllowed === body) {
