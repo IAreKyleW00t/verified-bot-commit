@@ -31428,7 +31428,7 @@ function requireBraceExpansion () {
 	    var isOptions = m.body.indexOf(',') >= 0;
 	    if (!isSequence && !isOptions) {
 	      // {a},b}
-	      if (m.post.match(/,.*\}/)) {
+	      if (m.post.match(/,(?!,).*\}/)) {
 	        str = m.pre + '{' + m.body + escClose + m.post;
 	        return expand(str);
 	      }
