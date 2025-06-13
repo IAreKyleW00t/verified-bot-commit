@@ -180,8 +180,12 @@ This Actions requires the following permissions granted to the `GITHUB_TOKEN`.
 ⚠️ The [Blob] API has a 40MiB limit, any files larger than this in your commit
 will fail.
 
-> [!TIP]
-> You can create a commit with large files using regular git CLI and push it to a temporary branch. Then `git log --format=raw` will get you the tree hash, which you can use to [create a commit](https://docs.github.com/en/rest/git/commits?apiVersion=2022-11-28#create-a-commit) with Github API. [See example](https://github.com/orgs/community/discussions/50055#discussioncomment-13460641).
+> [!TIP] You can create a commit with large files using regular git CLI and push
+> it to a temporary branch. Then `git log --format=raw` will get you the tree
+> hash, which you can use to
+> [create a commit](https://docs.github.com/en/rest/git/commits?apiVersion=2022-11-28#create-a-commit)
+> with Github API.
+> [See example](https://github.com/orgs/community/discussions/50055#discussioncomment-13460641).
 
 ⚠️ Using your own [Personal Access Token (PAT)] will result in an unsigned and
 unverified commit. You should _really_ look into [using your own keys] and
