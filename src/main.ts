@@ -18,6 +18,7 @@ export async function run(): Promise<void> {
     const noRetry = core.getBooleanInput('no-retry')
     const noThrottle = core.getBooleanInput('no-throttle')
     const octokit = new SafeOctokit({
+      baseUrl: core.getInput('api-url'),
       auth: core.getInput('token'),
       request: { retries: maxRetries },
       retry: { enabled: !noRetry },

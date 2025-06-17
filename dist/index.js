@@ -36386,6 +36386,7 @@ async function run() {
         const noRetry = coreExports.getBooleanInput('no-retry');
         const noThrottle = coreExports.getBooleanInput('no-throttle');
         const octokit = new SafeOctokit({
+            baseUrl: coreExports.getInput('api-url'),
             auth: coreExports.getInput('token'),
             request: { retries: maxRetries },
             retry: { enabled: !noRetry },

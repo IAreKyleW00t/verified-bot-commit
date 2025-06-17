@@ -56,6 +56,10 @@ inputs:
     description: Directory containing checked out files
     required: false
     default: ${{ github.workspace }}
+  api-url:
+    description: Base URL for the GitHub API
+    required: false
+    default: ${{ github.api_url }}
   token:
     description: GitHub Token for REST API access
     required: false

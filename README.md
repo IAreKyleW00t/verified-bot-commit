@@ -71,6 +71,7 @@ were not committed by the Action will be left staged.
 | `max-retries`     | Number  | Number of retries to attempt if a request fails      | `1`                       |
 | `follow-symlinks` | Boolean | Follow symbolic links when globbing files            | `true`                    |
 | `workspace`       | String  | Directory containing checked out files               | `${{ github.workspace }}` |
+| `api-url`         | String  | Base URL for the GitHub API                          | `${{ github.api_url }}`   |
 | `token`           | String  | GitHub Token for REST API access [5]                 | `${{ github.token }}`     |
 
 > 1. Files within your `.gitignore` will not be included. You can also negate
