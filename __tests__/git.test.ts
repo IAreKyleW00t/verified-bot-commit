@@ -57,7 +57,8 @@ describe('git.ts', () => {
       ['refs/heads/test', 'heads/test'],
       ['feat/test', 'heads/feat/test'],
       ['heads/feat/test', 'heads/feat/test'],
-      ['refs/heads/refs', 'heads/refs']
+      ['refs/heads/refs', 'heads/refs'],
+      ['refs/tags/test-tag', 'tags/test-tag']
     ])('handles %s', (ref, expected) => {
       const result = git.normalizeRef(ref)
       expect(result).toEqual(expected)
@@ -118,10 +119,13 @@ describe('git.ts', () => {
   })
 
   describe('getRef', () => {
-    test('returns a Ref via REST API', async () => {
-      const result = await git.getRef('heads/featureA', github.context, octokit)
-      expect(result).toBe('aa218f56b14c9653891f9e74264a383fa43fefbd')
-    })
+    test.each(['heads/featureA', 'tags/v1.2.3'])(
+      'returns a Ref via REST API (ref: %s)',
+      async (ref) => {
+        const result = await git.getRef(ref, github.context, octokit)
+        expect(result).toBe('aa218f56b14c9653891f9e74264a383fa43fefbd')
+      }
+    )
   })
 
   describe('createBlob', () => {
@@ -182,19 +186,21 @@ describe('git.ts', () => {
   })
 
   describe('updateRef', () => {
-    test.each([true, false])(
-      'updates a Ref via REST API (force: %s)',
-      async (force) => {
-        const result = await git.updateRef(
-          'heads/featureA',
-          '7638417db6d59f3c431d3e1f261cc637155684cd',
-          force,
-          github.context,
-          octokit
-        )
+    test.each([
+      ['heads/featureA', true],
+      ['heads/featureA', false],
+      ['tags/v1.2.3', true],
+      ['tags/v1.2.3', false]
+    ])('updates a Ref via REST API (ref: %s force: %s)', async (ref, force) => {
+      const result = await git.updateRef(
+        ref,
+        '7638417db6d59f3c431d3e1f261cc637155684cd',
+        force,
+        github.context,
+        octokit
+      )
 
-        expect(result).toBe('aa218f56b14c9653891f9e74264a383fa43fefbd')
-      }
-    )
+      expect(result).toBe('aa218f56b14c9653891f9e74264a383fa43fefbd')
+    })
   })
 })

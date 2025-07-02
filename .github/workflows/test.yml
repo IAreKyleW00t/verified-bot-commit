@@ -21,16 +21,19 @@ jobs:
       contents: write
     env:
       TEST_BRANCH: test-${{ matrix.os }}-${{ github.run_id }}
+      TEST_TAG: tag-${{ matrix.os }}-${{ github.run_id }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Create test branch
+      - name: Create test branch and tag
         id: branch
         shell: bash
         run: |
           git checkout -b "$TEST_BRANCH"
           git push -u origin "$TEST_BRANCH"
+          git tag "$TEST_TAG"
+          git push -u origin "$TEST_TAG"
 
       - name: Commit with error and without changes
         id: failure
@@ -94,6 +97,28 @@ jobs:
           git remote update
           if git status -uno "$TEST_BRANCH" | grep -q "branch is behind" ; then
             echo "::error::Found unexpectted commit on $TEST_BRANCH"
+            exit 1
+          fi
+
+      - name: Commit changes to tag
+        id: tag
+        uses: ./
+        with:
+          ref: tags/${{ env.TEST_TAG }}
+          message: 'test: ${{ github.ref }} @ ${{ github.sha }}'
+          files: |
+            README.md
+
+      - name: Verify tag
+        shell: bash
+        env:
+          EXPECTED_COMMIT: ${{ steps.tag.outputs.commit }}
+        run: |
+          git status
+          git fetch --tags -f
+          CURRENT_COMMIT=$(git rev-list -n1 "$TEST_TAG")
+          if [ "$CURRENT_COMMIT" != "$EXPECTED_COMMIT" ] ; then
+            echo "::error::$TEST_TAG was at $CURRENT_COMMIT but expected $EXPECTED_COMMIT"
             exit 1
           fi
 
@@ -320,3 +345,4 @@ jobs:
           fi
           git push -u origin --delete "$TEST_BRANCH"
           git push -u origin --delete "$TEST_BRANCH-test-repo"
+          git push -u origin --delete "$TEST_TAG"
