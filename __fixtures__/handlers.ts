@@ -19,6 +19,21 @@ export const handlers = [
     }
   ),
   http.get(
+    'https://api.github.com/repos/octocat/Hello-World/git/ref/tags%2Fv1.2.3',
+    () => {
+      return HttpResponse.json({
+        ref: 'refs/tags/v1.2.3',
+        node_id: 'MDM6UmVmcmVmcy9oZWFkcy9mZWF0dXJlQQ==',
+        url: 'https://api.github.com/repos/octocat/Hello-World/git/refs/tags/v1.2.3',
+        object: {
+          type: 'commit',
+          sha: 'aa218f56b14c9653891f9e74264a383fa43fefbd',
+          url: 'https://api.github.com/repos/octocat/Hello-World/git/commits/aa218f56b14c9653891f9e74264a383fa43fefbd'
+        }
+      })
+    }
+  ),
+  http.get(
     'https://api.github.com/repos/octocat/Hello-World/git/commits/aa218f56b14c9653891f9e74264a383fa43fefbd',
     () => {
       return HttpResponse.json({
@@ -140,6 +155,21 @@ export const handlers = [
         ref: 'refs/heads/featureA',
         node_id: 'MDM6UmVmcmVmcy9oZWFkcy9mZWF0dXJlQQ==',
         url: 'https://api.github.com/repos/octocat/Hello-World/git/refs/heads/featureA',
+        object: {
+          type: 'commit',
+          sha: 'aa218f56b14c9653891f9e74264a383fa43fefbd',
+          url: 'https://api.github.com/repos/octocat/Hello-World/git/commits/aa218f56b14c9653891f9e74264a383fa43fefbd'
+        }
+      })
+    }
+  ),
+  http.patch(
+    'https://api.github.com/repos/octocat/Hello-World/git/refs/tags%2Fv1.2.3',
+    () => {
+      return HttpResponse.json({
+        ref: 'refs/tags/v1.2.3',
+        node_id: 'MDM6UmVmcmVmcy9oZWFkcy9mZWF0dXJlQQ==',
+        url: 'https://api.github.com/repos/octocat/Hello-World/git/refs/tags/v1.2.3',
         object: {
           type: 'commit',
           sha: 'aa218f56b14c9653891f9e74264a383fa43fefbd',

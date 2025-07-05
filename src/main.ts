@@ -49,8 +49,8 @@ export async function run(): Promise<void> {
 
     // Lookup HEAD commit and tree
     const autoStage = core.getBooleanInput('auto-stage')
-    const headRef = git.normalizeRef(core.getInput('ref'))
-    const headCommit = await git.getRef(headRef, github.context, octokit)
+    const ref = git.normalizeRef(core.getInput('ref'))
+    const headCommit = await git.getRef(ref, github.context, octokit)
     const headTree = await git.getTree(headCommit, github.context, octokit)
 
     // Get list of changed files
@@ -162,20 +162,28 @@ export async function run(): Promise<void> {
     // Update the ref to point to the new commit
     const forcePush = core.getBooleanInput('force-push')
     const refSha = await git.updateRef(
-      headRef,
+      ref,
       commit,
       forcePush,
       github.context,
       octokit
     )
-    core.info(`⏩ Updated refs/${headRef} to point to ${refSha}`)
+    core.info(`⏩ Updated refs/${ref} to point to ${refSha}`)
     core.setOutput('ref', refSha)
 
-    // Update local branch
+    // Update local ref
     const updateLocal = core.getBooleanInput('update-local')
     if (updateLocal) {
-      core.startGroup('📍 Updating local branch...')
-      await exec.exec('git', ['pull', 'origin', `refs/${headRef}`], execOpts)
+      core.startGroup('📍 Updating local ref...')
+      if (ref.startsWith('tags/')) {
+        await exec.exec(
+          'git',
+          ['fetch', 'origin', `refs/${ref}`, '--tags', '--force'],
+          execOpts
+        )
+      } else {
+        await exec.exec('git', ['pull', 'origin', `refs/${ref}`], execOpts)
+      }
       core.endGroup()
     }
   } catch (error) {

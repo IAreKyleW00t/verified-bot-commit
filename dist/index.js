@@ -36287,8 +36287,8 @@ function buildCommitMessage(message, file) {
         return output;
 }
 function normalizeRef(ref) {
-    // Ensure ref matches format `heads/<ref>`
-    if (ref.startsWith('heads/'))
+    // Ensure ref matches format `heads/<ref>` or `tags/<ref>`
+    if (ref.startsWith('heads/') || ref.startsWith('tags/'))
         return ref;
     else if (ref.startsWith('refs/'))
         return ref.replace('refs/', '');
@@ -36416,8 +36416,8 @@ async function run() {
         const message = buildCommitMessage(coreExports.getInput('message'), coreExports.getInput('message-file'));
         // Lookup HEAD commit and tree
         const autoStage = coreExports.getBooleanInput('auto-stage');
-        const headRef = normalizeRef(coreExports.getInput('ref'));
-        const headCommit = await getRef(headRef, githubExports.context, octokit);
+        const ref = normalizeRef(coreExports.getInput('ref'));
+        const headCommit = await getRef(ref, githubExports.context, octokit);
         const headTree = await getTree(headCommit, githubExports.context, octokit);
         // Get list of changed files
         const workspace = coreExports.getInput('workspace');
@@ -36510,14 +36510,19 @@ async function run() {
         coreExports.setOutput('commit', commit);
         // Update the ref to point to the new commit
         const forcePush = coreExports.getBooleanInput('force-push');
-        const refSha = await updateRef(headRef, commit, forcePush, githubExports.context, octokit);
-        coreExports.info(`⏩ Updated refs/${headRef} to point to ${refSha}`);
+        const refSha = await updateRef(ref, commit, forcePush, githubExports.context, octokit);
+        coreExports.info(`⏩ Updated refs/${ref} to point to ${refSha}`);
         coreExports.setOutput('ref', refSha);
-        // Update local branch
+        // Update local ref
         const updateLocal = coreExports.getBooleanInput('update-local');
         if (updateLocal) {
-            coreExports.startGroup('📍 Updating local branch...');
-            await execExports.exec('git', ['pull', 'origin', `refs/${headRef}`], execOpts);
+            coreExports.startGroup('📍 Updating local ref...');
+            if (ref.startsWith('tags/')) {
+                await execExports.exec('git', ['fetch', 'origin', `refs/${ref}`, '--tags', '--force'], execOpts);
+            }
+            else {
+                await execExports.exec('git', ['pull', 'origin', `refs/${ref}`], execOpts);
+            }
             coreExports.endGroup();
         }
     }

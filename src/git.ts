@@ -22,8 +22,8 @@ export function buildCommitMessage(message?: string, file?: string): string {
 }
 
 export function normalizeRef(ref: string): string {
-  // Ensure ref matches format `heads/<ref>`
-  if (ref.startsWith('heads/')) return ref
+  // Ensure ref matches format `heads/<ref>` or `tags/<ref>`
+  if (ref.startsWith('heads/') || ref.startsWith('tags/')) return ref
   else if (ref.startsWith('refs/')) return ref.replace('refs/', '')
   else return `heads/${ref}`
 }
