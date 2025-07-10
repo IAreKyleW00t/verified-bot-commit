@@ -3,7 +3,6 @@ import { setupServer, SetupServerApi } from 'msw/node'
 import MockFs from 'mock-fs'
 
 import { handlers } from '../__fixtures__/handlers.js'
-import { github } from '../__fixtures__/github.js'
 
 import * as git from '../src/git.js'
 import { GitBlob } from '../src/git.js'
@@ -122,7 +121,7 @@ describe('git.ts', () => {
     test.each(['heads/featureA', 'tags/v1.2.3'])(
       'returns a Ref via REST API (ref: %s)',
       async (ref) => {
-        const result = await git.getRef(ref, github.context, octokit)
+        const result = await git.getRef(ref, 'octocat', 'Hello-World', octokit)
         expect(result).toBe('aa218f56b14c9653891f9e74264a383fa43fefbd')
       }
     )
@@ -138,7 +137,8 @@ describe('git.ts', () => {
         'some/file',
         '/workspace',
         true,
-        github.context,
+        'octocat',
+        'Hello-World',
         octokit
       )
 
@@ -163,7 +163,8 @@ describe('git.ts', () => {
       const result = await git.createTree(
         blobs,
         '9fb037999f264ba9a7fc6274d15fa3ae2ab98312',
-        github.context,
+        'octocat',
+        'Hello-World',
         octokit
       )
 
@@ -177,7 +178,8 @@ describe('git.ts', () => {
         'cd8274d15fa3ae2ab983129fb037999f264ba9a7',
         '9fb037999f264ba9a7fc6274d15fa3ae2ab98312',
         'my commit message',
-        github.context,
+        'octocat',
+        'Hello-World',
         octokit
       )
 
@@ -196,7 +198,8 @@ describe('git.ts', () => {
         ref,
         '7638417db6d59f3c431d3e1f261cc637155684cd',
         force,
-        github.context,
+        'octocat',
+        'Hello-World',
         octokit
       )
 

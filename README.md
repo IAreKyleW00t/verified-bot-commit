@@ -56,23 +56,24 @@ were not committed by the Action will be left staged.
 >   example.txt
 > ```
 
-| Name              | Type    | Description                                          | Default                   |
-| ----------------- | ------- | ---------------------------------------------------- | ------------------------- |
-| `ref`             | String  | The ref to push the commit to                        | `${{ github.ref }}`       |
-| `files`           | List    | Files/[Glob] patterns to include with the commit [1] | _required_                |
-| `message`         | String  | Message for the commit [2]                           | _optional_                |
-| `message-file`    | String  | File to use for the commit message [2]               | _optional_                |
-| `auto-stage`      | Boolean | Stage all changed files for committing [3]           | `true`                    |
-| `update-local`    | Boolean | Update local branch after committing [3]             | `true`                    |
-| `force-push`      | Boolean | Force push the commit                                | `false`                   |
-| `if-no-commit`    | String  | Set the behavior when no commit is made [4]          | `warning`                 |
-| `no-throttle`     | Boolean | Disable the throttling mechanism during requests     | `false`                   |
-| `no-retry`        | Boolean | Disable the retry mechanism during requests          | `false`                   |
-| `max-retries`     | Number  | Number of retries to attempt if a request fails      | `1`                       |
-| `follow-symlinks` | Boolean | Follow symbolic links when globbing files            | `true`                    |
-| `workspace`       | String  | Directory containing checked out files               | `${{ github.workspace }}` |
-| `api-url`         | String  | Base URL for the GitHub API                          | `${{ github.api_url }}`   |
-| `token`           | String  | GitHub Token for REST API access [5]                 | `${{ github.token }}`     |
+| Name              | Type    | Description                                          | Default                    |
+| ----------------- | ------- | ---------------------------------------------------- | -------------------------- |
+| `repository`      | String  | The target repository                                | `${{ github.repository }}` |
+| `ref`             | String  | The ref to push the commit to                        | `${{ github.ref }}`        |
+| `files`           | List    | Files/[Glob] patterns to include with the commit [1] | _required_                 |
+| `message`         | String  | Message for the commit [2]                           | _optional_                 |
+| `message-file`    | String  | File to use for the commit message [2]               | _optional_                 |
+| `auto-stage`      | Boolean | Stage all changed files for committing [3]           | `true`                     |
+| `update-local`    | Boolean | Update local branch after committing [3]             | `true`                     |
+| `force-push`      | Boolean | Force push the commit                                | `false`                    |
+| `if-no-commit`    | String  | Set the behavior when no commit is made [4]          | `warning`                  |
+| `no-throttle`     | Boolean | Disable the throttling mechanism during requests     | `false`                    |
+| `no-retry`        | Boolean | Disable the retry mechanism during requests          | `false`                    |
+| `max-retries`     | Number  | Number of retries to attempt if a request fails      | `1`                        |
+| `follow-symlinks` | Boolean | Follow symbolic links when globbing files            | `true`                     |
+| `workspace`       | String  | Directory containing checked out files               | `${{ github.workspace }}`  |
+| `api-url`         | String  | Base URL for the GitHub API                          | `${{ github.api_url }}`    |
+| `token`           | String  | GitHub Token for REST API access [5]                 | `${{ github.token }}`      |
 
 > 1. Files within your `.gitignore` will not be included. You can also negate
 >    any files by prefixing it with `!`

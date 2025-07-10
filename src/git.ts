@@ -1,7 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
 
-import { Context } from '@actions/github/lib/context.js'
 import { Octokit } from '@octokit/core'
 
 export type GitMode = '100644' | '100755' | '040000' | '160000' | '120000'
@@ -30,13 +29,14 @@ export function normalizeRef(ref: string): string {
 
 export async function getRef(
   ref: string,
-  context: Context,
+  owner: string,
+  repo: string,
   octokit: InstanceType<typeof Octokit>
 ): Promise<string> {
   return (
     await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
-      owner: context.repo.owner,
-      repo: context.repo.repo,
+      owner,
+      repo,
       ref
     })
   ).data.object.sha
@@ -44,15 +44,16 @@ export async function getRef(
 
 export async function getTree(
   sha: string,
-  context: Context,
+  owner: string,
+  repo: string,
   octokit: InstanceType<typeof Octokit>
 ): Promise<string> {
   return (
     await octokit.request(
       'GET /repos/{owner}/{repo}/git/commits/{commit_sha}',
       {
-        owner: context.repo.owner,
-        repo: context.repo.repo,
+        owner,
+        repo,
         commit_sha: sha
       }
     )
@@ -81,7 +82,8 @@ export async function createBlob(
   file: string,
   workspace: string,
   symlink: boolean,
-  context: Context,
+  owner: string,
+  repo: string,
   octokit: InstanceType<typeof Octokit>
 ): Promise<GitBlob> {
   // Get file data
@@ -92,8 +94,8 @@ export async function createBlob(
   // Send the blob to GitHub
   const sha = (
     await octokit.request('POST /repos/{owner}/{repo}/git/blobs', {
-      owner: context.repo.owner,
-      repo: context.repo.repo,
+      owner,
+      repo,
       encoding: 'base64',
       content
     })
@@ -111,13 +113,14 @@ export async function createBlob(
 export async function createTree(
   blobs: GitBlob[],
   headTree: string,
-  context: Context,
+  owner: string,
+  repo: string,
   octokit: InstanceType<typeof Octokit>
 ): Promise<string> {
   return (
     await octokit.request('POST /repos/{owner}/{repo}/git/trees', {
-      owner: context.repo.owner,
-      repo: context.repo.repo,
+      owner,
+      repo,
       base_tree: headTree,
       tree: blobs
     })
@@ -128,13 +131,14 @@ export async function createCommit(
   tree: string,
   headCommit: string,
   message: string,
-  context: Context,
+  owner: string,
+  repo: string,
   octokit: InstanceType<typeof Octokit>
 ): Promise<string> {
   return (
     await octokit.request('POST /repos/{owner}/{repo}/git/commits', {
-      owner: context.repo.owner,
-      repo: context.repo.repo,
+      owner,
+      repo,
       parents: [headCommit],
       message,
       tree
@@ -146,13 +150,14 @@ export async function updateRef(
   ref: string,
   sha: string,
   force: boolean,
-  context: Context,
+  owner: string,
+  repo: string,
   octokit: InstanceType<typeof Octokit>
 ): Promise<string> {
   return (
     await octokit.request('PATCH /repos/{owner}/{repo}/git/refs/{ref}', {
-      owner: context.repo.owner,
-      repo: context.repo.repo,
+      owner,
+      repo,
       sha,
       force,
       ref
