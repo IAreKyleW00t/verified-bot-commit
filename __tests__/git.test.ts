@@ -119,7 +119,7 @@ describe('git.ts', () => {
   })
 
   describe('getRef', () => {
-    test.each(['heads/featureA', 'tags/v1.2.3'])(
+    test.each(['heads/featureA', 'tags/v1.2.3', 'tags/v2.1.3'])(
       'returns a Ref via REST API (ref: %s)',
       async (ref) => {
         const result = await git.getRef(ref, github.context, octokit)

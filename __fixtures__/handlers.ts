@@ -34,6 +34,56 @@ export const handlers = [
     }
   ),
   http.get(
+    'https://api.github.com/repos/octocat/Hello-World/git/ref/tags%2Fv2.1.3',
+    () => {
+      return HttpResponse.json({
+        ref: 'refs/tags/v2.1.3',
+        node_id: 'MDM6UmVmcmVmcy9oZWFkcy9mZWF0dXJlQQ==',
+        url: 'https://api.github.com/repos/octocat/Hello-World/git/refs/tags/v2.1.3',
+        object: {
+          type: 'tag',
+          sha: '7638417db6d59f3c431d3e1f261cc637155684cd',
+          url: 'https://api.github.com/repos/octocat/Hello-World/git/commits/aa218f56b14c9653891f9e74264a383fa43fefbd'
+        }
+      })
+    }
+  ),
+  http.get(
+    'https://api.github.com/repos/octocat/Hello-World/git/tags/7638417db6d59f3c431d3e1f261cc637155684cd',
+    () => {
+      return HttpResponse.json({
+        sha: '7638417db6d59f3c431d3e1f261cc637155684cd',
+        node_id:
+          'TA_kwDOMr1CvdoAKDAyZDJkM2M0NzE0Zjc1MWE2ZGVjZTEwMzJmMDNiMWMyZWFmNmQyYTc==',
+        url: 'https://api.github.com/repos/octocat/Hello-World/git/tags/7638417db6d59f3c431d3e1f261cc637155684cd',
+        tagger: {
+          date: '2014-11-07T22:01:45Z',
+          name: 'Monalisa Octocat',
+          email: 'octocat@github.com'
+        },
+        committer: {
+          date: '2014-11-07T22:01:45Z',
+          name: 'Monalisa Octocat',
+          email: 'octocat@github.com'
+        },
+        tag: 'v2.1.3',
+        message: 'added readme, because im a good github citizen',
+        object: {
+          type: 'commit',
+          sha: 'aa218f56b14c9653891f9e74264a383fa43fefbd',
+          url: 'https://api.github.com/repos/octocat/Hello-World/git/commits/aa218f56b14c9653891f9e74264a383fa43fefbd'
+        },
+        verification: {
+          verified: false,
+          reason: 'unsigned',
+          signature: null,
+          payload: null,
+          verified_at: null
+        }
+      })
+    }
+  ),
+  http.get(
     'https://api.github.com/repos/octocat/Hello-World/git/commits/aa218f56b14c9653891f9e74264a383fa43fefbd',
     () => {
       return HttpResponse.json({

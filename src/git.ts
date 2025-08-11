@@ -33,13 +33,26 @@ export async function getRef(
   context: Context,
   octokit: InstanceType<typeof Octokit>
 ): Promise<string> {
-  return (
+  const data = (
     await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
       owner: context.repo.owner,
       repo: context.repo.repo,
       ref
     })
-  ).data.object.sha
+  ).data
+
+  // If the ref is a tag, we need to get the commit SHA from the tag object
+  if (data.object.type == 'tag') {
+    return (
+      await octokit.request('GET /repos/{owner}/{repo}/git/tags/{tag_sha}', {
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        tag_sha: data.object.sha
+      })
+    ).data.object.sha
+  } else if (data.object.type == 'commit') {
+    return data.object.sha
+  } else throw Error(`Unsupported ref type: ${data.object.type}`)
 }
 
 export async function getTree(
