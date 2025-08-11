@@ -1,7 +1,7 @@
 {
   "name": "verified-bot-commit",
   "description": "GitHub Action for creating signed and verified bot commits",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "author": "Kyle Colantonio",
   "private": true,
   "homepage": "https://github.com/IAreKyleW00t/verified-bot-commit",
