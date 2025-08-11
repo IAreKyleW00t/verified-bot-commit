@@ -36303,11 +36303,24 @@ function normalizeRef(ref) {
         return `heads/${ref}`;
 }
 async function getRef(ref, context, octokit) {
-    return (await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
+    const data = (await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
         owner: context.repo.owner,
         repo: context.repo.repo,
         ref
-    })).data.object.sha;
+    })).data;
+    // If the ref is a tag, we need to get the commit SHA from the tag object
+    if (data.object.type == 'tag') {
+        return (await octokit.request('GET /repos/{owner}/{repo}/git/tags/{tag_sha}', {
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            tag_sha: data.object.sha
+        })).data.object.sha;
+    }
+    else if (data.object.type == 'commit') {
+        return data.object.sha;
+    }
+    else
+        throw Error(`Unsupported ref type: ${data.object.type}`);
 }
 async function getTree(sha, context, octokit) {
     return (await octokit.request('GET /repos/{owner}/{repo}/git/commits/{commit_sha}', {
