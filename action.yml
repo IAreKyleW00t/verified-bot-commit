@@ -76,5 +76,5 @@ outputs:
     description: SHA for the ref that was updated (same as commit)
 
 runs:
-  using: node20
+  using: node24
   main: dist/index.js

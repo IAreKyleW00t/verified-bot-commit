@@ -234,7 +234,7 @@ back to current user/group.
 > Workflow in any PR.
 
 1. ⚙️ Install the version of [Node.js](https://nodejs.org/en) as defined in the
-   [`.node-version`](.node-version).  
+   [`.tool-versions`](.tool-versions).  
    You can use [asdf](https://github.com/asdf-vm/asdf) to help manage your
    project runtimes.
 
