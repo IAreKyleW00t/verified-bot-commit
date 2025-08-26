@@ -1,7 +1,7 @@
 {
   "name": "verified-bot-commit",
   "description": "GitHub Action for creating signed and verified bot commits",
-  "version": "1.5.3",
+  "version": "2.0.0",
   "author": "Kyle Colantonio",
   "private": true,
   "homepage": "https://github.com/IAreKyleW00t/verified-bot-commit",
@@ -22,7 +22,7 @@
   },
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "scripts": {
     "bundle": "npm run format:write && npm run package",
@@ -65,7 +65,6 @@
     "eslint-plugin-prettier": "^5.5.4",
     "jest": "^30.0.5",
     "mock-fs": "^5.5.0",
-    "msw": "^2.10.5",
     "prettier": "^3.6.2",
     "prettier-eslint": "^16.4.2",
     "rollup": "^4.48.1",
