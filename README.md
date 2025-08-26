@@ -33,7 +33,7 @@ were not committed by the Action will be left staged.
 
 ```yaml
 - name: Commit changes
-  uses: iarekylew00t/verified-bot-commit@v1
+  uses: iarekylew00t/verified-bot-commit@v2
   with:
     message: 'feat: Some changes'
     files: |
@@ -104,7 +104,7 @@ This Actions requires the following permissions granted to the `GITHUB_TOKEN`.
 
 ```yaml
 - name: Install regctl
-  uses: iarekylew00t/verified-bot-commit@v1
+  uses: iarekylew00t/verified-bot-commit@v2
   with:
     message: 'chore: Updates'
     files: |
@@ -115,7 +115,7 @@ This Actions requires the following permissions granted to the `GITHUB_TOKEN`.
 
 ```yaml
 - name: Install regctl
-  uses: iarekylew00t/verified-bot-commit@v1
+  uses: iarekylew00t/verified-bot-commit@v2
   with:
     ref: ${{ github.event.pull_request.head.ref }}
     message: 'chore: Update README'
@@ -127,7 +127,7 @@ This Actions requires the following permissions granted to the `GITHUB_TOKEN`.
 
 ```yaml
 - name: Install regctl
-  uses: iarekylew00t/verified-bot-commit@v1
+  uses: iarekylew00t/verified-bot-commit@v2
   with:
     if-no-commit: info
     message: 'feat: Some changes'
@@ -145,7 +145,7 @@ This Actions requires the following permissions granted to the `GITHUB_TOKEN`.
     git restore --staged docs/something/idont/want
 
 - name: Install regctl
-  uses: iarekylew00t/verified-bot-commit@v1
+  uses: iarekylew00t/verified-bot-commit@v2
   with:
     auto-stage: false
     message: 'chore: Updating docs'
@@ -166,7 +166,7 @@ This Actions requires the following permissions granted to the `GITHUB_TOKEN`.
   run: echo 'Hello World!' > my-repo/test.txt
 
 - name: Install regctl
-  uses: iarekylew00t/verified-bot-commit@v1
+  uses: iarekylew00t/verified-bot-commit@v2
   with:
     workspace: my-repo
     message: 'chore: Updating tests'
