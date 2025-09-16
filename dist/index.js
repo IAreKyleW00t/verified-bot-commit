@@ -34906,7 +34906,7 @@ var createTokenAuth = function createTokenAuth2(token) {
   });
 };
 
-const VERSION$2 = "7.0.3";
+const VERSION$2 = "7.0.4";
 
 const noop$1 = () => {
 };
