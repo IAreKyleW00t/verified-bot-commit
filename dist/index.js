@@ -33990,7 +33990,7 @@ let RequestError$2 = class RequestError extends Error {
 // pkg/dist-src/index.js
 
 // pkg/dist-src/version.js
-var VERSION$6 = "10.0.3";
+var VERSION$6 = "10.0.5";
 
 // pkg/dist-src/defaults.js
 var defaults_default$1 = {
@@ -34555,7 +34555,7 @@ let RequestError$1 = class RequestError extends Error {
 // pkg/dist-src/index.js
 
 // pkg/dist-src/version.js
-var VERSION$4 = "10.0.3";
+var VERSION$4 = "10.0.5";
 
 // pkg/dist-src/defaults.js
 var defaults_default = {
@@ -34906,7 +34906,7 @@ var createTokenAuth = function createTokenAuth2(token) {
   });
 };
 
-const VERSION$2 = "7.0.4";
+const VERSION$2 = "7.0.5";
 
 const noop$1 = () => {
 };
@@ -36757,7 +36757,7 @@ function throttling(octokit, octokitOptions) {
     const retryCount = ~~request.retryCount;
     request.retryCount = retryCount;
     options.request.retryCount = retryCount;
-    const { wantRetry, retryAfter = 0 } = await async function() {
+    const { wantRetry, retryAfter = 0 } = await (async function() {
       if (/\bsecondary rate\b/i.test(error.message)) {
         const retryAfter2 = Number(error.response.headers["retry-after"]) || state2.fallbackSecondaryRateRetryAfter;
         const wantRetry2 = await emitter.trigger(
@@ -36791,7 +36791,7 @@ function throttling(octokit, octokitOptions) {
         return { wantRetry: wantRetry2, retryAfter: retryAfter2 };
       }
       return {};
-    }();
+    })();
     if (wantRetry) {
       request.retryCount++;
       return retryAfter * state2.retryAfterBaseValue;
