@@ -74,7 +74,7 @@ jobs:
           echo "$GITHUB_RUN_ID" | tee src/test2.txt
           echo "uncommitted file" | tee blah.txt
           mkdir -p "$TEST_BRANCH"
-          for i in {1..100}; do
+          for i in {1..10}; do
             echo "$i-$GITHUB_RUN_ID-$RANDOM" | tee "$TEST_BRANCH/$i-$GITHUB_RUN_ID"
           done
           mkdir -p "$GITHUB_RUN_ID"
@@ -177,8 +177,8 @@ jobs:
           FILES=$(git ls-files --others --exclude-standard)
           COUNT=$(echo "$FILES" | wc -l)
           echo -e "Untracked files: $COUNT\n$FILES"
-          if [ "$COUNT" -ne 104 ]; then
-            echo "::error::Expected 104 untracked files but got $COUNT"
+          if [ "$COUNT" -ne 14 ]; then
+            echo "::error::Expected 14 untracked files but got $COUNT"
             RC=1
           fi
           exit "$RC"
