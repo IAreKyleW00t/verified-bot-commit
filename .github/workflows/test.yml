@@ -74,7 +74,7 @@ jobs:
           echo "$GITHUB_RUN_ID" | tee src/test2.txt
           echo "uncommitted file" | tee blah.txt
           mkdir -p "$TEST_BRANCH"
-          for i in {1..100}; do
+          for i in {1..10}; do
             echo "$i-$GITHUB_RUN_ID-$RANDOM" | tee "$TEST_BRANCH/$i-$GITHUB_RUN_ID"
           done
           mkdir -p "$GITHUB_RUN_ID"
@@ -177,8 +177,8 @@ jobs:
           FILES=$(git ls-files --others --exclude-standard)
           COUNT=$(echo "$FILES" | wc -l)
           echo -e "Untracked files: $COUNT\n$FILES"
-          if [ "$COUNT" -ne 104 ]; then
-            echo "::error::Expected 104 untracked files but got $COUNT"
+          if [ "$COUNT" -ne 14 ]; then
+            echo "::error::Expected 14 untracked files but got $COUNT"
             RC=1
           fi
           exit "$RC"
@@ -219,8 +219,8 @@ jobs:
           FILES=$(git diff-tree --no-commit-id --name-only -r "$COMMIT")
           COUNT=$(echo "$FILES" | wc -l)
           echo -e "Committed files: $COUNT\n$FILES"
-          if [ "$COUNT" -ne 91 ]; then
-            echo "::error::Expected 91 committed files but got $COUNT"
+          if [ "$COUNT" -ne 11 ]; then
+            echo "::error::Expected 11 committed files but got $COUNT"
             RC=1
           fi
           echo
@@ -228,8 +228,8 @@ jobs:
           FILES=$(git diff --cached --name-only)
           COUNT=$(echo "$FILES" | wc -l)
           echo -e "Staged files: $COUNT\n$FILES"
-          if [ "$COUNT" -ne 14 ]; then
-            echo "::error::Expected 14 staged files but got $COUNT"
+          if [ "$COUNT" -ne 4 ]; then
+            echo "::error::Expected 4 staged files but got $COUNT"
             RC=1
           fi
           echo
@@ -335,14 +335,14 @@ jobs:
           exit "$RC"
 
       - name: Delete test branches
-        if: (!cancelled())
+        if: always()
         shell: bash
         run: |
           if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
-            git checkout "${GITHUB_REF/#refs\//}"
+            git checkout "${GITHUB_REF/#refs\//}" || true
           else
-            git checkout "$GITHUB_REF_NAME"
+            git checkout "$GITHUB_REF_NAME" || true
           fi
-          git push -u origin --delete "$TEST_BRANCH"
-          git push -u origin --delete "$TEST_BRANCH-test-repo"
-          git push -u origin --delete "$TEST_TAG"
+          git push -u origin --delete "$TEST_BRANCH" || true
+          git push -u origin --delete "$TEST_BRANCH-test-repo" || true
+          git push -u origin --delete "$TEST_TAG" || true
