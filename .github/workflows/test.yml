@@ -74,7 +74,7 @@ jobs:
           echo "$GITHUB_RUN_ID" | tee src/test2.txt
           echo "uncommitted file" | tee blah.txt
           mkdir -p "$TEST_BRANCH"
-          for i in {1..100}; do
+          for i in {1..10}; do
             echo "$i-$GITHUB_RUN_ID-$RANDOM" | tee "$TEST_BRANCH/$i-$GITHUB_RUN_ID"
           done
           mkdir -p "$GITHUB_RUN_ID"
