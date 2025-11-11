@@ -334,15 +334,15 @@ jobs:
           fi
           exit "$RC"
 
-      - name: Delete test branches
-        if: (!cancelled())
+      - name: Delete test branches and tags
+        if: always()
         shell: bash
         run: |
           if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
-            git checkout "${GITHUB_REF/#refs\//}"
+            git checkout "${GITHUB_REF/#refs\//}" || true
           else
-            git checkout "$GITHUB_REF_NAME"
+            git checkout "$GITHUB_REF_NAME" || true
           fi
-          git push -u origin --delete "$TEST_BRANCH"
-          git push -u origin --delete "$TEST_BRANCH-test-repo"
-          git push -u origin --delete "$TEST_TAG"
+          git push -u origin --delete "$TEST_BRANCH" || true
+          git push -u origin --delete "$TEST_BRANCH-test-repo" || true
+          git push -u origin --delete "$TEST_TAG" || true
