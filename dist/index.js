@@ -28495,16 +28495,16 @@ const createTokenAuth$1 = function createTokenAuth2(token) {
 var VERSION$a = "5.2.2";
 
 // pkg/dist-src/index.js
-var noop$2 = () => {
+var noop$4 = () => {
 };
 var consoleWarn$1 = console.warn.bind(console);
 var consoleError$1 = console.error.bind(console);
 function createLogger$1(logger = {}) {
   if (typeof logger.debug !== "function") {
-    logger.debug = noop$2;
+    logger.debug = noop$4;
   }
   if (typeof logger.info !== "function") {
-    logger.info = noop$2;
+    logger.info = noop$4;
   }
   if (typeof logger.warn !== "function") {
     logger.warn = consoleWarn$1;
@@ -34000,12 +34000,13 @@ let RequestError$2 = class RequestError extends Error {
    */
   response;
   constructor(message, statusCode, options) {
-    super(message);
+    super(message, { cause: options.cause });
     this.name = "HttpError";
     this.status = Number.parseInt(statusCode);
     if (Number.isNaN(this.status)) {
       this.status = 0;
     }
+    /* v8 ignore else -- @preserve -- Bug with vitest coverage where it sees an else branch that doesn't exist */
     if ("response" in options) {
       this.response = options.response;
     }
@@ -34026,7 +34027,7 @@ let RequestError$2 = class RequestError extends Error {
 // pkg/dist-src/index.js
 
 // pkg/dist-src/version.js
-var VERSION$6 = "10.0.6";
+var VERSION$6 = "10.0.7";
 
 // pkg/dist-src/defaults.js
 var defaults_default$1 = {
@@ -34044,6 +34045,7 @@ function isPlainObject$2(value) {
   const Ctor = Object.prototype.hasOwnProperty.call(proto, "constructor") && proto.constructor;
   return typeof Ctor === "function" && Ctor instanceof Ctor && Function.prototype.call(Ctor) === Function.prototype.call(value);
 }
+var noop$3 = () => "";
 async function fetchWrapper$1(requestOptions) {
   const fetch = requestOptions.request?.fetch || globalThis.fetch;
   if (!fetch) {
@@ -34145,7 +34147,7 @@ async function fetchWrapper$1(requestOptions) {
 async function getResponseData$1(response) {
   const contentType = response.headers.get("content-type");
   if (!contentType) {
-    return response.text().catch(() => "");
+    return response.text().catch(noop$3);
   }
   const mimetype = fastContentTypeParseExports.safeParse(contentType);
   if (isJSONResponse$1(mimetype)) {
@@ -34157,9 +34159,12 @@ async function getResponseData$1(response) {
       return text;
     }
   } else if (mimetype.type.startsWith("text/") || mimetype.parameters.charset?.toLowerCase() === "utf-8") {
-    return response.text().catch(() => "");
+    return response.text().catch(noop$3);
   } else {
-    return response.arrayBuffer().catch(() => new ArrayBuffer(0));
+    return response.arrayBuffer().catch(
+      /* v8 ignore next -- @preserve */
+      () => new ArrayBuffer(0)
+    );
   }
 }
 function isJSONResponse$1(mimetype) {
@@ -34206,6 +34211,8 @@ function withDefaults$3(oldEndpoint, newDefaults) {
 
 // pkg/dist-src/index.js
 var request$1 = withDefaults$3(endpoint$1, defaults_default$1);
+/* v8 ignore next -- @preserve */
+/* v8 ignore else -- @preserve */
 
 // pkg/dist-src/defaults.js
 
@@ -34565,12 +34572,13 @@ let RequestError$1 = class RequestError extends Error {
    */
   response;
   constructor(message, statusCode, options) {
-    super(message);
+    super(message, { cause: options.cause });
     this.name = "HttpError";
     this.status = Number.parseInt(statusCode);
     if (Number.isNaN(this.status)) {
       this.status = 0;
     }
+    /* v8 ignore else -- @preserve -- Bug with vitest coverage where it sees an else branch that doesn't exist */
     if ("response" in options) {
       this.response = options.response;
     }
@@ -34591,7 +34599,7 @@ let RequestError$1 = class RequestError extends Error {
 // pkg/dist-src/index.js
 
 // pkg/dist-src/version.js
-var VERSION$4 = "10.0.6";
+var VERSION$4 = "10.0.7";
 
 // pkg/dist-src/defaults.js
 var defaults_default = {
@@ -34609,6 +34617,7 @@ function isPlainObject(value) {
   const Ctor = Object.prototype.hasOwnProperty.call(proto, "constructor") && proto.constructor;
   return typeof Ctor === "function" && Ctor instanceof Ctor && Function.prototype.call(Ctor) === Function.prototype.call(value);
 }
+var noop$2 = () => "";
 async function fetchWrapper(requestOptions) {
   const fetch = requestOptions.request?.fetch || globalThis.fetch;
   if (!fetch) {
@@ -34710,7 +34719,7 @@ async function fetchWrapper(requestOptions) {
 async function getResponseData(response) {
   const contentType = response.headers.get("content-type");
   if (!contentType) {
-    return response.text().catch(() => "");
+    return response.text().catch(noop$2);
   }
   const mimetype = fastContentTypeParseExports.safeParse(contentType);
   if (isJSONResponse(mimetype)) {
@@ -34722,9 +34731,12 @@ async function getResponseData(response) {
       return text;
     }
   } else if (mimetype.type.startsWith("text/") || mimetype.parameters.charset?.toLowerCase() === "utf-8") {
-    return response.text().catch(() => "");
+    return response.text().catch(noop$2);
   } else {
-    return response.arrayBuffer().catch(() => new ArrayBuffer(0));
+    return response.arrayBuffer().catch(
+      /* v8 ignore next -- @preserve */
+      () => new ArrayBuffer(0)
+    );
   }
 }
 function isJSONResponse(mimetype) {
@@ -34771,6 +34783,8 @@ function withDefaults$1(oldEndpoint, newDefaults) {
 
 // pkg/dist-src/index.js
 var request = withDefaults$1(endpoint, defaults_default);
+/* v8 ignore next -- @preserve */
+/* v8 ignore else -- @preserve */
 
 // pkg/dist-src/index.js
 
@@ -36854,12 +36868,13 @@ class RequestError extends Error {
    */
   response;
   constructor(message, statusCode, options) {
-    super(message);
+    super(message, { cause: options.cause });
     this.name = "HttpError";
     this.status = Number.parseInt(statusCode);
     if (Number.isNaN(this.status)) {
       this.status = 0;
     }
+    /* v8 ignore else -- @preserve -- Bug with vitest coverage where it sees an else branch that doesn't exist */
     if ("response" in options) {
       this.response = options.response;
     }
