@@ -1,5 +1,4 @@
 import * as core from '@actions/core'
-import * as github from '@actions/github'
 import * as exec from '@actions/exec'
 
 import { minimatch } from 'minimatch'
@@ -48,10 +47,15 @@ export async function run(): Promise<void> {
     )
 
     // Lookup HEAD commit and tree
+    if (!core.getInput('repository').includes('/')) {
+      throw new Error("Repository must be in the format 'owner/name'")
+    }
+
+    const repo = core.getInput('repository').split('/')
     const autoStage = core.getBooleanInput('auto-stage')
     const ref = git.normalizeRef(core.getInput('ref'))
-    const headCommit = await git.getRef(ref, github.context, octokit)
-    const headTree = await git.getTree(headCommit, github.context, octokit)
+    const headCommit = await git.getRef(ref, repo[0], repo[1], octokit)
+    const headTree = await git.getTree(headCommit, repo[0], repo[1], octokit)
 
     // Get list of changed files
     const workspace = core.getInput('workspace')
@@ -114,7 +118,8 @@ export async function run(): Promise<void> {
             file,
             workspace,
             followSymbolicLinks,
-            github.context,
+            repo[0],
+            repo[1],
             octokit
           )
           core.info(`${blob.sha}\t${blob.path}`)
@@ -144,7 +149,13 @@ export async function run(): Promise<void> {
     }
 
     // Create tree with all blobs
-    const tree = await git.createTree(blobs, headTree, github.context, octokit)
+    const tree = await git.createTree(
+      blobs,
+      headTree,
+      repo[0],
+      repo[1],
+      octokit
+    )
     core.info(`🌳 Created Git Tree @ ${tree}`)
     core.setOutput('tree', tree)
 
@@ -153,7 +164,8 @@ export async function run(): Promise<void> {
       tree,
       headCommit,
       message,
-      github.context,
+      repo[0],
+      repo[1],
       octokit
     )
     core.info(`✅ Created Commit @ ${commit}`)
@@ -165,7 +177,8 @@ export async function run(): Promise<void> {
       ref,
       commit,
       forcePush,
-      github.context,
+      repo[0],
+      repo[1],
       octokit
     )
     core.info(`⏩ Updated refs/${ref} to point to ${refSha}`)
