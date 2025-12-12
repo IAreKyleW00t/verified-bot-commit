@@ -10,6 +10,70 @@ on:
       - main
 
 jobs:
+  test-app:
+    name: Test action with GH App
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TEST_BRANCH: test-app-ubuntu-${{ github.run_id }}
+    steps:
+      - name: Create GitHub App Token
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        id: app-token
+        with:
+          app-id: ${{ secrets.TEST_GH_APP_ID }}
+          private-key: ${{ secrets.TEST_GH_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+
+      - name: Checkout repo
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Create test branch and tag
+        id: branch
+        shell: bash
+        run: |
+          git checkout -b "$TEST_BRANCH"
+          git push -u origin "$TEST_BRANCH"
+          echo -e "\n### $(date -Iseconds)" | tee -a README.md
+          date -Iseconds | tee date.txt
+
+      - name: Commit with error and without changes
+        id: commit
+        uses: ./
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          ref: ${{ env.TEST_BRANCH }}
+          message: 'test: ${{ github.ref }} @ ${{ github.sha }}'
+          if-no-commit: error
+          files: |
+            **
+
+      - name: Verify GPG signature
+        shell: bash
+        env:
+          COMMIT: ${{ steps.commit.outputs.commit }}
+          GPG_KEY_ID: 968479A1AFF927E37D1A566BB5690EEEBB952194
+        run: |
+          git log --show-signature HEAD^..HEAD
+          curl -fSsL "https://github.com/web-flow.gpg" | gpg --import
+          echo "$GPG_KEY_ID:6" | gpg --import-ownertrust
+          git verify-commit "$COMMIT"
+
+      - name: Delete test branches
+        if: always()
+        shell: bash
+        run: |
+          if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
+            git checkout "${GITHUB_REF/#refs\//}" || true
+          else
+            git checkout "$GITHUB_REF_NAME" || true
+          fi
+          git push -u origin --delete "$TEST_BRANCH" || true
+
   test:
     name: Test action
     runs-on: ${{ matrix.os }}-latest
@@ -204,6 +268,7 @@ jobs:
           COMMIT: ${{ steps.commit.outputs.commit }}
           GPG_KEY_ID: 968479A1AFF927E37D1A566BB5690EEEBB952194
         run: |
+          git log --show-signature HEAD^..HEAD
           curl -fSsL "https://github.com/web-flow.gpg" | gpg --import
           echo "$GPG_KEY_ID:6" | gpg --import-ownertrust
           git verify-commit "$COMMIT"

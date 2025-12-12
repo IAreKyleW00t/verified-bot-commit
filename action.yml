@@ -7,6 +7,10 @@ branding:
   color: green
 
 inputs:
+  repository:
+    description: The target repository
+    required: false
+    default: ${{ github.repository }}
   ref:
     description: The ref to push the commit to
     required: false

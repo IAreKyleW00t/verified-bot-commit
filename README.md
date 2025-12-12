@@ -10,9 +10,10 @@
 [![Dependabot](https://img.shields.io/badge/Dependabot-0366d6?style=flat&logo=dependabot&logoColor=white)](.github/dependabot.yml)
 
 A GitHub Action to create signed and verified commits as the
-`github-actions[bot]` User with the standard `GITHUB_TOKEN`. This is
-accomplished via the GitHub [REST API] by using the [Blob] and [Tree] endpoints
-to build the commit and update the original Ref to point to it. [^1]
+`github-actions[bot]` User with the standard `GITHUB_TOKEN`, or with your own
+[GitHub App Token](#github-app-token). This is accomplished via the GitHub [REST
+API] by using the [Blob] and [Tree] endpoints to build the commit and update the
+original Ref to point to it. [^1]
 
 This Action will stage all changed files in your local branch and add those that
 match your file patterns to the commit. Afterwards, your local branch will be
@@ -56,32 +57,36 @@ were not committed by the Action will be left staged.
 >   example.txt
 > ```
 
-| Name              | Type    | Description                                          | Default                   |
-| ----------------- | ------- | ---------------------------------------------------- | ------------------------- |
-| `ref`             | String  | The ref to push the commit to                        | `${{ github.ref }}`       |
-| `files`           | List    | Files/[Glob] patterns to include with the commit [1] | _required_                |
-| `message`         | String  | Message for the commit [2]                           | _optional_                |
-| `message-file`    | String  | File to use for the commit message [2]               | _optional_                |
-| `auto-stage`      | Boolean | Stage all changed files for committing [3]           | `true`                    |
-| `update-local`    | Boolean | Update local branch after committing [3]             | `true`                    |
-| `force-push`      | Boolean | Force push the commit                                | `false`                   |
-| `if-no-commit`    | String  | Set the behavior when no commit is made [4]          | `warning`                 |
-| `no-throttle`     | Boolean | Disable the throttling mechanism during requests     | `false`                   |
-| `no-retry`        | Boolean | Disable the retry mechanism during requests          | `false`                   |
-| `max-retries`     | Number  | Number of retries to attempt if a request fails      | `1`                       |
-| `follow-symlinks` | Boolean | Follow symbolic links when globbing files            | `true`                    |
-| `workspace`       | String  | Directory containing checked out files               | `${{ github.workspace }}` |
-| `api-url`         | String  | Base URL for the GitHub API                          | `${{ github.api_url }}`   |
-| `token`           | String  | GitHub Token for REST API access [5]                 | `${{ github.token }}`     |
+| Name              | Type    | Description                                          | Default                    |
+| ----------------- | ------- | ---------------------------------------------------- | -------------------------- |
+| `repository`      | String  | The target repository [1]                            | `${{ github.repository }}` |
+| `ref`             | String  | The ref to push the commit to                        | `${{ github.ref }}`        |
+| `files`           | List    | Files/[Glob] patterns to include with the commit [2] | _required_                 |
+| `message`         | String  | Message for the commit [3]                           | _optional_                 |
+| `message-file`    | String  | File to use for the commit message [3]               | _optional_                 |
+| `auto-stage`      | Boolean | Stage all changed files for committing [4]           | `true`                     |
+| `update-local`    | Boolean | Update local branch after committing [4]             | `true`                     |
+| `force-push`      | Boolean | Force push the commit                                | `false`                    |
+| `if-no-commit`    | String  | Set the behavior when no commit is made [5]          | `warning`                  |
+| `no-throttle`     | Boolean | Disable the throttling mechanism during requests     | `false`                    |
+| `no-retry`        | Boolean | Disable the retry mechanism during requests          | `false`                    |
+| `max-retries`     | Number  | Number of retries to attempt if a request fails      | `1`                        |
+| `follow-symlinks` | Boolean | Follow symbolic links when globbing files            | `true`                     |
+| `workspace`       | String  | Directory containing checked out files               | `${{ github.workspace }}`  |
+| `api-url`         | String  | Base URL for the GitHub API                          | `${{ github.api_url }}`    |
+| `token`           | String  | GitHub Token for REST API access [6]                 | `${{ github.token }}`      |
 
-> 1. Files within your `.gitignore` will not be included. You can also negate
+> 1. Must in the format `owner/repo-name`. To push to other repositories you
+>    will _need_ to use a [GitHub App Token](#custom-github-app-token).
+> 2. Files within your `.gitignore` will not be included. You can also negate
 >    any files by prefixing it with `!`
-> 2. You must include either `message` or `message-file` (which takes priority).
-> 3. Only files that match a pattern you include will be in the final commit,
+> 3. You must include either `message` or `message-file` (which takes priority).
+> 4. Only files that match a pattern you include will be in the final commit,
 >    but you can optionally stage files yourself for more control.
-> 4. Available options are `info`, `notice`, `warning` and `error`.
-> 5. This Action is intended to work with the default `GITHUB_TOKEN`. See the
->    [notice](#verified-bot-commit-action) and [limitations](#limitations)
+> 5. Available options are `info`, `notice`, `warning` and `error`.
+> 6. This Action is intended to work with the default `GITHUB_TOKEN` or a
+>    [GitHub App Token](#custom-github-app-token). See the
+>    [limitations](#limitations) section.
 
 ### Outputs
 
@@ -92,18 +97,34 @@ were not committed by the Action will be left staged.
 | `commit` | String | SHA of the commit itself                          |
 | `ref`    | String | SHA for the ref that was updated (same as commit) |
 
-### Token Permissions
+### GITHUB_TOKEN Permissions
 
 This Actions requires the following permissions granted to the `GITHUB_TOKEN`.
 
 - `contents: write`
+
+### GitHub App Token
+
+As an alternative to the default `GITHUB_TOKEN`, you can use a GitHub App to
+generate the necessary token to create _and_ sign the commit instead. This gives
+you a nicely signed/verified commit plus all the benefits that using using your
+token provide, such as your own bot's name, writing to protected tags/branches,
+writing to other repositories, etc.
+
+Refer to the [Use a GitHub App Token](#use-a-github-app-token) example to to
+quickly get started with this approach.
+
+For more details, refer to these discussions on the topic:
+
+- [How to Use Commit Signing with GitHub Apps](https://github.com/orgs/community/discussions/50055)
+- [GitHub App Installation Token and Authenticating as a GitHub App](https://github.com/orgs/community/discussions/48186)
 
 ## Examples
 
 ### Commit all changes
 
 ```yaml
-- name: Install regctl
+- name: Commit & Push changes
   uses: iarekylew00t/verified-bot-commit@v2
   with:
     message: 'chore: Updates'
@@ -114,7 +135,7 @@ This Actions requires the following permissions granted to the `GITHUB_TOKEN`.
 ### Commit changes back to a Pull Request
 
 ```yaml
-- name: Install regctl
+- name: Commit & Push changes
   uses: iarekylew00t/verified-bot-commit@v2
   with:
     ref: ${{ github.event.pull_request.head.ref }}
@@ -126,7 +147,7 @@ This Actions requires the following permissions granted to the `GITHUB_TOKEN`.
 ### Ignore warnings when no files changed
 
 ```yaml
-- name: Install regctl
+- name: Commit & Push changes
   uses: iarekylew00t/verified-bot-commit@v2
   with:
     if-no-commit: info
@@ -144,7 +165,7 @@ This Actions requires the following permissions granted to the `GITHUB_TOKEN`.
     git add docs/
     git restore --staged docs/something/idont/want
 
-- name: Install regctl
+- name: Commit & Push changes
   uses: iarekylew00t/verified-bot-commit@v2
   with:
     auto-stage: false
@@ -165,7 +186,7 @@ This Actions requires the following permissions granted to the `GITHUB_TOKEN`.
   shell: bash
   run: echo 'Hello World!' > my-repo/test.txt
 
-- name: Install regctl
+- name: Commit & Push changes
   uses: iarekylew00t/verified-bot-commit@v2
   with:
     workspace: my-repo
@@ -174,9 +195,40 @@ This Actions requires the following permissions granted to the `GITHUB_TOKEN`.
       test.txt
 ```
 
+### Use a GitHub App Token
+
+```yaml
+- name: Create GitHub App Token
+  uses: actions/create-github-app-token@v2
+  id: github-app-token
+  with:
+    app-id: ${{ secrets.GH_APP_ID }}
+    private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+    owner: ${{ github.repository_owner }}
+    repositories: ${{ github.event.repository.name }}
+
+- name: Checkout repository
+  uses: actions/checkout@v6
+  with:
+    ref: ${{ github.event.pull_request.head.ref }}
+    token: ${{ steps.github-app-token.outputs.token }} # Use the App token to checkout
+
+# Other steps that make changes...
+
+- name: Commit & Push changes
+  uses: iarekylew00t/verified-bot-commit@v2
+  with:
+    message: 'chore: Updating README'
+    ref: ${{ github.event.pull_request.head.ref }}
+    token: ${{ steps.github-app-token.outputs.token }} # Use the App token to commit changes
+    files: |
+      README.md
+      **/README.md
+```
+
 ## Limitations
 
-⚠️ As always, the `GITHUB_TOKEN` cannot push to protected Refs.
+⚠️ As always, the default `GITHUB_TOKEN` cannot push to protected Refs.
 
 ⚠️ The [Blob] API has a 40MiB limit, any files larger than this in your commit
 will fail.
@@ -191,8 +243,9 @@ will fail.
 > [See example](https://github.com/orgs/community/discussions/50055#discussioncomment-13460641).
 
 ⚠️ Using your own [Personal Access Token (PAT)] will result in an unsigned and
-unverified commit. You should _really_ look into [using your own keys] and
-[signing commits] yourself with the help of Actions like
+unverified commit. You should look into using a
+[GitHub App Token](#github-app-token), or [using your own keys] and [signing
+commits] yourself with the help of Actions like
 [webfactory/ssh-agent](https://github.com/webfactory/ssh-agent) and
 [crazy-max/ghaction-import-gpg](https://github.com/crazy-max/ghaction-import-gpg).
 
