@@ -34204,12 +34204,12 @@ async function run() {
                 }
                 // Skip the file entirely if a pattern specifically negates it
                 if (pattern.startsWith('!')) {
-                    if (minimatch(file, pattern.substring(1)))
+                    if (minimatch(file, pattern.substring(1), { dot: true }))
                         break;
                     continue;
                 }
                 // Only include files that match a pattern
-                if (minimatch(file, pattern)) {
+                if (minimatch(file, pattern, { dot: true })) {
                     const blob = await createBlob(file, workspace, followSymbolicLinks, repo[0], repo[1], octokit);
                     info(`${blob.sha}\t${blob.path}`);
                     blobs.push(blob);

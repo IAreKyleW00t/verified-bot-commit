@@ -47,7 +47,7 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
           ref: ${{ env.TEST_BRANCH }}
-          message: 'test: ${{ github.ref }} @ ${{ github.sha }}'
+          message: "test: ${{ github.ref }} @ ${{ github.sha }}"
           if-no-commit: error
           files: |
             **
@@ -105,7 +105,7 @@ jobs:
         continue-on-error: true
         with:
           ref: ${{ env.TEST_BRANCH }}
-          message: 'test: ${{ github.ref }} @ ${{ github.sha }}'
+          message: "test: ${{ github.ref }} @ ${{ github.sha }}"
           if-no-commit: error
           files: |
             README.md
@@ -133,6 +133,7 @@ jobs:
           echo -e "\n### $(date -Iseconds)" | tee -a README.md
           date -Iseconds | tee date.txt
           date -Iseconds | tee test-ignore.txt
+          date -Iseconds | tee .github/.test-file.txt
           echo "$GITHUB_RUN_ID" | tee __tests__/ignore/test-abcdef.txt
           echo "$GITHUB_RUN_ID" | tee src/test.txt
           echo "$GITHUB_RUN_ID" | tee src/test2.txt
@@ -150,7 +151,7 @@ jobs:
         uses: ./
         with:
           ref: ${{ env.TEST_BRANCH }}
-          message: 'test: ${{ github.ref }} @ ${{ github.sha }}'
+          message: "test: ${{ github.ref }} @ ${{ github.sha }}"
           files: |
             something-that-doesnt-exist.txt
 
@@ -169,7 +170,7 @@ jobs:
         uses: ./
         with:
           ref: tags/${{ env.TEST_TAG }}
-          message: 'test: ${{ github.ref }} @ ${{ github.sha }}'
+          message: "test: ${{ github.ref }} @ ${{ github.sha }}"
           files: |
             README.md
 
@@ -198,7 +199,7 @@ jobs:
         uses: ./
         with:
           ref: ${{ env.TEST_BRANCH }}
-          message: 'staged: ${{ github.ref }} @ ${{ github.sha }}'
+          message: "staged: ${{ github.ref }} @ ${{ github.sha }}"
           auto-stage: false
           files: |
             **
@@ -241,8 +242,8 @@ jobs:
           FILES=$(git ls-files --others --exclude-standard)
           COUNT=$(echo "$FILES" | wc -l)
           echo -e "Untracked files: $COUNT\n$FILES"
-          if [ "$COUNT" -ne 104 ]; then
-            echo "::error::Expected 104 untracked files but got $COUNT"
+          if [ "$COUNT" -ne 105 ]; then
+            echo "::error::Expected 105 untracked files but got $COUNT"
             RC=1
           fi
           exit "$RC"
@@ -252,13 +253,14 @@ jobs:
         uses: ./
         with:
           ref: ${{ env.TEST_BRANCH }}
-          message: 'test: ${{ github.ref }} @ ${{ github.sha }}'
+          message: "test: ${{ github.ref }} @ ${{ github.sha }}"
           files: |
             README.md
             date.txt
             !src/test.txt
             src/*.txt
             __tests__/**
+            .github/**
             !${{ env.TEST_BRANCH }}/1*-*
             ${{ env.TEST_BRANCH }}/**
 
@@ -284,8 +286,8 @@ jobs:
           FILES=$(git diff-tree --no-commit-id --name-only -r "$COMMIT")
           COUNT=$(echo "$FILES" | wc -l)
           echo -e "Committed files: $COUNT\n$FILES"
-          if [ "$COUNT" -ne 91 ]; then
-            echo "::error::Expected 91 committed files but got $COUNT"
+          if [ "$COUNT" -ne 92 ]; then
+            echo "::error::Expected 92 committed files but got $COUNT"
             RC=1
           fi
           echo
@@ -345,7 +347,7 @@ jobs:
         with:
           workspace: test-repo
           ref: ${{ env.TEST_BRANCH }}-test-repo
-          message: 'test: ${{ github.ref }} @ ${{ github.sha }}'
+          message: "test: ${{ github.ref }} @ ${{ github.sha }}"
           files: |
             *.txt
             !src/test.txt
