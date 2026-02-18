@@ -29872,12 +29872,25 @@ class AST {
         let escaping = false;
         let re = '';
         let uflag = false;
+        // multiple stars that aren't globstars coalesce into one *
+        let inStar = false;
         for (let i = 0; i < glob.length; i++) {
             const c = glob.charAt(i);
             if (escaping) {
                 escaping = false;
                 re += (reSpecials.has(c) ? '\\' : '') + c;
                 continue;
+            }
+            if (c === '*') {
+                if (inStar)
+                    continue;
+                inStar = true;
+                re += noEmpty && /^[*]+$/.test(glob) ? starNoEmpty : star$1;
+                hasMagic = true;
+                continue;
+            }
+            else {
+                inStar = false;
             }
             if (c === '\\') {
                 if (i === glob.length - 1) {
@@ -29897,11 +29910,6 @@ class AST {
                     hasMagic = hasMagic || magic;
                     continue;
                 }
-            }
-            if (c === '*') {
-                re += noEmpty && glob === '*' ? starNoEmpty : star$1;
-                hasMagic = true;
-                continue;
             }
             if (c === '?') {
                 re += qmark$1;
@@ -30253,7 +30261,7 @@ class Minimatch {
     // to the right as possible, even if it increases the number
     // of patterns that we have to process.
     preprocess(globParts) {
-        // if we're not in globstar mode, then turn all ** into *
+        // if we're not in globstar mode, then turn ** into *
         if (this.options.noglobstar) {
             for (let i = 0; i < globParts.length; i++) {
                 for (let j = 0; j < globParts[i].length; j++) {
