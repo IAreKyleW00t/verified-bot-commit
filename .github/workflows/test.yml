@@ -47,7 +47,7 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
           ref: ${{ env.TEST_BRANCH }}
-          message: "test: ${{ github.ref }} @ ${{ github.sha }}"
+          message: 'test: ${{ github.ref }} @ ${{ github.sha }}'
           if-no-commit: error
           files: |
             **
@@ -105,7 +105,7 @@ jobs:
         continue-on-error: true
         with:
           ref: ${{ env.TEST_BRANCH }}
-          message: "test: ${{ github.ref }} @ ${{ github.sha }}"
+          message: 'test: ${{ github.ref }} @ ${{ github.sha }}'
           if-no-commit: error
           files: |
             README.md
@@ -151,7 +151,7 @@ jobs:
         uses: ./
         with:
           ref: ${{ env.TEST_BRANCH }}
-          message: "test: ${{ github.ref }} @ ${{ github.sha }}"
+          message: 'test: ${{ github.ref }} @ ${{ github.sha }}'
           files: |
             something-that-doesnt-exist.txt
 
@@ -170,7 +170,7 @@ jobs:
         uses: ./
         with:
           ref: tags/${{ env.TEST_TAG }}
-          message: "test: ${{ github.ref }} @ ${{ github.sha }}"
+          message: 'test: ${{ github.ref }} @ ${{ github.sha }}'
           files: |
             README.md
 
@@ -199,7 +199,7 @@ jobs:
         uses: ./
         with:
           ref: ${{ env.TEST_BRANCH }}
-          message: "staged: ${{ github.ref }} @ ${{ github.sha }}"
+          message: 'staged: ${{ github.ref }} @ ${{ github.sha }}'
           auto-stage: false
           files: |
             **
@@ -253,7 +253,7 @@ jobs:
         uses: ./
         with:
           ref: ${{ env.TEST_BRANCH }}
-          message: "test: ${{ github.ref }} @ ${{ github.sha }}"
+          message: 'test: ${{ github.ref }} @ ${{ github.sha }}'
           files: |
             README.md
             date.txt
@@ -347,7 +347,7 @@ jobs:
         with:
           workspace: test-repo
           ref: ${{ env.TEST_BRANCH }}-test-repo
-          message: "test: ${{ github.ref }} @ ${{ github.sha }}"
+          message: 'test: ${{ github.ref }} @ ${{ github.sha }}'
           files: |
             *.txt
             !src/test.txt
