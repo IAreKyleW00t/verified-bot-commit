@@ -30850,7 +30850,11 @@ class Minimatch {
         // split the pattern up into globstar-delimited sections
         // the tail has to be at the end, and the others just have
         // to be found in order from the head.
-        const [head, body, tail] = [
+        const [head, body, tail] = partial ? [
+            pattern.slice(patternIndex, firstgs),
+            pattern.slice(firstgs + 1),
+            [],
+        ] : [
             pattern.slice(patternIndex, firstgs),
             pattern.slice(firstgs + 1, lastgs),
             pattern.slice(lastgs + 1),
@@ -30910,7 +30914,8 @@ class Minimatch {
                     return false;
                 }
             }
-            return sawSome;
+            // in partial mode, we just need to get past all file parts
+            return partial || sawSome;
         }
         // now we know that there's one or more body sections, which can
         // be matched anywhere from the 0 index (because the head was pruned)
@@ -30990,7 +30995,7 @@ class Minimatch {
             fileIndex++;
         }
         // walked off. no point continuing
-        return null;
+        return partial || null;
     }
     #matchOne(file, pattern, partial, fileIndex, patternIndex) {
         let fi;
