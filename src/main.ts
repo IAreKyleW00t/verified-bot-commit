@@ -23,14 +23,24 @@ export async function run(): Promise<void> {
       retry: { enabled: !noRetry },
       throttle: {
         enabled: !noThrottle,
-        onRateLimit: (retryAfter, options, _, retryCount) => {
+        onRateLimit: (
+          retryAfter: number,
+          options: { method: string; url: string },
+          _: Octokit,
+          retryCount: number
+        ) => {
           const message = `Request quota exhausted for request ${options.method} ${options.url}`
           if (!noRetry && retryCount < maxRetries) {
             core.warning(`${message} - Retrying after ${retryAfter} seconds...`)
             return true
           } else core.warning(message)
         },
-        onSecondaryRateLimit: (retryAfter, options, _, retryCount) => {
+        onSecondaryRateLimit: (
+          retryAfter: number,
+          options: { method: string; url: string },
+          _: Octokit,
+          retryCount: number
+        ) => {
           const message = `SecondaryRateLimit detected for request ${options.method} ${options.url}`
           if (!noRetry && retryCount < maxRetries) {
             core.warning(`${message} - Retrying after ${retryAfter} seconds...`)
