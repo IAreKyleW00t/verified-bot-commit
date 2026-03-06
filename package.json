@@ -55,7 +55,7 @@
     "@types/jest": "^30.0.0",
     "@types/minimatch": "^6.0.0",
     "@types/mock-fs": "^4.13.4",
-    "@types/node": "^25.3.3",
+    "@types/node": "^25.3.4",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "eslint": "^10.0.0",
     "eslint-config-prettier": "^10.1.8",
