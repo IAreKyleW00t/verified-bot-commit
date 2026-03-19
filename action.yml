@@ -40,6 +40,10 @@ inputs:
     description: Set the behavior when no commit is made
     required: false
     default: 'warning'
+  allow-empty-commit:
+    description: Allow creating an empty commit if there are no changes
+    required: false
+    default: 'false'
   no-throttle:
     description: Disable the throttling mechanism during requests
     required: false

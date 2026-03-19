@@ -89,7 +89,10 @@ export async function run(): Promise<void> {
       .filter((f) => f)
 
     // If there are no changed files, exit early
-    const noCommitAction = core.getInput('if-no-commit')
+    const allowEmptyCommit = core.getBooleanInput('allow-empty-commit')
+    const noCommitAction = allowEmptyCommit
+      ? 'ignore'
+      : core.getInput('if-no-commit')
     if (changedFiles.length === 0) {
       if (noCommitAction === 'error') {
         throw new Error('No changes found in local branch')
@@ -100,7 +103,8 @@ export async function run(): Promise<void> {
       } else {
         core.info('No changes found in local branch')
       }
-      return
+
+      if (!allowEmptyCommit) return
     }
 
     // Create a blob object for each file
@@ -145,6 +149,7 @@ export async function run(): Promise<void> {
     )
 
     // Confirm that blobs were made
+    let tree = headTree
     if (blobs.length === 0) {
       if (noCommitAction === 'error') {
         throw new Error('No files to commit')
@@ -155,18 +160,13 @@ export async function run(): Promise<void> {
       } else {
         core.info('No files to commit')
       }
-      return
+      if (!allowEmptyCommit) return
+      core.info(`🌳 Reusing Git Tree @ ${tree}`)
+    } else {
+      // Create tree with all blobs
+      tree = await git.createTree(blobs, headTree, repo[0], repo[1], octokit)
+      core.info(`🌳 Created Git Tree @ ${tree}`)
     }
-
-    // Create tree with all blobs
-    const tree = await git.createTree(
-      blobs,
-      headTree,
-      repo[0],
-      repo[1],
-      octokit
-    )
-    core.info(`🌳 Created Git Tree @ ${tree}`)
     core.setOutput('tree', tree)
 
     // Create the signed commit

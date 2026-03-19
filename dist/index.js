@@ -34744,7 +34744,10 @@ async function run() {
             .split(/\r?\n/)
             .filter((f) => f);
         // If there are no changed files, exit early
-        const noCommitAction = getInput('if-no-commit');
+        const allowEmptyCommit = getBooleanInput('allow-empty-commit');
+        const noCommitAction = allowEmptyCommit
+            ? 'ignore'
+            : getInput('if-no-commit');
         if (changedFiles.length === 0) {
             if (noCommitAction === 'error') {
                 throw new Error('No changes found in local branch');
@@ -34758,7 +34761,8 @@ async function run() {
             else {
                 info('No changes found in local branch');
             }
-            return;
+            if (!allowEmptyCommit)
+                return;
         }
         // Create a blob object for each file
         const blobs = [];
@@ -34789,6 +34793,7 @@ async function run() {
         endGroup();
         setOutput('blobs', blobs.map((b) => b.sha));
         // Confirm that blobs were made
+        let tree = headTree;
         if (blobs.length === 0) {
             if (noCommitAction === 'error') {
                 throw new Error('No files to commit');
@@ -34802,11 +34807,15 @@ async function run() {
             else {
                 info('No files to commit');
             }
-            return;
+            if (!allowEmptyCommit)
+                return;
+            info(`🌳 Reusing Git Tree @ ${tree}`);
         }
-        // Create tree with all blobs
-        const tree = await createTree(blobs, headTree, repo[0], repo[1], octokit);
-        info(`🌳 Created Git Tree @ ${tree}`);
+        else {
+            // Create tree with all blobs
+            tree = await createTree(blobs, headTree, repo[0], repo[1], octokit);
+            info(`🌳 Created Git Tree @ ${tree}`);
+        }
         setOutput('tree', tree);
         // Create the signed commit
         const commit = await createCommit(tree, headCommit, message, repo[0], repo[1], octokit);
