@@ -127,6 +127,11 @@ jobs:
             exit 1
           fi
 
+      - name: Capture HEAD before empty commit
+        id: before-empty
+        shell: bash
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
       - name: Commit with allow-empty-commit and without changes
         id: empty-commit
         uses: ./
@@ -140,18 +145,17 @@ jobs:
         shell: bash
         env:
           COMMIT: ${{ steps.empty-commit.outputs.commit }}
+          PREV_HEAD: ${{ steps.before-empty.outputs.sha }}
         run: |
           if [ -z "$COMMIT" ]; then
             echo "::error::Expected a commit SHA but got none"
             exit 1
           fi
 
-          git remote update
-          if ! git status -uno "$TEST_BRANCH" | grep -q "branch is behind" ; then
-            echo "::error::Expected branch to be behind after empty commit"
+          if [ "$COMMIT" = "$PREV_HEAD" ]; then
+            echo "::error::Expected a new commit SHA but got the same as before ($PREV_HEAD)"
             exit 1
           fi
-          git pull
 
           COUNT=$(git diff-tree --no-commit-id --name-only -r "$COMMIT" | wc -l)
           if [ "$COUNT" -ne 0 ]; then

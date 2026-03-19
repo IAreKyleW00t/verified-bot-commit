@@ -84,7 +84,8 @@ were not committed by the Action will be left staged.
 > 3. You must include either `message` or `message-file` (which takes priority).
 > 4. Only files that match a pattern you include will be in the final commit,
 >    but you can optionally stage files yourself for more control.
-> 5. Available options are `info`, `notice`, `warning` and `error`.
+> 5. Available options are `info`, `notice`, `warning` and `error`. (Will be set
+>    to `ignore` if `allow-empty-commit` is `true`)
 > 6. This Action is intended to work with the default `GITHUB_TOKEN` or a
 >    [GitHub App Token](#custom-github-app-token). See the
 >    [limitations](#limitations) section.
