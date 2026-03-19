@@ -127,6 +127,38 @@ jobs:
             exit 1
           fi
 
+      - name: Commit with allow-empty-commit and without changes
+        id: empty-commit
+        uses: ./
+        with:
+          ref: ${{ env.TEST_BRANCH }}
+          message: 'test(empty): ${{ github.ref }} @ ${{ github.sha }}'
+          allow-empty-commit: true
+          files: ''
+
+      - name: Verify empty commit
+        shell: bash
+        env:
+          COMMIT: ${{ steps.empty-commit.outputs.commit }}
+        run: |
+          if [ -z "$COMMIT" ]; then
+            echo "::error::Expected a commit SHA but got none"
+            exit 1
+          fi
+
+          git remote update
+          if ! git status -uno "$TEST_BRANCH" | grep -q "branch is behind" ; then
+            echo "::error::Expected branch to be behind after empty commit"
+            exit 1
+          fi
+          git pull
+
+          COUNT=$(git diff-tree --no-commit-id --name-only -r "$COMMIT" | wc -l)
+          if [ "$COUNT" -ne 0 ]; then
+            echo "::error::Expected 0 committed files but got $COUNT"
+            exit 1
+          fi
+
       - name: Generate file changes
         shell: bash
         run: |

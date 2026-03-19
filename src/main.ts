@@ -89,7 +89,10 @@ export async function run(): Promise<void> {
       .filter((f) => f)
 
     // If there are no changed files, exit early
-    const noCommitAction = core.getInput('if-no-commit')
+    const allowEmptyCommit = core.getBooleanInput('allow-empty-commit')
+    const noCommitAction = allowEmptyCommit
+      ? 'ignore'
+      : core.getInput('if-no-commit')
     if (changedFiles.length === 0) {
       if (noCommitAction === 'error') {
         throw new Error('No changes found in local branch')
@@ -100,7 +103,8 @@ export async function run(): Promise<void> {
       } else {
         core.info('No changes found in local branch')
       }
-      return
+
+      if (!allowEmptyCommit) return
     }
 
     // Create a blob object for each file
@@ -155,7 +159,7 @@ export async function run(): Promise<void> {
       } else {
         core.info('No files to commit')
       }
-      return
+      if (!allowEmptyCommit) return
     }
 
     // Create tree with all blobs

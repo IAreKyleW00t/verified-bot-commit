@@ -57,24 +57,25 @@ were not committed by the Action will be left staged.
 >   example.txt
 > ```
 
-| Name              | Type    | Description                                          | Default                    |
-| ----------------- | ------- | ---------------------------------------------------- | -------------------------- |
-| `repository`      | String  | The target repository [1]                            | `${{ github.repository }}` |
-| `ref`             | String  | The ref to push the commit to                        | `${{ github.ref }}`        |
-| `files`           | List    | Files/[Glob] patterns to include with the commit [2] | _required_                 |
-| `message`         | String  | Message for the commit [3]                           | _optional_                 |
-| `message-file`    | String  | File to use for the commit message [3]               | _optional_                 |
-| `auto-stage`      | Boolean | Stage all changed files for committing [4]           | `true`                     |
-| `update-local`    | Boolean | Update local branch after committing [4]             | `true`                     |
-| `force-push`      | Boolean | Force push the commit                                | `false`                    |
-| `if-no-commit`    | String  | Set the behavior when no commit is made [5]          | `warning`                  |
-| `no-throttle`     | Boolean | Disable the throttling mechanism during requests     | `false`                    |
-| `no-retry`        | Boolean | Disable the retry mechanism during requests          | `false`                    |
-| `max-retries`     | Number  | Number of retries to attempt if a request fails      | `1`                        |
-| `follow-symlinks` | Boolean | Follow symbolic links when globbing files            | `true`                     |
-| `workspace`       | String  | Directory containing checked out files               | `${{ github.workspace }}`  |
-| `api-url`         | String  | Base URL for the GitHub API                          | `${{ github.api_url }}`    |
-| `token`           | String  | GitHub Token for REST API access [6]                 | `${{ github.token }}`      |
+| Name                 | Type    | Description                                            | Default                    |
+| -------------------- | ------- | ------------------------------------------------------ | -------------------------- |
+| `repository`         | String  | The target repository [1]                              | `${{ github.repository }}` |
+| `ref`                | String  | The ref to push the commit to                          | `${{ github.ref }}`        |
+| `files`              | List    | Files/[Glob] patterns to include with the commit [2]   | _required_                 |
+| `message`            | String  | Message for the commit [3]                             | _optional_                 |
+| `message-file`       | String  | File to use for the commit message [3]                 | _optional_                 |
+| `auto-stage`         | Boolean | Stage all changed files for committing [4]             | `true`                     |
+| `update-local`       | Boolean | Update local branch after committing [4]               | `true`                     |
+| `force-push`         | Boolean | Force push the commit                                  | `false`                    |
+| `if-no-commit`       | String  | Set the behavior when no commit is made [5]            | `warning`                  |
+| `allow-empty-commit` | Boolean | Allow creating an empty commit if there are no changes | `false`                    |
+| `no-throttle`        | Boolean | Disable the throttling mechanism during requests       | `false`                    |
+| `no-retry`           | Boolean | Disable the retry mechanism during requests            | `false`                    |
+| `max-retries`        | Number  | Number of retries to attempt if a request fails        | `1`                        |
+| `follow-symlinks`    | Boolean | Follow symbolic links when globbing files              | `true`                     |
+| `workspace`          | String  | Directory containing checked out files                 | `${{ github.workspace }}`  |
+| `api-url`            | String  | Base URL for the GitHub API                            | `${{ github.api_url }}`    |
+| `token`              | String  | GitHub Token for REST API access [6]                   | `${{ github.token }}`      |
 
 > 1. Must in the format `owner/repo-name`. To push to other repositories you
 >    will _need_ to use a [GitHub App Token](#custom-github-app-token).
@@ -154,6 +155,17 @@ For more details, refer to these discussions on the topic:
     message: 'feat: Some changes'
     files: |
       README.md
+```
+
+### Creating an empty commit
+
+```yaml
+- name: Commit & Push changes
+  uses: iarekylew00t/verified-bot-commit@v2
+  with:
+    message: 'chore: Empty commit'
+    files: '' # don't target any files
+    allow-empty-commit: true
 ```
 
 ### Manually stage your own files
