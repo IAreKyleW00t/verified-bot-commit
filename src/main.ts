@@ -149,6 +149,7 @@ export async function run(): Promise<void> {
     )
 
     // Confirm that blobs were made
+    let tree = headTree
     if (blobs.length === 0) {
       if (noCommitAction === 'error') {
         throw new Error('No files to commit')
@@ -160,17 +161,12 @@ export async function run(): Promise<void> {
         core.info('No files to commit')
       }
       if (!allowEmptyCommit) return
+      core.info(`🌳 Reusing Git Tree @ ${tree}`)
+    } else {
+      // Create tree with all blobs
+      tree = await git.createTree(blobs, headTree, repo[0], repo[1], octokit)
+      core.info(`🌳 Created Git Tree @ ${tree}`)
     }
-
-    // Create tree with all blobs
-    const tree = await git.createTree(
-      blobs,
-      headTree,
-      repo[0],
-      repo[1],
-      octokit
-    )
-    core.info(`🌳 Created Git Tree @ ${tree}`)
     core.setOutput('tree', tree)
 
     // Create the signed commit

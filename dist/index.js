@@ -34793,6 +34793,7 @@ async function run() {
         endGroup();
         setOutput('blobs', blobs.map((b) => b.sha));
         // Confirm that blobs were made
+        let tree = headTree;
         if (blobs.length === 0) {
             if (noCommitAction === 'error') {
                 throw new Error('No files to commit');
@@ -34808,10 +34809,13 @@ async function run() {
             }
             if (!allowEmptyCommit)
                 return;
+            info(`🌳 Reusing Git Tree @ ${tree}`);
         }
-        // Create tree with all blobs
-        const tree = await createTree(blobs, headTree, repo[0], repo[1], octokit);
-        info(`🌳 Created Git Tree @ ${tree}`);
+        else {
+            // Create tree with all blobs
+            tree = await createTree(blobs, headTree, repo[0], repo[1], octokit);
+            info(`🌳 Created Git Tree @ ${tree}`);
+        }
         setOutput('tree', tree);
         // Create the signed commit
         const commit = await createCommit(tree, headCommit, message, repo[0], repo[1], octokit);
