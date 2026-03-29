@@ -11,7 +11,7 @@ jobs:
     name: Create Release
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     steps:
       - name: Checkout repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -36,15 +36,16 @@ jobs:
           make_latest: ${{ steps.latest.outputs.latest }}
           tag_name: ${{ github.ref_name }}
           generate_release_notes: true
+          token: ${{ secrets.GH_RELEASE_PAT }}
 
   tags:
     name: Update shared tags
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Checkout repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          token: ${{ secrets.GH_RELEASE_PAT }}
 
       - name: Update tags
         shell: bash
