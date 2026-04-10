@@ -34754,7 +34754,6 @@ async function run() {
                 }
             }
         });
-        console.log(execOutput);
         endGroup();
         const changedFiles = execOutput
             .trim()
