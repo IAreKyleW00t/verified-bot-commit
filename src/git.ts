@@ -102,8 +102,11 @@ export async function createBlob(
   // Get file data
   const location = path.join(workspace, file)
 
-  // File doesn't exist in path - was deleted
-  if (!fs.existsSync(location)) {
+  let mode: GitMode
+  try {
+    mode = getFileMode(location, symlink)
+  } catch {
+    // File doesn't exist, assume it was deleted
     return {
       path: file,
       type: 'blob',
@@ -111,7 +114,6 @@ export async function createBlob(
       sha: null
     }
   }
-  const mode = getFileMode(location, symlink)
   const content = Buffer.from(fs.readFileSync(location)).toString('base64')
 
   // Send the blob to GitHub

@@ -34641,8 +34641,12 @@ function getFileMode(file, symlink) {
 async function createBlob(file, workspace, symlink, owner, repo, octokit) {
     // Get file data
     const location = path$1.join(workspace, file);
-    // File doesn't exist in path - was deleted
-    if (!fs.existsSync(location)) {
+    let mode;
+    try {
+        mode = getFileMode(location, symlink);
+    }
+    catch {
+        // File doesn't exist, assume it was deleted
         return {
             path: file,
             type: 'blob',
@@ -34650,7 +34654,6 @@ async function createBlob(file, workspace, symlink, owner, repo, octokit) {
             sha: null
         };
     }
-    const mode = getFileMode(location, symlink);
     const content = Buffer.from(fs.readFileSync(location)).toString('base64');
     // Send the blob to GitHub
     const sha = (await octokit.request('POST /repos/{owner}/{repo}/git/blobs', {
