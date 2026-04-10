@@ -355,6 +355,65 @@ jobs:
           fi
           exit "$RC"
 
+      - name: Delete/rename previously commit files
+        shell: bash
+        run: |
+          mv date.txt date_renamed.txt
+
+      - name: Commit deleted/renamed changes
+        id: commit-remove
+        uses: ./
+        with:
+          ref: ${{ env.TEST_BRANCH }}
+          message: 'test: delete ${{ github.ref }} @ ${{ github.sha }}'
+          files: |
+            date.txt
+            date_renamed.txt
+
+      - name: Verify removed file changes
+        shell: bash
+        env:
+          COMMIT: ${{ steps.commit-remove.outputs.commit }}
+        run: |
+          git status
+          RC=0
+
+          FILES=$(git diff-tree --no-commit-id --name-only -r "$COMMIT")
+          COUNT=$(echo "$FILES" | wc -l)
+          echo -e "Committed files: $COUNT\n$FILES"
+          if [ "$COUNT" -ne 2 ]; then
+            echo "::error::Expected 2 committed files but got $COUNT"
+            RC=1
+          fi
+          echo
+
+          FILES=$(git diff --cached --name-only)
+          COUNT=$(echo "$FILES" | wc -l)
+          echo -e "Staged files: $COUNT\n$FILES"
+          if [ "$COUNT" -ne 14 ]; then
+            echo "::error::Expected 14 staged files but got $COUNT"
+            RC=1
+          fi
+          echo
+
+          FILES=$(git diff --name-only)
+          COUNT=$(echo "$FILES" | wc -l)
+          echo -e "Unstaged files: $COUNT\n$FILES"
+          if [ -n "$COUNT" ] && [ "$COUNT" -ne 1 ]; then
+            echo "::error::Expected 0 unstaged files but got $COUNT"
+            RC=1
+          fi
+          echo
+
+          FILES=$(git ls-files --others --exclude-standard)
+          COUNT=$(echo "$FILES" | wc -l)
+          echo -e "Untracked files: $COUNT\n$FILES"
+          if [ -n "$COUNT" ] && [ "$COUNT" -ne 1 ]; then
+            echo "::error::Expected 0 untracked files but got $COUNT"
+            RC=1
+          fi
+          exit "$RC"
+
       - name: Checkout test-repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:

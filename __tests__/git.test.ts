@@ -95,5 +95,12 @@ describe('git.ts', () => {
       const result = git.getFileMode('link', false)
       expect(result).toEqual('100644')
     })
+
+    test('throws exception for file that does not exist', () => {
+      MockFs() // empty filesystem
+
+      const result = () => git.getFileMode('nonexistent', false)
+      expect(result).toThrow("ENOENT, no such file or directory 'nonexistent'")
+    })
   })
 })
