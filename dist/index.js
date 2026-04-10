@@ -34641,6 +34641,15 @@ function getFileMode(file, symlink) {
 async function createBlob(file, workspace, symlink, owner, repo, octokit) {
     // Get file data
     const location = path$1.join(workspace, file);
+    // File doesn't exist in path - was deleted
+    if (!fs.existsSync(location)) {
+        return {
+            path: file,
+            type: 'blob',
+            mode: '100644',
+            sha: null
+        };
+    }
     const mode = getFileMode(location, symlink);
     const content = Buffer.from(fs.readFileSync(location)).toString('base64');
     // Send the blob to GitHub
@@ -34737,7 +34746,7 @@ async function run() {
         startGroup('🪁 Getting changed files...');
         if (autoStage)
             await exec('git', ['add', '-A'], execOpts);
-        await exec('git', ['diff', '--cached', '--name-only'], {
+        await exec('git', ['diff', '--cached', '--name-only', '--no-renames'], {
             ...execOpts,
             listeners: {
                 stdout: (data) => {
@@ -34745,6 +34754,7 @@ async function run() {
                 }
             }
         });
+        console.log(execOutput);
         endGroup();
         const changedFiles = execOutput
             .trim()

@@ -8,7 +8,7 @@ export interface GitBlob {
   path: string
   mode: GitMode
   type: 'blob' // Only supported type in our case
-  sha: string
+  sha: string | null
 }
 
 export function buildCommitMessage(message?: string, file?: string): string {
@@ -101,6 +101,16 @@ export async function createBlob(
 ): Promise<GitBlob> {
   // Get file data
   const location = path.join(workspace, file)
+
+  // File doesn't exist in path - was deleted
+  if (!fs.existsSync(location)) {
+    return {
+      path: file,
+      type: 'blob',
+      mode: '100644',
+      sha: null
+    }
+  }
   const mode = getFileMode(location, symlink)
   const content = Buffer.from(fs.readFileSync(location)).toString('base64')
 

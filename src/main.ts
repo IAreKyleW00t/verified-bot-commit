@@ -74,14 +74,18 @@ export async function run(): Promise<void> {
 
     core.startGroup('🪁 Getting changed files...')
     if (autoStage) await exec.exec('git', ['add', '-A'], execOpts)
-    await exec.exec('git', ['diff', '--cached', '--name-only'], {
-      ...execOpts,
-      listeners: {
-        stdout: (data: Buffer) => {
-          execOutput += data.toString()
+    await exec.exec(
+      'git',
+      ['diff', '--cached', '--name-only', '--no-renames'],
+      {
+        ...execOpts,
+        listeners: {
+          stdout: (data: Buffer) => {
+            execOutput += data.toString()
+          }
         }
       }
-    })
+    )
     core.endGroup()
     const changedFiles = execOutput
       .trim()
