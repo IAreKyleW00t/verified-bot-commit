@@ -215,7 +215,7 @@ For more details, refer to these discussions on the topic:
   uses: actions/create-github-app-token@v2
   id: github-app-token
   with:
-    app-id: ${{ secrets.GH_APP_ID }}
+    client-id: ${{ secrets.GH_APP_ID }}
     private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
     owner: ${{ github.repository_owner }}
     repositories: ${{ github.event.repository.name }}
