@@ -9,12 +9,13 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   test-app:
     name: Test action with GH App
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     env:
       TEST_BRANCH: test-app-ubuntu-${{ github.run_id }}
     steps:
@@ -32,8 +33,7 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
 
-      - name: Create test branch and tag
-        id: branch
+      - name: Create test branch
         shell: bash
         run: |
           git checkout -b "$TEST_BRANCH"
@@ -74,30 +74,26 @@ jobs:
           fi
           git push -u origin --delete "$TEST_BRANCH" || true
 
-  test:
-    name: Test action
+  test-empty-commit:
+    name: Test empty commit on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}-latest
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         os: [macos, ubuntu, windows]
     permissions:
       contents: write
     env:
-      TEST_BRANCH: test-${{ matrix.os }}-${{ github.run_id }}
-      TEST_TAG: tag-${{ matrix.os }}-${{ github.run_id }}
+      TEST_BRANCH: test-empty-${{ matrix.os }}-${{ github.run_id }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Create test branch and tag
-        id: branch
+      - name: Create test branch
         shell: bash
         run: |
           git checkout -b "$TEST_BRANCH"
           git push -u origin "$TEST_BRANCH"
-          git tag "$TEST_TAG"
-          git push -u origin "$TEST_TAG"
 
       - name: Commit with error and without changes
         id: failure
@@ -118,7 +114,7 @@ jobs:
           git status
           git remote update
           if git status -uno "$TEST_BRANCH" | grep -q "branch is behind" ; then
-            echo "::error::Found unexpectted commit on $TEST_BRANCH"
+            echo "::error::Found unexpected commit on $TEST_BRANCH"
             exit 1
           fi
 
@@ -163,6 +159,41 @@ jobs:
             exit 1
           fi
 
+      - name: Delete test branch
+        if: always()
+        shell: bash
+        run: |
+          if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
+            git checkout "${GITHUB_REF/#refs\//}" || true
+          else
+            git checkout "$GITHUB_REF_NAME" || true
+          fi
+          git push -u origin --delete "$TEST_BRANCH" || true
+
+  test-file-matching:
+    name: Test file matching on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos, ubuntu, windows]
+    permissions:
+      contents: write
+    env:
+      TEST_BRANCH: test-match-${{ matrix.os }}-${{ github.run_id }}
+      TEST_TAG: tag-match-${{ matrix.os }}-${{ github.run_id }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create test branch and tag
+        shell: bash
+        run: |
+          git checkout -b "$TEST_BRANCH"
+          git push -u origin "$TEST_BRANCH"
+          git tag "$TEST_TAG"
+          git push -u origin "$TEST_TAG"
+
       - name: Generate file changes
         shell: bash
         run: |
@@ -197,7 +228,7 @@ jobs:
           git status
           git remote update
           if git status -uno "$TEST_BRANCH" | grep -q "branch is behind" ; then
-            echo "::error::Found unexpectted commit on $TEST_BRANCH"
+            echo "::error::Found unexpected commit on $TEST_BRANCH"
             exit 1
           fi
 
@@ -222,6 +253,59 @@ jobs:
             echo "::error::$TEST_TAG was at $CURRENT_COMMIT but expected $EXPECTED_COMMIT"
             exit 1
           fi
+
+      - name: Delete test branch and tag
+        if: always()
+        shell: bash
+        run: |
+          if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
+            git checkout "${GITHUB_REF/#refs\//}" || true
+          else
+            git checkout "$GITHUB_REF_NAME" || true
+          fi
+          git push -u origin --delete "$TEST_BRANCH" || true
+          git push -u origin --delete "$TEST_TAG" || true
+
+  test-file-mutations:
+    name: Test staged and removal flows on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos, ubuntu, windows]
+    permissions:
+      contents: write
+    env:
+      TEST_BRANCH: test-mutate-${{ matrix.os }}-${{ github.run_id }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create test branch
+        shell: bash
+        run: |
+          git checkout -b "$TEST_BRANCH"
+          git push -u origin "$TEST_BRANCH"
+
+      - name: Generate file changes
+        shell: bash
+        run: |
+          echo -e "\n### $(date -Iseconds)" | tee -a README.md
+          date -Iseconds | tee date.txt
+          date -Iseconds | tee test-ignore.txt
+          date -Iseconds | tee .github/.test-file.txt
+          echo "$GITHUB_RUN_ID" | tee __tests__/ignore/test-abcdef.txt
+          echo "$GITHUB_RUN_ID" | tee src/test.txt
+          echo "$GITHUB_RUN_ID" | tee src/test2.txt
+          echo "uncommitted file" | tee blah.txt
+          mkdir -p "$TEST_BRANCH"
+          for i in {1..100}; do
+            echo "$i-$GITHUB_RUN_ID-$RANDOM" | tee "$TEST_BRANCH/$i-$GITHUB_RUN_ID"
+          done
+          mkdir -p "$GITHUB_RUN_ID"
+          for i in {1..10}; do
+            echo "$i-$TEST_BRANCH-$RANDOM" | tee "$GITHUB_RUN_ID/$i-$TEST_BRANCH"
+          done
 
       - name: Manually stage files
         shell: bash
@@ -249,7 +333,10 @@ jobs:
           RC=0
 
           FILES=$(git diff-tree --no-commit-id --name-only -r "$COMMIT")
-          COUNT=$(echo "$FILES" | wc -l)
+          COUNT=0
+          if [ -n "$FILES" ]; then
+            COUNT=$(printf "%s\n" "$FILES" | wc -l)
+          fi
           echo -e "Committed files: $COUNT\n$FILES"
           if [ "$COUNT" -ne 10 ]; then
             echo "::error::Expected 10 committed files but got $COUNT"
@@ -258,25 +345,34 @@ jobs:
           echo
 
           FILES=$(git diff --cached --name-only)
-          COUNT=$(echo "$FILES" | wc -l)
+          COUNT=0
+          if [ -n "$FILES" ]; then
+            COUNT=$(printf "%s\n" "$FILES" | wc -l)
+          fi
           echo -e "Staged files: $COUNT\n$FILES"
-          if [ -n "$COUNT" ] && [ "$COUNT" -ne 1 ]; then
+          if [ "$COUNT" -ne 0 ]; then
             echo "::error::Expected 0 staged files but got $COUNT"
             RC=1
           fi
           echo
 
           FILES=$(git diff --name-only)
-          COUNT=$(echo "$FILES" | wc -l)
+          COUNT=0
+          if [ -n "$FILES" ]; then
+            COUNT=$(printf "%s\n" "$FILES" | wc -l)
+          fi
           echo -e "Unstaged files: $COUNT\n$FILES"
-          if [ -z "$COUNT" ] && [ "$COUNT" -ne 1 ]; then
-            echo "::error::Expected 1 unstaged files but got 0"
+          if [ "$COUNT" -ne 1 ]; then
+            echo "::error::Expected 1 unstaged file but got $COUNT"
             RC=1
           fi
           echo
 
           FILES=$(git ls-files --others --exclude-standard)
-          COUNT=$(echo "$FILES" | wc -l)
+          COUNT=0
+          if [ -n "$FILES" ]; then
+            COUNT=$(printf "%s\n" "$FILES" | wc -l)
+          fi
           echo -e "Untracked files: $COUNT\n$FILES"
           if [ "$COUNT" -ne 105 ]; then
             echo "::error::Expected 105 untracked files but got $COUNT"
@@ -320,7 +416,10 @@ jobs:
           RC=0
 
           FILES=$(git diff-tree --no-commit-id --name-only -r "$COMMIT")
-          COUNT=$(echo "$FILES" | wc -l)
+          COUNT=0
+          if [ -n "$FILES" ]; then
+            COUNT=$(printf "%s\n" "$FILES" | wc -l)
+          fi
           echo -e "Committed files: $COUNT\n$FILES"
           if [ "$COUNT" -ne 92 ]; then
             echo "::error::Expected 92 committed files but got $COUNT"
@@ -329,7 +428,10 @@ jobs:
           echo
 
           FILES=$(git diff --cached --name-only)
-          COUNT=$(echo "$FILES" | wc -l)
+          COUNT=0
+          if [ -n "$FILES" ]; then
+            COUNT=$(printf "%s\n" "$FILES" | wc -l)
+          fi
           echo -e "Staged files: $COUNT\n$FILES"
           if [ "$COUNT" -ne 14 ]; then
             echo "::error::Expected 14 staged files but got $COUNT"
@@ -338,18 +440,24 @@ jobs:
           echo
 
           FILES=$(git diff --name-only)
-          COUNT=$(echo "$FILES" | wc -l)
+          COUNT=0
+          if [ -n "$FILES" ]; then
+            COUNT=$(printf "%s\n" "$FILES" | wc -l)
+          fi
           echo -e "Unstaged files: $COUNT\n$FILES"
-          if [ -n "$COUNT" ] && [ "$COUNT" -ne 1 ]; then
+          if [ "$COUNT" -ne 0 ]; then
             echo "::error::Expected 0 unstaged files but got $COUNT"
             RC=1
           fi
           echo
 
           FILES=$(git ls-files --others --exclude-standard)
-          COUNT=$(echo "$FILES" | wc -l)
+          COUNT=0
+          if [ -n "$FILES" ]; then
+            COUNT=$(printf "%s\n" "$FILES" | wc -l)
+          fi
           echo -e "Untracked files: $COUNT\n$FILES"
-          if [ -n "$COUNT" ] && [ "$COUNT" -ne 1 ]; then
+          if [ "$COUNT" -ne 0 ]; then
             echo "::error::Expected 0 untracked files but got $COUNT"
             RC=1
           fi
@@ -379,7 +487,10 @@ jobs:
           RC=0
 
           FILES=$(git diff-tree --no-commit-id --name-only -r "$COMMIT")
-          COUNT=$(echo "$FILES" | wc -l)
+          COUNT=0
+          if [ -n "$FILES" ]; then
+            COUNT=$(printf "%s\n" "$FILES" | wc -l)
+          fi
           echo -e "Committed files: $COUNT\n$FILES"
           if [ "$COUNT" -ne 2 ]; then
             echo "::error::Expected 2 committed files but got $COUNT"
@@ -388,7 +499,10 @@ jobs:
           echo
 
           FILES=$(git diff --cached --name-only)
-          COUNT=$(echo "$FILES" | wc -l)
+          COUNT=0
+          if [ -n "$FILES" ]; then
+            COUNT=$(printf "%s\n" "$FILES" | wc -l)
+          fi
           echo -e "Staged files: $COUNT\n$FILES"
           if [ "$COUNT" -ne 14 ]; then
             echo "::error::Expected 14 staged files but got $COUNT"
@@ -397,24 +511,50 @@ jobs:
           echo
 
           FILES=$(git diff --name-only)
-          COUNT=$(echo "$FILES" | wc -l)
+          COUNT=0
+          if [ -n "$FILES" ]; then
+            COUNT=$(printf "%s\n" "$FILES" | wc -l)
+          fi
           echo -e "Unstaged files: $COUNT\n$FILES"
-          if [ -n "$COUNT" ] && [ "$COUNT" -ne 1 ]; then
+          if [ "$COUNT" -ne 0 ]; then
             echo "::error::Expected 0 unstaged files but got $COUNT"
             RC=1
           fi
           echo
 
           FILES=$(git ls-files --others --exclude-standard)
-          COUNT=$(echo "$FILES" | wc -l)
+          COUNT=0
+          if [ -n "$FILES" ]; then
+            COUNT=$(printf "%s\n" "$FILES" | wc -l)
+          fi
           echo -e "Untracked files: $COUNT\n$FILES"
-          if [ -n "$COUNT" ] && [ "$COUNT" -ne 1 ]; then
+          if [ "$COUNT" -ne 0 ]; then
             echo "::error::Expected 0 untracked files but got $COUNT"
             RC=1
           fi
           exit "$RC"
 
-      - name: Checkout test-repo
+      - name: Delete test branch
+        if: always()
+        shell: bash
+        run: |
+          if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
+            git checkout "${GITHUB_REF/#refs\//}" || true
+          else
+            git checkout "$GITHUB_REF_NAME" || true
+          fi
+          git push -u origin --delete "$TEST_BRANCH" || true
+
+  test-workspace:
+    name: Test action with workspace checkout
+    runs-on: ubuntu-latest
+    env:
+      TEST_BRANCH: test-workspace-${{ github.run_id }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Checkout nested test-repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           path: test-repo
@@ -423,8 +563,8 @@ jobs:
         shell: bash
         run: |
           cd test-repo
-          git checkout -b "$TEST_BRANCH-test-repo"
-          git push -u origin "$TEST_BRANCH-test-repo"
+          git checkout -b "${TEST_BRANCH}-test-repo"
+          git push -u origin "${TEST_BRANCH}-test-repo"
           echo -e "Just a test" | tee -a test.txt
           date -Iseconds | tee test-ignore.txt
           echo "$GITHUB_RUN_ID" | tee __tests__/ignore/test-abcdef.txt
@@ -461,16 +601,22 @@ jobs:
           RC=0
 
           FILES=$(git diff-tree --no-commit-id --name-only -r "$COMMIT")
-          COUNT=$(echo "$FILES" | wc -l)
+          COUNT=0
+          if [ -n "$FILES" ]; then
+            COUNT=$(printf "%s\n" "$FILES" | wc -l)
+          fi
           echo -e "Committed files: $COUNT\n$FILES"
-          if [ -z "$COUNT" ] && [ "$COUNT" -ne 10 ]; then
+          if [ "$COUNT" -ne 10 ]; then
             echo "::error::Expected 10 committed files but got $COUNT"
             RC=1
           fi
           echo
 
           FILES=$(git diff --cached --name-only)
-          COUNT=$(echo "$FILES" | wc -l)
+          COUNT=0
+          if [ -n "$FILES" ]; then
+            COUNT=$(printf "%s\n" "$FILES" | wc -l)
+          fi
           echo -e "Staged files: $COUNT\n$FILES"
           if [ "$COUNT" -ne 3 ]; then
             echo "::error::Expected 3 staged files but got $COUNT"
@@ -479,18 +625,24 @@ jobs:
           echo
 
           FILES=$(git diff --name-only)
-          COUNT=$(echo "$FILES" | wc -l)
+          COUNT=0
+          if [ -n "$FILES" ]; then
+            COUNT=$(printf "%s\n" "$FILES" | wc -l)
+          fi
           echo -e "Unstaged files: $COUNT\n$FILES"
-          if [ -n "$COUNT" ] && [ "$COUNT" -ne 1 ]; then
+          if [ "$COUNT" -ne 0 ]; then
             echo "::error::Expected 0 unstaged files but got $COUNT"
             RC=1
           fi
           echo
 
           FILES=$(git ls-files --others --exclude-standard)
-          COUNT=$(echo "$FILES" | wc -l)
+          COUNT=0
+          if [ -n "$FILES" ]; then
+            COUNT=$(printf "%s\n" "$FILES" | wc -l)
+          fi
           echo -e "Untracked files: $COUNT\n$FILES"
-          if [ -n "$COUNT" ] && [ "$COUNT" -ne 1 ]; then
+          if [ "$COUNT" -ne 0 ]; then
             echo "::error::Expected 0 untracked files but got $COUNT"
             RC=1
           fi
@@ -500,11 +652,10 @@ jobs:
         if: always()
         shell: bash
         run: |
+          cd test-repo
           if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
             git checkout "${GITHUB_REF/#refs\//}" || true
           else
             git checkout "$GITHUB_REF_NAME" || true
           fi
-          git push -u origin --delete "$TEST_BRANCH" || true
-          git push -u origin --delete "$TEST_BRANCH-test-repo" || true
-          git push -u origin --delete "$TEST_TAG" || true
+          git push -u origin --delete "${TEST_BRANCH}-test-repo" || true
