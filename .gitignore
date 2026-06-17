@@ -1,6 +1,10 @@
 # Dependency directory
 node_modules
 
+# CLI bundle (built by the publish workflow, not needed in repo)
+dist/cli.js
+dist/cli.js.map
+
 # Rest pulled from https://github.com/github/gitignore/blob/master/Node.gitignore
 # Logs
 logs

@@ -45,6 +45,43 @@ were not committed by the Action will be left staged.
       test-data/**
 ```
 
+## Standalone CLI
+
+The action is also available as a standalone CLI via the
+[`@iarekylewoot/verified-bot-commit`](https://github.com/IAreKyleW00t/verified-bot-commit/pkgs/npm/verified-bot-commit)
+package on GitHub Packages.
+
+### CLI Prerequisites
+
+GitHub Packages requires scoped registry configuration before `npx` can resolve
+the package. Run once on each machine or CI environment:
+
+```sh
+npm config set @iarekylewoot:registry https://npm.pkg.github.com
+npm config set //npm.pkg.github.com/:_authToken YOUR_GITHUB_TOKEN
+```
+
+A token with `read:packages` scope is required. In GitHub Actions,
+`${{ secrets.GITHUB_TOKEN }}` works when the workflow declares `permissions`
+with `packages: read`.
+
+### CLI Usage
+
+```sh
+npx --yes @iarekylewoot/verified-bot-commit \
+  --repository owner/repo \
+  --ref main \
+  --files "**/*.ts" \
+  --message "chore: updates" \
+  --token $GITHUB_TOKEN
+```
+
+The `--yes` flag is required in non-interactive environments (CI, GitHub
+Actions) to skip the install confirmation prompt.
+
+Run `npx @iarekylewoot/verified-bot-commit --help` to see all available
+arguments, which mirror the action inputs 1:1.
+
 ## Usage
 
 ### Inputs

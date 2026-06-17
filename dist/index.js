@@ -34697,16 +34697,14 @@ async function updateRef(ref, sha, force, owner, repo, octokit) {
     })).data.object.sha;
 }
 
-async function run() {
+async function run(config) {
     try {
         // Authenticate Octokit with plugins
         const SafeOctokit = Octokit.plugin(throttling, retry);
-        const maxRetries = parseInt(getInput('max-retries'));
-        const noRetry = getBooleanInput('no-retry');
-        const noThrottle = getBooleanInput('no-throttle');
+        const { maxRetries, noRetry, noThrottle } = config;
         const octokit = new SafeOctokit({
-            baseUrl: getInput('api-url'),
-            auth: getInput('token'),
+            baseUrl: config.apiUrl,
+            auth: config.token,
             request: { retries: maxRetries },
             retry: { enabled: !noRetry },
             throttle: {
@@ -34732,22 +34730,20 @@ async function run() {
             }
         });
         // Get commit message
-        const message = buildCommitMessage(getInput('message'), getInput('message-file'));
+        const message = buildCommitMessage(config.message, config.messageFile);
         // Lookup HEAD commit and tree
-        if (!getInput('repository').includes('/')) {
+        if (!config.repository.includes('/')) {
             throw new Error("Repository must be in the format 'owner/name'");
         }
-        const repo = getInput('repository').split('/');
-        const autoStage = getBooleanInput('auto-stage');
-        const ref = normalizeRef(getInput('ref'));
+        const repo = config.repository.split('/');
+        const ref = normalizeRef(config.ref);
         const headCommit = await getRef(ref, repo[0], repo[1], octokit);
         const headTree = await getTree(headCommit, repo[0], repo[1], octokit);
         // Get list of changed files
-        const workspace = getInput('workspace');
-        const execOpts = { cwd: workspace };
+        const execOpts = { cwd: config.workspace };
         let execOutput = '';
         startGroup('🪁 Getting changed files...');
-        if (autoStage)
+        if (config.autoStage)
             await exec('git', ['add', '-A'], execOpts);
         await exec('git', ['diff', '--cached', '--name-only', '--no-renames'], {
             ...execOpts,
@@ -34763,10 +34759,8 @@ async function run() {
             .split(/\r?\n/)
             .filter((f) => f);
         // If there are no changed files, exit early
-        const allowEmptyCommit = getBooleanInput('allow-empty-commit');
-        const noCommitAction = allowEmptyCommit
-            ? 'ignore'
-            : getInput('if-no-commit');
+        const { allowEmptyCommit } = config;
+        const noCommitAction = allowEmptyCommit ? 'ignore' : config.ifNoCommit;
         if (changedFiles.length === 0) {
             if (noCommitAction === 'error') {
                 throw new Error('No changes found in local branch');
@@ -34785,8 +34779,8 @@ async function run() {
         }
         // Create a blob object for each file
         const blobs = [];
-        const patterns = getMultilineInput('files');
-        const followSymbolicLinks = getBooleanInput('follow-symlinks');
+        const patterns = config.files;
+        const followSymbolicLinks = config.followSymlinks;
         startGroup(`🗂️ Creating Git Blobs...`);
         for (const file of changedFiles) {
             for (const pattern of patterns) {
@@ -34802,7 +34796,7 @@ async function run() {
                 }
                 // Only include files that match a pattern
                 if (minimatch(file, pattern, { dot: true })) {
-                    const blob = await createBlob(file, workspace, followSymbolicLinks, repo[0], repo[1], octokit);
+                    const blob = await createBlob(file, config.workspace, followSymbolicLinks, repo[0], repo[1], octokit);
                     info(`${blob.sha}\t${blob.path}`);
                     blobs.push(blob);
                     break;
@@ -34841,13 +34835,11 @@ async function run() {
         info(`✅ Created Commit @ ${commit}`);
         setOutput('commit', commit);
         // Update the ref to point to the new commit
-        const forcePush = getBooleanInput('force-push');
-        const refSha = await updateRef(ref, commit, forcePush, repo[0], repo[1], octokit);
+        const refSha = await updateRef(ref, commit, config.forcePush, repo[0], repo[1], octokit);
         info(`⏩ Updated refs/${ref} to point to ${refSha}`);
         setOutput('ref', refSha);
         // Update local ref
-        const updateLocal = getBooleanInput('update-local');
-        if (updateLocal) {
+        if (config.updateLocal) {
             startGroup('📍 Updating local ref...');
             if (ref.startsWith('tags/')) {
                 await exec('git', ['fetch', 'origin', `refs/${ref}`, '--tags', '--force'], execOpts);
@@ -34867,5 +34859,25 @@ async function run() {
 }
 
 /* istanbul ignore next */
-run();
+const config = {
+    token: getInput('token'),
+    apiUrl: getInput('api-url'),
+    repository: getInput('repository'),
+    ref: getInput('ref'),
+    files: getMultilineInput('files'),
+    message: getInput('message') || undefined,
+    messageFile: getInput('message-file') || undefined,
+    autoStage: getBooleanInput('auto-stage'),
+    updateLocal: getBooleanInput('update-local'),
+    forcePush: getBooleanInput('force-push'),
+    ifNoCommit: getInput('if-no-commit'),
+    allowEmptyCommit: getBooleanInput('allow-empty-commit'),
+    noThrottle: getBooleanInput('no-throttle'),
+    noRetry: getBooleanInput('no-retry'),
+    maxRetries: parseInt(getInput('max-retries')),
+    followSymlinks: getBooleanInput('follow-symlinks'),
+    workspace: getInput('workspace')
+};
+/* istanbul ignore next */
+run(config);
 //# sourceMappingURL=index.js.map

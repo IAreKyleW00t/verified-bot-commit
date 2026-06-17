@@ -1,9 +1,12 @@
 {
-  "name": "verified-bot-commit",
+  "name": "@iarekylewoot/verified-bot-commit",
   "description": "GitHub Action for creating signed and verified bot commits",
   "version": "2.3.2",
   "author": "Kyle Colantonio",
-  "private": true,
+  "private": false,
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "homepage": "https://github.com/IAreKyleW00t/verified-bot-commit",
   "repository": {
     "type": "git",
@@ -17,9 +20,6 @@
     "node",
     "git"
   ],
-  "exports": {
-    ".": "./dist/index.js"
-  },
   "type": "module",
   "engines": {
     "node": ">=24"
@@ -36,12 +36,19 @@
     "all": "npm run format:write && npm run lint && npm run test && npm run package"
   },
   "license": "MIT",
+  "files": [
+    "dist/cli.js"
+  ],
+  "bin": {
+    "verified-bot-commit": "dist/cli.js"
+  },
   "dependencies": {
     "@actions/core": "^3.0.1",
     "@actions/exec": "^3.0.0",
     "@octokit/core": "^7.0.6",
     "@octokit/plugin-retry": "^8.1.0",
     "@octokit/plugin-throttling": "^11.0.3",
+    "commander": "^14.0.0",
     "minimatch": "^10.2.5"
   },
   "devDependencies": {

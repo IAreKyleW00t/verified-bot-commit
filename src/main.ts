@@ -8,17 +8,16 @@ import { retry } from '@octokit/plugin-retry'
 
 import * as git from './git.js'
 import { GitBlob } from './git.js'
+import { RunConfig } from './config.js'
 
-export async function run(): Promise<void> {
+export async function run(config: RunConfig): Promise<void> {
   try {
     // Authenticate Octokit with plugins
     const SafeOctokit = Octokit.plugin(throttling, retry)
-    const maxRetries = parseInt(core.getInput('max-retries'))
-    const noRetry = core.getBooleanInput('no-retry')
-    const noThrottle = core.getBooleanInput('no-throttle')
+    const { maxRetries, noRetry, noThrottle } = config
     const octokit = new SafeOctokit({
-      baseUrl: core.getInput('api-url'),
-      auth: core.getInput('token'),
+      baseUrl: config.apiUrl,
+      auth: config.token,
       request: { retries: maxRetries },
       retry: { enabled: !noRetry },
       throttle: {
@@ -51,29 +50,24 @@ export async function run(): Promise<void> {
     })
 
     // Get commit message
-    const message = git.buildCommitMessage(
-      core.getInput('message'),
-      core.getInput('message-file')
-    )
+    const message = git.buildCommitMessage(config.message, config.messageFile)
 
     // Lookup HEAD commit and tree
-    if (!core.getInput('repository').includes('/')) {
+    if (!config.repository.includes('/')) {
       throw new Error("Repository must be in the format 'owner/name'")
     }
 
-    const repo = core.getInput('repository').split('/')
-    const autoStage = core.getBooleanInput('auto-stage')
-    const ref = git.normalizeRef(core.getInput('ref'))
+    const repo = config.repository.split('/')
+    const ref = git.normalizeRef(config.ref)
     const headCommit = await git.getRef(ref, repo[0], repo[1], octokit)
     const headTree = await git.getTree(headCommit, repo[0], repo[1], octokit)
 
     // Get list of changed files
-    const workspace = core.getInput('workspace')
-    const execOpts = { cwd: workspace }
+    const execOpts = { cwd: config.workspace }
     let execOutput = ''
 
     core.startGroup('🪁 Getting changed files...')
-    if (autoStage) await exec.exec('git', ['add', '-A'], execOpts)
+    if (config.autoStage) await exec.exec('git', ['add', '-A'], execOpts)
     await exec.exec(
       'git',
       ['diff', '--cached', '--name-only', '--no-renames'],
@@ -93,10 +87,8 @@ export async function run(): Promise<void> {
       .filter((f) => f)
 
     // If there are no changed files, exit early
-    const allowEmptyCommit = core.getBooleanInput('allow-empty-commit')
-    const noCommitAction = allowEmptyCommit
-      ? 'ignore'
-      : core.getInput('if-no-commit')
+    const { allowEmptyCommit } = config
+    const noCommitAction = allowEmptyCommit ? 'ignore' : config.ifNoCommit
     if (changedFiles.length === 0) {
       if (noCommitAction === 'error') {
         throw new Error('No changes found in local branch')
@@ -113,8 +105,8 @@ export async function run(): Promise<void> {
 
     // Create a blob object for each file
     const blobs: GitBlob[] = []
-    const patterns = core.getMultilineInput('files')
-    const followSymbolicLinks = core.getBooleanInput('follow-symlinks')
+    const patterns = config.files
+    const followSymbolicLinks = config.followSymlinks
 
     core.startGroup(`🗂️ Creating Git Blobs...`)
     for (const file of changedFiles) {
@@ -134,7 +126,7 @@ export async function run(): Promise<void> {
         if (minimatch(file, pattern, { dot: true })) {
           const blob = await git.createBlob(
             file,
-            workspace,
+            config.workspace,
             followSymbolicLinks,
             repo[0],
             repo[1],
@@ -186,11 +178,10 @@ export async function run(): Promise<void> {
     core.setOutput('commit', commit)
 
     // Update the ref to point to the new commit
-    const forcePush = core.getBooleanInput('force-push')
     const refSha = await git.updateRef(
       ref,
       commit,
-      forcePush,
+      config.forcePush,
       repo[0],
       repo[1],
       octokit
@@ -199,8 +190,7 @@ export async function run(): Promise<void> {
     core.setOutput('ref', refSha)
 
     // Update local ref
-    const updateLocal = core.getBooleanInput('update-local')
-    if (updateLocal) {
+    if (config.updateLocal) {
       core.startGroup('📍 Updating local ref...')
       if (ref.startsWith('tags/')) {
         await exec.exec(
