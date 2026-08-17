@@ -72,7 +72,7 @@ describe('git.ts', () => {
       expect(result).toEqual('040000')
     })
 
-    test('returns correct mode for symlinks', () => {
+    test('returns target mode when following symlinks', () => {
       MockFs({
         file: 'some file',
         link: MockFs.symlink({
@@ -81,10 +81,10 @@ describe('git.ts', () => {
       })
 
       const result = git.getFileMode('link', true)
-      expect(result).toEqual('120000')
+      expect(result).toEqual('100644')
     })
 
-    test('returns correct mode for symlinks when not following', () => {
+    test('returns symlink mode when not following symlinks', () => {
       MockFs({
         file: 'some file',
         link: MockFs.symlink({
@@ -93,7 +93,7 @@ describe('git.ts', () => {
       })
 
       const result = git.getFileMode('link', false)
-      expect(result).toEqual('100644')
+      expect(result).toEqual('120000')
     })
 
     test('throws exception for file that does not exist', () => {

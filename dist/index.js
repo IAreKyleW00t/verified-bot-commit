@@ -35466,7 +35466,7 @@ async function getTree(sha, owner, repo, octokit) {
     })).data.tree.sha;
 }
 function getFileMode(file, symlink) {
-    const stat = symlink ? fs.lstatSync(file) : fs.statSync(file);
+    const stat = symlink ? fs.statSync(file) : fs.lstatSync(file);
     if (stat.isFile()) {
         // Check if execute bit is set on file for current user
         if (stat.mode & fs.constants.S_IXUSR) {
@@ -35503,7 +35503,10 @@ async function createBlob(file, workspace, symlink, owner, repo, octokit) {
             sha: null
         };
     }
-    const content = Buffer.from(fs.readFileSync(location)).toString('base64');
+    const data = mode === '120000'
+        ? fs.readlinkSync(location, { encoding: 'buffer' })
+        : fs.readFileSync(location);
+    const content = data.toString('base64');
     // Send the blob to GitHub
     const sha = (await octokit.request('POST /repos/{owner}/{repo}/git/blobs', {
         owner,
