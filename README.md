@@ -72,7 +72,7 @@ were not committed by the Action will be left staged.
 | `no-throttle`        | Boolean | Disable the throttling mechanism during requests       | `false`                    |
 | `no-retry`           | Boolean | Disable the retry mechanism during requests            | `false`                    |
 | `max-retries`        | Number  | Number of retries to attempt if a request fails        | `1`                        |
-| `follow-symlinks`    | Boolean | Follow symbolic links when globbing files              | `true`                     |
+| `follow-symlinks`    | Boolean | Dereference symbolic links and commit target files [7] | `false`                    |
 | `workspace`          | String  | Directory containing checked out files                 | `${{ github.workspace }}`  |
 | `api-url`            | String  | Base URL for the GitHub API                            | `${{ github.api_url }}`    |
 | `token`              | String  | GitHub Token for REST API access [6]                   | `${{ github.token }}`      |
@@ -89,6 +89,9 @@ were not committed by the Action will be left staged.
 > 6. This Action is intended to work with the default `GITHUB_TOKEN` or a
 >    [GitHub App Token](#custom-github-app-token). See the
 >    [limitations](#limitations) section.
+> 7. When disabled, symbolic links are committed with their link target path and
+>    Git symlink mode. When enabled, the referenced file's contents and mode are
+>    committed instead.
 
 ### Outputs
 

@@ -57,9 +57,9 @@ inputs:
     required: false
     default: '1'
   follow-symlinks:
-    description: Follow symbolic links when globbing files
+    description: Dereference symbolic links and commit their target contents
     required: false
-    default: 'true'
+    default: 'false'
   workspace:
     description: Directory containing checked out files
     required: false

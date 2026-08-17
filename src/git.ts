@@ -74,7 +74,7 @@ export async function getTree(
 }
 
 export function getFileMode(file: string, symlink: boolean): GitMode {
-  const stat = symlink ? fs.lstatSync(file) : fs.statSync(file)
+  const stat = symlink ? fs.statSync(file) : fs.lstatSync(file)
   if (stat.isFile()) {
     // Check if execute bit is set on file for current user
     if (stat.mode & fs.constants.S_IXUSR) {
@@ -114,7 +114,11 @@ export async function createBlob(
       sha: null
     }
   }
-  const content = Buffer.from(fs.readFileSync(location)).toString('base64')
+  const data =
+    mode === '120000'
+      ? fs.readlinkSync(location, { encoding: 'buffer' })
+      : fs.readFileSync(location)
+  const content = data.toString('base64')
 
   // Send the blob to GitHub
   const sha = (
