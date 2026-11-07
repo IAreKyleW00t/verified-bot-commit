@@ -42,7 +42,7 @@
     "@octokit/core": "^7.0.8",
     "@octokit/plugin-retry": "^8.1.1",
     "@octokit/plugin-throttling": "^11.0.5",
-    "minimatch": "^10.2.6"
+    "minimatch": "^11.0.1"
   },
   "devDependencies": {
     "@eslint/compat": "^2.1.1",
