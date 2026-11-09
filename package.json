@@ -64,7 +64,7 @@
     "jest": "^30.5.2",
     "mock-fs": "^5.5.0",
     "prettier": "^3.9.10",
-    "rollup": "^4.67.2",
+    "rollup": "^4.68.0",
     "ts-jest": "^29.4.15",
     "ts-jest-resolver": "^2.0.1",
     "tslib": "^2.9.1",
